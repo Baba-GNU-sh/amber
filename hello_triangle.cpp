@@ -3,11 +3,21 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <random>
 #include <iostream>
 #include <cmath>
 
+static double zoom = 1.0;
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
+static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    std::cout << "Scroll" << yoffset << '\n';
+    zoom *= 1.0 + (yoffset/10);
+}
+
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -19,7 +29,7 @@ const char *vertexShaderSource = "#version 330 core\n"
                                  "uniform float scale_x;\n"
                                  "void main()\n"
                                  "{\n"
-                                 "   gl_Position = vec4((coord2d.x + offset_x) * scale_x, coord2d.y, 0, 1);\n"
+                                 "   gl_Position = vec4((coord2d.x * scale_x) + offset_x, coord2d.y, 0, 1);\n"
                                  "}\0";
 const char *fragmentShaderSource = "#version 330 core\n"
                                    "out vec4 FragColor;\n"
@@ -52,6 +62,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, cursor_position_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -107,6 +119,7 @@ int main()
 
     // float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
     int vertexColorLocation = glGetUniformLocation(shaderProgram, "scale_x");
+    int offsetLocation = glGetUniformLocation(shaderProgram, "offset_x");
     glUseProgram(shaderProgram);
     glUniform1f(vertexColorLocation, .5f);
 
@@ -117,6 +130,14 @@ int main()
     };
 
     point graph[2000];
+    point graph_wibbles[2000];
+
+    std::random_device dev;
+    std::mt19937 rng(dev());
+
+    std::uniform_real_distribution<> dist(-.1, .1); // distribution in range [1, 6]
+
+    // std::cout <<  << std::endl;
 
     for (int i = 0; i < 2000; i++)
     {
@@ -133,7 +154,7 @@ int main()
     unsigned int vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(graph), graph, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(graph), graph, GL_DYNAMIC_DRAW);
 
     // vertices[0] = -1.0f;
     // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
@@ -166,12 +187,27 @@ int main()
 
         // draw our first triangle
         glUseProgram(shaderProgram);
-        glUniform1f(vertexColorLocation, 1/glfwGetTime());
+
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+
+        glUniform1f(vertexColorLocation, zoom);
+        glUniform1f(offsetLocation, 2*(xpos-width/2) / width);
         glBindVertexArray(vertex_array); // seeing as we only have a single vertex_array there's no need to bind it every time, but we'll do so to keep things a bit more organized
 
         // vertices[0] += 0.001f;
+
+        // for (int i = 0; i < 2000; i++)
+        // {
+        //     graph_wibbles[i].x = graph[i].x;
+        //     graph_wibbles[i].y = graph[i].y + dist(rng);
+        // }
+
         // glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-        // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph_wibbles), graph_wibbles);
 
         glDrawArrays(GL_LINE_STRIP, 0, 2000);
         // glBindVertexArray(0); // no need to unbind it every time
@@ -209,4 +245,9 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+}
+
+static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
+{
+    // std::cout << xpos << '\n';
 }
