@@ -1,13 +1,13 @@
-
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "cpp-tsdb/tsdb.hpp"
 
 #include <random>
 #include <iostream>
 #include <cmath>
 
-static double zoom = 1.0;
+static double zoom = 0.01;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -135,7 +135,7 @@ int main()
     std::random_device dev;
     std::mt19937 rng(dev());
 
-    std::uniform_real_distribution<> dist(-.1, .1); // distribution in range [1, 6]
+    std::uniform_real_distribution<> dist(-.1, .1);
 
     // std::cout <<  << std::endl;
 
@@ -172,6 +172,9 @@ int main()
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    SparseTimeSeries ts(true);
+    Time time = 0;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -195,8 +198,21 @@ int main()
         glfwGetWindowSize(window, &width, &height);
 
         glUniform1f(vertexColorLocation, zoom);
-        glUniform1f(offsetLocation, 2*(xpos-width/2) / width);
+        glUniform1f(offsetLocation, -1);
+
         glBindVertexArray(vertex_array); // seeing as we only have a single vertex_array there's no need to bind it every time, but we'll do so to keep things a bit more organized
+
+        auto value = std::sin(static_cast<double>(time) / 100.0);
+        ts.push(time++, value);
+
+        auto buf = ts.mean(0, 1, 2000);
+        for (int i = 0; i < 2000; i++)
+        {
+            graph[i].x = i;
+            graph[i].y = buf[i];
+        }
+
+        // std::cout << buf.size() << '\n';
 
         // vertices[0] += 0.001f;
 
@@ -206,8 +222,8 @@ int main()
         //     graph_wibbles[i].y = graph[i].y + dist(rng);
         // }
 
-        // glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-        // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph_wibbles), graph_wibbles);
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
 
         glDrawArrays(GL_LINE_STRIP, 0, 2000);
         // glBindVertexArray(0); // no need to unbind it every time
