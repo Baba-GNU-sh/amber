@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "cpp-tsdb/tsdb.hpp"
+#include "shader_loader.hpp"
 
 #include <random>
 #include <iostream>
@@ -90,6 +91,10 @@ int main()
                   << infoLog << std::endl;
     }
     // fragment shader
+
+    ShaderLoader loader("/home/steve/Development/glot/fragment.glsl");
+    auto fragmentShaderSourceStr = loader.load();
+    const char *fragmentShaderSource = fragmentShaderSourceStr.c_str();
     int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
@@ -101,9 +106,26 @@ int main()
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
                   << infoLog << std::endl;
     }
+
+    ShaderLoader geomLoader("/home/steve/Development/glot/geometry.glsl");
+    auto geomShaderSourceStr = geomLoader.load();
+    const char *geomShaderSource = geomShaderSourceStr.c_str();
+    int geomShader = glCreateShader(GL_GEOMETRY_SHADER);
+    glShaderSource(geomShader, 1, &geomShaderSource, NULL);
+    glCompileShader(geomShader);
+    // check for shader compile errors
+    glGetShaderiv(geomShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::GEOM::COMPILATION_FAILED\n"
+                  << infoLog << std::endl;
+    }
+
     // link shaders
     int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, geomShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
     // check for linking errors
