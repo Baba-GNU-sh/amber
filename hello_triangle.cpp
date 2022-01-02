@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "cpp-tsdb/tsdb.hpp"
+#include "tsdb/tsdb.hpp"
 
 #include <random>
 #include <iostream>
