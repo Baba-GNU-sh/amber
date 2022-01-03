@@ -11,7 +11,7 @@ add_subdirectory(libs/glfw-3.3.6)
 
 # Add tsdb
 set(TSDB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-add_subdirectory(cpp-tsdb)
+add_subdirectory(libs/tsdb)
 
 # Build the glot executable
 add_executable(glot hello_triangle.cpp libs/glad/src/glad.c)
