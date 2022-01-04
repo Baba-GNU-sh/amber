@@ -13,8 +13,12 @@ cmake ..
 
 This should generate the visual studio build dirs in glot/build. You should be able to open the solution with VS Community and build it using the normal methods.
 
-## Building for Debian-based platforms:
-Install OpenGL
+## Building for Debian/Ubuntu:
+Install deps:
+
+```
+sudo apt install libgl-dev libxinerama-dev libxcursor-dev libxi-dev
+```
 
 ```
 git clone --recurse-submodules https://github.com/stevegolton/glot.git
