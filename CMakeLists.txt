@@ -14,7 +14,7 @@ set(TSDB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(libs/tsdb)
 
 # Build the glot executable
-add_executable(glot hello_triangle.cpp libs/glad/src/glad.c)
+add_executable(glot glot.cpp libs/glad/src/glad.c)
 
 target_include_directories(glot
 	PRIVATE
