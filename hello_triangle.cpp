@@ -8,17 +8,16 @@
 #include <iostream>
 #include <cmath>
 
-static double zoom = 0.01;
+static double zoom = 0.1;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     std::cout << "Scroll" << yoffset << '\n';
-    zoom *= 1.0 + (yoffset/10);
+    zoom *= 1.0 + (yoffset / 10);
 }
-
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -44,6 +43,7 @@ int main()
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
+    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -73,6 +73,8 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+
+    glEnable(GL_MULTISAMPLE);
 
     // build and compile our shader program
     // ------------------------------------
@@ -157,9 +159,7 @@ int main()
     std::random_device dev;
     std::mt19937 rng(dev());
 
-    std::uniform_real_distribution<> dist(-.1, .1);
-
-    // std::cout <<  << std::endl;
+    std::uniform_real_distribution<> dist(-.3, .3);
 
     for (int i = 0; i < 2000; i++)
     {
@@ -192,10 +192,16 @@ int main()
     glBindVertexArray(0);
 
     // uncomment this call to draw in wireframe polygons.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     SparseTimeSeries ts(true);
     Time time = 0;
+
+    for (int i = 0; i < 2000; i++)
+    {
+        graph[i].x = i;
+        graph[i].y = dist(rng) + std::sin(static_cast<double>(i) / 10);
+    }
 
     // render loop
     // -----------
@@ -224,25 +230,18 @@ int main()
 
         glBindVertexArray(vertex_array); // seeing as we only have a single vertex_array there's no need to bind it every time, but we'll do so to keep things a bit more organized
 
-        auto value = std::sin(static_cast<double>(time) / 100.0);
-        ts.push(time++, value);
+        // auto value = std::sin(static_cast<double>(time) / 500.0);
+        // ts.push(time++, value);
 
-        auto buf = ts.mean(0, 1, 2000);
-        for (int i = 0; i < 2000; i++)
-        {
-            graph[i].x = i;
-            graph[i].y = buf[i];
-        }
-
-        // std::cout << buf.size() << '\n';
+        // auto buf = ts.mean(0, 100, 2000);
+        // for (int i = 0; i < 2000; i++)
+        // {
+        //     graph[i].x = i;
+        //     graph[i].y = buf[i];
+        // }
 
         // vertices[0] += 0.001f;
 
-        // for (int i = 0; i < 2000; i++)
-        // {
-        //     graph_wibbles[i].x = graph[i].x;
-        //     graph_wibbles[i].y = graph[i].y + dist(rng);
-        // }
 
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
