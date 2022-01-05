@@ -1,8 +1,9 @@
 #version 330 core
 attribute vec2 coord2d;
-uniform float scale_x;
+uniform vec2 scale;
+uniform vec2 offset;
 
 void main()
 {
-    gl_Position = vec4((coord2d.x * scale_x) - 1.0, coord2d.y, 0, 1);
+    gl_Position = vec4((coord2d.x * scale.x) + offset.x, (coord2d.y * scale.y) + offset.y, 0, 1);
 }

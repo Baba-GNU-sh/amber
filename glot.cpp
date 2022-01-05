@@ -9,20 +9,17 @@
 #include <iostream>
 #include <cmath>
 
-struct point
-{
-    GLfloat x;
-    GLfloat y;
-};
-
 class GraphWindow
 {
 public:
     GraphWindow()
         : m_cursor(0.0),
-          m_zoom(1.0)
+          m_offset(0.0),
+          m_zoom(1.0),
+          m_dragging(false),
+          m_time(0)
     {
-        m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+        m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLOT", NULL, NULL);
         if (m_window == NULL)
         {
             glfwTerminate();
@@ -34,6 +31,7 @@ public:
         glfwSetFramebufferSizeCallback(m_window, GraphWindow::framebuffer_size_callback);
         glfwSetCursorPosCallback(m_window, GraphWindow::cursor_pos_callback);
         glfwSetScrollCallback(m_window, GraphWindow::scroll_callback);
+        glfwSetMouseButtonCallback(m_window, GraphWindow::mouse_button_callback);
 
         // glad: load all OpenGL function pointers
         // ---------------------------------------
@@ -45,6 +43,7 @@ public:
         glEnable(GL_MULTISAMPLE);
 
         load_shaders();
+        create_uniforms();
 
         glGenVertexArrays(1, &m_vertex_array);
         // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
@@ -70,9 +69,9 @@ public:
         // uncomment this call to draw in wireframe polygons.
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        for (int i = 0; i < 2000; i++)
+        for (int i = 0; i < 3; i++)
         {
-            graph[i].x = i;
+            graph[i].x = i - 1.0;
             graph[i].y = std::sin(static_cast<double>(i));
         }
     }
@@ -88,55 +87,53 @@ public:
         glfwDestroyWindow(m_window);
     }
 
+    void render()
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(m_shader_program);
+
+        int width, height;
+        glfwGetWindowSize(m_window, &width, &height);
+
+        // Feed line thickness info to the geometry shader, this depends on the window size
+        const auto lt = win2screen(glm::vec2(LINE_THICKNESS_PX, -LINE_THICKNESS_PX));
+        glUniform2f(m_uniform_line_thickness, lt.x, lt.y);
+
+        // Feed offset and scale info to the shaders
+        glUniform2f(m_uniform_offset, m_offset.x, m_offset.y);
+        glUniform2f(m_uniform_scale, m_zoom, m_zoom);
+
+        // seeing as we only have a single vertex_array there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        glBindVertexArray(m_vertex_array);
+
+        // Plot an interesting function
+        for (int i = 0; i < NPOINTS; i++)
+        {
+            float x = (i - 1000.0) / 100.0;
+            graph[i].x = x;
+            graph[i].y = std::sin(m_time * 0.01 + x * 10.0) / (1.0 + x * x);
+        }
+        m_time += 1.0;
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
+
+        glDrawArrays(GL_LINE_STRIP, 0, NPOINTS);
+        glBindVertexArray(0);
+
+        glfwSwapBuffers(m_window);
+    }
+
     void spin()
     {
         // render loop
         // -----------
         while (!glfwWindowShouldClose(m_window))
         {
-            // input
-            // -----
             process_input();
-
-            // render
-            // ------
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            // draw our first triangle
-            glUseProgram(m_shader_program);
-
-            // double xpos, ypos;
-            // glfwGetCursorPos(m_window, &xpos, &ypos);
-
-            // int width, height;
-            // glfwGetWindowSize(m_window, &width, &height);
-
-            glUniform1f(m_uniform_scale_x, m_zoom);
-
-            glBindVertexArray(m_vertex_array); // seeing as we only have a single vertex_array there's no need to bind it every time, but we'll do so to keep things a bit more organized
-
-            // auto value = std::sin(static_cast<double>(time) / 500.0);
-            // ts.push(time++, value);
-
-            // auto buf = ts.mean(0, 100, 2000);
-            // for (int i = 0; i < 2000; i++)
-            // {
-            //     graph[i].x = i;
-            //     graph[i].y = buf[i];
-            // }
-
-            // vertices[0] += 0.001f;
-
-            glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
-
-            glDrawArrays(GL_LINE_STRIP, 0, 2000);
-            // glBindVertexArray(0); // no need to unbind it every time
-
-            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-            // -------------------------------------------------------------------------------
-            glfwSwapBuffers(m_window);
+            render();
             glfwPollEvents();
         }
     }
@@ -150,8 +147,19 @@ private:
 
     static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
     {
+        glm::vec2 cursor(xpos, ypos);
+
         GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
-        obj->m_cursor = glm::vec2(xpos, ypos);
+        if (obj->m_dragging)
+        {
+            auto offset = cursor - obj->m_cursor;
+            obj->m_offset += obj->win2screen(offset);
+
+            std::cout << "Dragging...\n";
+            std::cout << obj->m_offset.x << '\n';
+        }
+
+        obj->m_cursor = cursor;
     }
 
     static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
@@ -160,6 +168,19 @@ private:
 
         GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
         obj->m_zoom *= 1.0 + (yoffset / 10);
+    }
+
+    static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+    {
+        GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            obj->m_dragging = true;
+        }
+        else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+        {
+            obj->m_dragging = false;
+        }
     }
 
     void process_input()
@@ -240,21 +261,49 @@ private:
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
         glDeleteShader(geomShader);
+    }
 
-        m_uniform_scale_x = glGetUniformLocation(m_shader_program, "scale_x");
-        glUseProgram(m_shader_program);
-        glUniform1f(m_uniform_scale_x, 1.0f);
+    void create_uniforms()
+    {
+        m_uniform_offset = glGetUniformLocation(m_shader_program, "offset");
+        m_uniform_scale = glGetUniformLocation(m_shader_program, "scale");
+        m_uniform_line_thickness = glGetUniformLocation(m_shader_program, "line_thickness");
+    }
+
+    /**
+     * @brief Converts from window coordinates )e.g. pixels) to screen space.
+     * Screen space is -1->1 in both axis with the origin in the bottom left.
+     * 
+     * @param win Windows coordinates in px.
+     * @return glm::vec2 The screen space vector.
+     */
+    glm::vec2 win2screen(const glm::vec2 &win)
+    {
+        int width, height;
+        glfwGetWindowSize(m_window, &width, &height);
+
+        glm::vec2 ret;
+        ret.x = 2 * win.x / width;
+        ret.y = -2 * win.y / height;
+
+        return ret;
     }
 
     static constexpr unsigned int SCR_WIDTH = 800;
     static constexpr unsigned int SCR_HEIGHT = 600;
+    static constexpr std::size_t NPOINTS = 2000;
+    static constexpr int LINE_THICKNESS_PX = 1.0;
 
     GLFWwindow *m_window;
-    int m_shader_program, m_uniform_scale_x;
+    int m_shader_program;
+    int m_uniform_offset, m_uniform_scale, m_uniform_line_thickness;
     unsigned int m_vertex_array, m_vertex_buffer;
     glm::vec2 m_cursor;
+    glm::vec2 m_offset;
     double m_zoom;
-    point graph[2000];
+    glm::vec2 graph[NPOINTS];
+    bool m_dragging;
+    float m_time;
 };
 
 // settings
@@ -281,14 +330,9 @@ int main()
 
     // std::uniform_real_distribution<> dist(-.3, .3);
 
-    // for (int i = 0; i < 2000; i++)
-    // {
-    //     float x = (i - 1000.0) / 100.0;
-    //     graph[i].x = x;
-    //     graph[i].y = std::sin(x * 10.0) / (1.0 + x * x);
-    // }
-
     glfwTerminate();
+
+    std::cout << "Bye!\n";
 
     return 0;
 }
