@@ -2,13 +2,15 @@ cmake_minimum_required(VERSION 3.16)
 project(glot)
 
 find_package(OpenGL REQUIRED)
-find_package(glm REQUIRED)
 
-# Build GLFW from source - it's easier than trying to install it on all platforms - especially windows
+# Build GLFW from source - easier than trying to install the binary package on Windows!
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(libs/glfw-3.3.6)
+
+# Include GLM from source - again ... easier on windows..!
+add_subdirectory(libs/glm-0.9.9.8)
 
 # Add tsdb
 set(TSDB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
