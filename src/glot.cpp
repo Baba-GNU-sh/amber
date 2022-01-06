@@ -19,6 +19,8 @@ public:
           m_dragging(false),
           m_time(0)
     {
+        std::cout << "Use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around\n";
+
         m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLOT", NULL, NULL);
         if (m_window == NULL)
         {
