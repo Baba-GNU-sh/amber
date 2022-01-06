@@ -12,10 +12,6 @@ add_subdirectory(libs/glfw-3.3.6)
 # Include GLM from source - again ... easier on windows..!
 add_subdirectory(libs/glm-0.9.9.8)
 
-# Add tsdb
-set(TSDB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-add_subdirectory(libs/tsdb)
-
 # Build the glot executable
 add_executable(
 	glot
@@ -34,5 +30,4 @@ configure_file(shaders/vertex.glsl shaders/ COPYONLY)
 configure_file(shaders/geometry.glsl shaders/ COPYONLY)
 configure_file(shaders/fragment.glsl shaders/ COPYONLY)
 
-#target_link_libraries(glot OpenGL::GL GLU glfw dl)
-target_link_libraries(glot OpenGL::GL glm::glm glfw tsdb)
+target_link_libraries(glot OpenGL::GL glm::glm glfw)
