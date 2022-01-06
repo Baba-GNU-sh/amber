@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "shader_loader.hpp"
+#include "shader_utils.hpp"
 #include "tsdb/tsdb.hpp"
 
 #include <random>
@@ -43,7 +43,6 @@ public:
         glEnable(GL_MULTISAMPLE);
 
         load_shaders();
-        create_uniforms();
 
         glGenVertexArrays(1, &m_vertex_array);
         // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
@@ -82,7 +81,6 @@ public:
         // ------------------------------------------------------------------------
         glDeleteVertexArrays(1, &m_vertex_array);
         glDeleteBuffers(1, &m_vertex_buffer);
-        glDeleteProgram(m_shader_program);
 
         glfwDestroyWindow(m_window);
     }
@@ -92,7 +90,7 @@ public:
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(m_shader_program);
+        glUseProgram(m_shader_program->get_handle());
 
         int width, height;
         glfwGetWindowSize(m_window, &width, &height);
@@ -155,8 +153,7 @@ private:
             auto offset = cursor - obj->m_cursor;
             obj->m_offset += obj->win2screen(offset);
 
-            std::cout << "Dragging...\n";
-            std::cout << obj->m_offset.x << '\n';
+            std::cout << "Dragging: " << obj->m_offset.x << ", " << obj->m_offset.y << "\n";
         }
 
         obj->m_cursor = cursor;
@@ -164,7 +161,7 @@ private:
 
     static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
     {
-        std::cout << "Scroll " << yoffset << '\n';
+        std::cout << "Scrolling: " << yoffset << '\n';
 
         GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
         obj->m_zoom *= 1.0 + (yoffset / 10);
@@ -193,87 +190,22 @@ private:
 
     void load_shaders()
     {
-        // vertex shader
-        ShaderLoader vertex_loader("/home/steve/Development/glot/vertex.glsl");
-        auto vertexShaderSourceStr = vertex_loader.load();
-        const char *vertexShaderSource = vertexShaderSourceStr.c_str();
-        int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-        glCompileShader(vertexShader);
-        // check for shader compile errors
-        int success;
-        char infoLog[512];
-        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-                      << infoLog << std::endl;
-        }
+        std::vector<std::shared_ptr<Shader>> shaders{
+            std::make_shared<Shader>("shaders/vertex.glsl", GL_VERTEX_SHADER),
+            std::make_shared<Shader>("shaders/geometry.glsl", GL_GEOMETRY_SHADER),
+            std::make_shared<Shader>("shaders/fragment.glsl", GL_FRAGMENT_SHADER)};
 
-        // fragment shader
-        ShaderLoader loader("/home/steve/Development/glot/fragment.glsl");
-        auto fragmentShaderSourceStr = loader.load();
-        const char *fragmentShaderSource = fragmentShaderSourceStr.c_str();
-        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-        glCompileShader(fragmentShader);
-        // check for shader compile errors
-        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-                      << infoLog << std::endl;
-        }
+        m_shader_program = std::make_unique<ShaderProgram>(std::move(shaders));
 
-        // Geometry shader
-        ShaderLoader geomLoader("/home/steve/Development/glot/geometry.glsl");
-        auto geomShaderSourceStr = geomLoader.load();
-        const char *geomShaderSource = geomShaderSourceStr.c_str();
-        int geomShader = glCreateShader(GL_GEOMETRY_SHADER);
-        glShaderSource(geomShader, 1, &geomShaderSource, NULL);
-        glCompileShader(geomShader);
-        // check for shader compile errors
-        glGetShaderiv(geomShader, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::GEOM::COMPILATION_FAILED\n"
-                      << infoLog << std::endl;
-        }
-
-        // link shaders
-        m_shader_program = glCreateProgram();
-        glAttachShader(m_shader_program, vertexShader);
-        glAttachShader(m_shader_program, geomShader);
-        glAttachShader(m_shader_program, fragmentShader);
-        glLinkProgram(m_shader_program);
-        // check for linking errors
-        glGetProgramiv(m_shader_program, GL_LINK_STATUS, &success);
-        if (!success)
-        {
-            glGetProgramInfoLog(m_shader_program, 512, NULL, infoLog);
-            std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-                      << infoLog << std::endl;
-            throw std::runtime_error("Error linking shader");
-        }
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        glDeleteShader(geomShader);
-    }
-
-    void create_uniforms()
-    {
-        m_uniform_offset = glGetUniformLocation(m_shader_program, "offset");
-        m_uniform_scale = glGetUniformLocation(m_shader_program, "scale");
-        m_uniform_line_thickness = glGetUniformLocation(m_shader_program, "line_thickness");
+        m_uniform_offset = m_shader_program->get_uniform_location("offset");
+        m_uniform_scale = m_shader_program->get_uniform_location("scale");
+        m_uniform_line_thickness = m_shader_program->get_uniform_location("line_thickness");
     }
 
     /**
      * @brief Converts from window coordinates )e.g. pixels) to screen space.
      * Screen space is -1->1 in both axis with the origin in the bottom left.
-     * 
+     *
      * @param win Windows coordinates in px.
      * @return glm::vec2 The screen space vector.
      */
@@ -292,10 +224,10 @@ private:
     static constexpr unsigned int SCR_WIDTH = 800;
     static constexpr unsigned int SCR_HEIGHT = 600;
     static constexpr std::size_t NPOINTS = 2000;
-    static constexpr int LINE_THICKNESS_PX = 1.0;
+    static constexpr int LINE_THICKNESS_PX = 5.0;
 
     GLFWwindow *m_window;
-    int m_shader_program;
+    std::unique_ptr<ShaderProgram> m_shader_program;
     int m_uniform_offset, m_uniform_scale, m_uniform_line_thickness;
     unsigned int m_vertex_array, m_vertex_buffer;
     glm::vec2 m_cursor;

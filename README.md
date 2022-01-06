@@ -1,27 +1,13 @@
-Glot is a high performance plotting tool and time series database, capable of plotting and exploting high frequency (e.g. kHz) time series data from various sources.
+Glot in an example project showing how lines of varying thicknesses can be drawn using geometry shaders.
 
-## Building for Windows:
-
-First make sure to install git, and cmake. Make sure to add them to your path.
-Also install Visual Studio Community edition. Glot has been tested with the 2019 version.
-
-```
-git clone --recurse-submodules https://github.com/stevegolton/glot.git
-mkdir glot/build && cd glot/build
-cmake ..
-```
-
-This should generate the visual studio build dirs in glot/build. You should be able to open the solution with VS Community and build it using the normal methods.
-
-## Building for Debian/Ubuntu:
+## Debian/Ubuntu
 Install deps:
+```
+sudo apt install git cmake build-essential libgl-dev libxinerama-dev libxcursor-dev libxi-dev libglm-dev
+```
 
 ```
-sudo apt install libgl-dev libxinerama-dev libxcursor-dev libxi-dev
-```
-
-```
-git clone --recurse-submodules https://github.com/stevegolton/glot.git
+git clone https://github.com/stevegolton/glot.git
 mkdir glot/build && cd glot/build
 cmake .. && make -j`nproc`
 ```
@@ -30,3 +16,22 @@ Run it with:
 ```
 ./glot
 ```
+
+You should see something like this:
+![screenshot](screenshot.png)
+
+## Windows
+
+First make sure to install git and cmake & make sure to add them to your path.
+Also install Visual Studio Community edition - has been tested with the 2019 version.
+
+```
+git clone https://github.com/stevegolton/glot.git
+mkdir glot/build
+cd glot/build
+cmake ..
+```
+
+This should generate the visual studio build dirs in glot/build. You should be able to open the solution with VS Community and build it using the normal methods.
+
+
