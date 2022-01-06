@@ -53,9 +53,6 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(graph), graph, GL_DYNAMIC_DRAW);
 
-        // vertices[0] = -1.0f;
-        // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glEnableVertexAttribArray(0);
 
@@ -68,12 +65,6 @@ public:
 
         // uncomment this call to draw in wireframe polygons.
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        for (int i = 0; i < 3; i++)
-        {
-            graph[i].x = i - 1.0;
-            graph[i].y = std::sin(static_cast<double>(i));
-        }
     }
 
     ~GraphWindow()
