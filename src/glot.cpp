@@ -72,7 +72,7 @@ public:
         // Generate an interesting function
         for (int i = 0; i < NPOINTS; i++)
         {
-            float x = (i - 1000.0) / 100.0;
+            float x = (i - 1000.0) / 20.0;
             graph[i].x = x;
             graph[i].y = std::sin(m_time + x * 10.0) / (1.0 + x * x);
         }
@@ -212,7 +212,7 @@ private:
     static constexpr unsigned int SCR_WIDTH = 800;
     static constexpr unsigned int SCR_HEIGHT = 600;
     static constexpr std::size_t NPOINTS = 2000;
-    static constexpr int LINE_THICKNESS_PX = 5.0;
+    static constexpr int LINE_THICKNESS_PX = 10.0;
 
     GLFWwindow *m_window;
     std::unique_ptr<ShaderProgram> m_shader_program;
