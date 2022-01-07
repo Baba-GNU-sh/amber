@@ -41,85 +41,59 @@ public:
             throw std::runtime_error("Failed to initialize GLAD");
         }
 
+        // Optimistically attempt to enable multisampling
         glEnable(GL_MULTISAMPLE);
 
         load_shaders();
 
+        // Create and bind the Vertex Array Object
         glGenVertexArrays(1, &m_vertex_array);
-        // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
         glBindVertexArray(m_vertex_array);
 
+        // Create and bind the Vertex Buffer Object
         glGenBuffers(1, &m_vertex_buffer);
         glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(graph), graph, GL_DYNAMIC_DRAW);
 
+        // Set vertex array attributes such as the element type, and the stride
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glEnableVertexAttribArray(0);
-
-        // note that this is allowed, the call to glVertexAtribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        // You can unbind the vertex_array afterwards so other vertex_array calls won't accidentally modify this vertex_array, but this rarely happens. Modifying other
-        // vertex_arrays requires a call to glBindVertexArray anyways so we generally don't unbind vertex_arrays (nor VBOs) when it's not directly necessary.
-        glBindVertexArray(0);
-
-        // uncomment this call to draw in wireframe polygons.
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
     ~GraphWindow()
     {
-        // optional: de-allocate all resources once they've outlived their purpose:
-        // ------------------------------------------------------------------------
         glDeleteVertexArrays(1, &m_vertex_array);
         glDeleteBuffers(1, &m_vertex_buffer);
-
         glfwDestroyWindow(m_window);
     }
 
     void render()
     {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glUseProgram(m_shader_program->get_handle());
-
-        int width, height;
-        glfwGetWindowSize(m_window, &width, &height);
-
-        // Feed line thickness info to the geometry shader, this depends on the window size
-        const auto lt = win2screen(glm::vec2(LINE_THICKNESS_PX, -LINE_THICKNESS_PX));
-        glUniform2f(m_uniform_line_thickness, lt.x, lt.y);
-
-        // Feed offset and scale info to the shaders
-        glUniform2f(m_uniform_offset, m_offset.x, m_offset.y);
-        glUniform2f(m_uniform_scale, m_zoom, m_zoom);
-
-        // seeing as we only have a single vertex_array there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glBindVertexArray(m_vertex_array);
-
-        // Plot an interesting function
+        // Generate an interesting function
         for (int i = 0; i < NPOINTS; i++)
         {
             float x = (i - 1000.0) / 100.0;
             graph[i].x = x;
-            graph[i].y = std::sin(m_time * 0.01 + x * 10.0) / (1.0 + x * x);
+            graph[i].y = std::sin(m_time + x * 10.0) / (1.0 + x * x);
         }
-        m_time += 1.0;
+        m_time += 0.01;
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
+        // Clear the buffer with a nice dark blue/green colour
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Swap the data in graph into the VBO
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
 
+        // Draw lines using the VBO data to the backbuffer
         glDrawArrays(GL_LINE_STRIP, 0, NPOINTS);
-        glBindVertexArray(0);
 
+        // Swap out the frame buffers to revel the data we just wrote to the back buffer
         glfwSwapBuffers(m_window);
     }
 
     void spin()
     {
-        // render loop
-        // -----------
         while (!glfwWindowShouldClose(m_window))
         {
             process_input();
@@ -129,10 +103,16 @@ public:
     }
 
 private:
-    static void framebuffer_size_callback(GLFWwindow *, int width, int height)
+    static void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     {
         std::cout << "Resized window " << width << "x" << height << "px\n";
         glViewport(0, 0, width, height);
+
+        GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
+
+        // Feed line thickness info to the geometry shader, this depends on the window size
+        const auto lt = obj->win2screen(glm::vec2(obj->LINE_THICKNESS_PX, -obj->LINE_THICKNESS_PX));
+        glUniform2f(obj->m_uniform_line_thickness, lt.x, lt.y);
     }
 
     static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
@@ -146,6 +126,8 @@ private:
             obj->m_offset += obj->win2screen(offset);
 
             std::cout << "Dragging: " << obj->m_offset.x << ", " << obj->m_offset.y << "\n";
+
+            glUniform2f(obj->m_uniform_offset, obj->m_offset.x, obj->m_offset.y);
         }
 
         obj->m_cursor = cursor;
@@ -157,6 +139,8 @@ private:
 
         GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
         obj->m_zoom *= 1.0 + (yoffset / 10);
+
+        glUniform2f(obj->m_uniform_scale, obj->m_zoom, obj->m_zoom);
     }
 
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
@@ -192,6 +176,18 @@ private:
         m_uniform_offset = m_shader_program->get_uniform_location("offset");
         m_uniform_scale = m_shader_program->get_uniform_location("scale");
         m_uniform_line_thickness = m_shader_program->get_uniform_location("line_thickness");
+
+        glUseProgram(m_shader_program->get_handle());
+
+        // Set up uniform initial values
+        glUniform2f(m_uniform_scale, m_zoom, m_zoom);
+        glUniform2f(m_uniform_offset, m_offset.x, m_offset.y);
+
+        // Set up the line thickness uniform
+        int width, height;
+        glfwGetWindowSize(m_window, &width, &height);
+        const auto lt = win2screen(glm::vec2(LINE_THICKNESS_PX, -LINE_THICKNESS_PX));
+        glUniform2f(m_uniform_line_thickness, lt.x, lt.y);
     }
 
     /**
@@ -248,11 +244,6 @@ int main()
         GraphWindow win;
         win.spin();
     }
-
-    // std::random_device dev;
-    // std::mt19937 rng(dev());
-
-    // std::uniform_real_distribution<> dist(-.3, .3);
 
     glfwTerminate();
 
