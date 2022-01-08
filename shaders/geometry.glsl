@@ -17,9 +17,6 @@ flat out vec3 fColor;
 // I can't beleive GLSL doesn't have a PI definition
 #define M_PI 3.1415926535897932384626433832795
 
-#define JOIN_NONE 0
-#define JOIN_BEVEL 1
-
 // Returns the normalized angle between -Pi and +Pi
 float normalize_angle(float angle)
 {
