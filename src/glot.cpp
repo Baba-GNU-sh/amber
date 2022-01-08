@@ -72,7 +72,7 @@ public:
         // Generate an interesting function
         for (int i = 0; i < NPOINTS; i++)
         {
-            float x = (i - 1000.0) / 20.0;
+            float x = (i - 1000.0) / 200.0;
             graph[i].x = x;
             graph[i].y = std::sin(m_time + x * 10.0) / (1.0 + x * x);
         }
@@ -86,7 +86,7 @@ public:
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
 
         // Draw lines using the VBO data to the backbuffer
-        glDrawArrays(GL_LINE_STRIP, 0, NPOINTS);
+        glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, NPOINTS);
 
         // Swap out the frame buffers to revel the data we just wrote to the back buffer
         glfwSwapBuffers(m_window);
@@ -109,10 +109,7 @@ private:
         glViewport(0, 0, width, height);
 
         GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
-
-        // Feed line thickness info to the geometry shader, this depends on the window size
-        const auto lt = obj->win2screen(glm::vec2(obj->LINE_THICKNESS_PX, -obj->LINE_THICKNESS_PX));
-        glUniform2f(obj->m_uniform_line_thickness, lt.x, lt.y);
+        glUniform2i(obj->m_uniform_viewport_res, width, height);
     }
 
     static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
@@ -175,6 +172,7 @@ private:
 
         m_uniform_offset = m_shader_program->get_uniform_location("offset");
         m_uniform_scale = m_shader_program->get_uniform_location("scale");
+        m_uniform_viewport_res = m_shader_program->get_uniform_location("viewport_res");
         m_uniform_line_thickness = m_shader_program->get_uniform_location("line_thickness");
 
         glUseProgram(m_shader_program->get_handle());
@@ -182,12 +180,12 @@ private:
         // Set up uniform initial values
         glUniform2f(m_uniform_scale, m_zoom, m_zoom);
         glUniform2f(m_uniform_offset, m_offset.x, m_offset.y);
+        glUniform1f(m_uniform_line_thickness, LINE_THICKNESS_PX);
 
         // Set up the line thickness uniform
         int width, height;
         glfwGetWindowSize(m_window, &width, &height);
-        const auto lt = win2screen(glm::vec2(LINE_THICKNESS_PX, -LINE_THICKNESS_PX));
-        glUniform2f(m_uniform_line_thickness, lt.x, lt.y);
+        glUniform2i(m_uniform_viewport_res, width, height);
     }
 
     /**
@@ -212,11 +210,11 @@ private:
     static constexpr unsigned int SCR_WIDTH = 800;
     static constexpr unsigned int SCR_HEIGHT = 600;
     static constexpr std::size_t NPOINTS = 2000;
-    static constexpr int LINE_THICKNESS_PX = 10.0;
+    static constexpr int LINE_THICKNESS_PX = 8;
 
     GLFWwindow *m_window;
     std::unique_ptr<ShaderProgram> m_shader_program;
-    int m_uniform_offset, m_uniform_scale, m_uniform_line_thickness;
+    int m_uniform_offset, m_uniform_scale, m_uniform_viewport_res, m_uniform_line_thickness;
     unsigned int m_vertex_array, m_vertex_buffer;
     glm::vec2 m_cursor;
     glm::vec2 m_offset;
