@@ -6,13 +6,15 @@ uniform float line_thickness;
 
 // Lines have 2 vertices per-primitive, the geometry shader is run once per primitive
 layout (lines_adjacency) in;
+in vec2 minmax_out[];
 
 // We want to output a box per line primitive which requies two trianges - with a line strip we can do this with 4 verticies
 // We could probably also do this with a quad
-layout (triangle_strip, max_vertices = 5) out;
+layout (triangle_strip, max_vertices = 9) out;
+
 
 // An output to the fragment shader - the flat qualifier signifies that this output won't be interpolated over the entire primitive's output
-flat out vec3 fColor;
+flat out vec4 fColor;
 
 // I can't beleive GLSL doesn't have a PI definition
 #define M_PI 3.1415926535897932384626433832795
@@ -59,9 +61,22 @@ void main (void)
     vec4 point_c = gl_in[3].gl_Position;
 
     // Some colours for the triangles
-    const vec3 orange = vec3(1.0f, 0.5f, 0.2f);
-    const vec3 green = vec3(0.5f, 1.0f, 0.2f);
-    const vec3 blue = vec3(0.5f, 0.6f, 1.0f);
+    const vec4 orange = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    const vec4 green = vec4(0.5f, 1.0f, 0.2f, 1.0f);
+    const vec4 blue = vec4(0.5f, 0.6f, 1.0f, 1.0f);
+    const vec4 WHITE = vec4(.5f, .5f, .5f, 1.0f);
+
+    fColor = WHITE;
+    float depth = 0.1;
+    gl_Position = vec4(point_a.x, minmax_out[0][0], depth, 1);
+    EmitVertex();
+    gl_Position = vec4(point_a.x, minmax_out[0][1], depth, 1);
+    EmitVertex();
+    gl_Position = vec4(point_b.x, minmax_out[1][0], depth, 1);
+    EmitVertex();
+    gl_Position = vec4(point_b.x, minmax_out[1][1], depth, 1);
+    EmitVertex();
+    EndPrimitive();
 
     // Work out the angle between this point and the next point
     vec4 normal_a = line_thickness * get_line_normal(point_b, point_a);

@@ -43,6 +43,7 @@ public:
 
         // Optimistically attempt to enable multisampling
         glEnable(GL_MULTISAMPLE);
+        glEnable(GL_DEPTH_TEST);
 
         load_shaders();
 
@@ -56,8 +57,10 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(graph), graph, GL_DYNAMIC_DRAW);
 
         // Set vertex array attributes such as the element type, and the stride
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     }
 
     ~GraphWindow()
@@ -72,15 +75,17 @@ public:
         // Generate an interesting function
         for (int i = 0; i < NPOINTS; i++)
         {
-            float x = (i - 1000.0) / 200.0;
+            float x = (i - 1000.0) / 20.0;
             graph[i].x = x;
             graph[i].y = std::sin(m_time + x * 10.0) / (1.0 + x * x);
+            graph[i].z = graph[i].y + 0.5;
+            graph[i].w = graph[i].y - 0.5;
         }
         m_time += 0.01;
 
         // Clear the buffer with a nice dark blue/green colour
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
 
         // Swap the data in graph into the VBO
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
@@ -210,7 +215,7 @@ private:
     static constexpr unsigned int SCR_WIDTH = 800;
     static constexpr unsigned int SCR_HEIGHT = 600;
     static constexpr std::size_t NPOINTS = 2000;
-    static constexpr int LINE_THICKNESS_PX = 8;
+    static constexpr int LINE_THICKNESS_PX = 2;
 
     GLFWwindow *m_window;
     std::unique_ptr<ShaderProgram> m_shader_program;
@@ -219,7 +224,7 @@ private:
     glm::vec2 m_cursor;
     glm::vec2 m_offset;
     double m_zoom;
-    glm::vec2 graph[NPOINTS];
+    glm::vec4 graph[NPOINTS];
     bool m_dragging;
     float m_time;
 };
