@@ -75,7 +75,7 @@ public:
         // Generate an interesting function
         for (int i = 0; i < NPOINTS; i++)
         {
-            float x = (i - 1000.0) / 20.0;
+            float x = (i - 1000.0) / 100.0;
             graph[i].x = x;
             graph[i].y = std::sin(m_time + x * 10.0) / (1.0 + x * x);
             graph[i].z = graph[i].y + 0.5;
