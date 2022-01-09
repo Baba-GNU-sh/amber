@@ -1,12 +1,21 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <random>
 
 #include "shader_utils.hpp"
 
 #include <random>
 #include <iostream>
 #include <cmath>
+
+struct Sample
+{
+    GLfloat t;
+    GLfloat avg;
+    GLfloat max;
+    GLfloat min;
+};
 
 class GraphWindow
 {
@@ -60,7 +69,10 @@ public:
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+
+        // Set the colour to be a nice dark green
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     }
 
     ~GraphWindow()
@@ -70,30 +82,36 @@ public:
         glfwDestroyWindow(m_window);
     }
 
+    void plot_graph()
+    {
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_real_distribution<> dist(-1, 1);
+
+        for (int i = 0; i < NPOINTS; i++)
+        {
+            float x = (i - 1000.0) / 200.0;
+            graph[i].t = x;
+            graph[i].avg = std::sin(m_time + x * 10.0) / (1.0 + x * x) + 0.01 * dist(rng);
+            graph[i].max = graph[i].avg + 0.1 + 0.05 * dist(rng);
+            graph[i].min = graph[i].avg - 0.1 + 0.05 * dist(rng);
+        }
+        m_time += 0.01;
+    }
+
     void render()
     {
         // Generate an interesting function
-        for (int i = 0; i < NPOINTS; i++)
-        {
-            float x = (i - 1000.0) / 100.0;
-            graph[i].x = x;
-            graph[i].y = std::sin(m_time + x * 10.0) / (1.0 + x * x);
-            graph[i].z = graph[i].y + 0.5;
-            graph[i].w = graph[i].y - 0.5;
-        }
-        m_time += 0.01;
+        plot_graph();
 
         // Clear the buffer with a nice dark blue/green colour
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Swap the data in graph into the VBO
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
 
-        // Draw lines using the VBO data to the backbuffer
+        // Draw lines using the VBO data to the backbuffer then swap buffers
         glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, NPOINTS);
-
-        // Swap out the frame buffers to revel the data we just wrote to the back buffer
         glfwSwapBuffers(m_window);
     }
 
@@ -224,7 +242,7 @@ private:
     glm::vec2 m_cursor;
     glm::vec2 m_offset;
     double m_zoom;
-    glm::vec4 graph[NPOINTS];
+    Sample graph[NPOINTS];
     bool m_dragging;
     float m_time;
 };
