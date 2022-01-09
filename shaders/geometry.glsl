@@ -68,13 +68,13 @@ void main (void)
 
     fColor = WHITE;
     float depth = 0.1;
-    gl_Position = vec4(point_a.x, minmax_out[0][0], depth, 1);
+    gl_Position = vec4(point_a.x, minmax_out[1][0], depth, 1);
     EmitVertex();
-    gl_Position = vec4(point_a.x, minmax_out[0][1], depth, 1);
+    gl_Position = vec4(point_a.x, minmax_out[1][1], depth, 1);
     EmitVertex();
-    gl_Position = vec4(point_b.x, minmax_out[1][0], depth, 1);
+    gl_Position = vec4(point_b.x, minmax_out[2][0], depth, 1);
     EmitVertex();
-    gl_Position = vec4(point_b.x, minmax_out[1][1], depth, 1);
+    gl_Position = vec4(point_b.x, minmax_out[2][1], depth, 1);
     EmitVertex();
     EndPrimitive();
 
