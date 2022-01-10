@@ -195,8 +195,8 @@ private:
 
         m_uniform_offset = m_shader_program.get_uniform_location("offset");
         m_uniform_scale = m_shader_program.get_uniform_location("scale");
-        m_uniform_viewport_res = m_shader_program.get_uniform_location("viewport_res");
-        m_uniform_line_thickness = m_shader_program.get_uniform_location("line_thickness");
+        m_uniform_viewport_res = m_shader_program.get_uniform_location("viewport_res_px");
+        m_uniform_line_thickness = m_shader_program.get_uniform_location("line_thickness_px");
 
         m_shader_program.use();
 
@@ -205,7 +205,7 @@ private:
         glUniform2f(m_uniform_offset, m_offset.x, m_offset.y);
         glUniform1f(m_uniform_line_thickness, LINE_THICKNESS_PX);
 
-        // Set up the line thickness uniform
+        // Set up the line window size uniform
         int width, height;
         glfwGetWindowSize(m_window, &width, &height);
         glUniform2i(m_uniform_viewport_res, width, height);
@@ -233,7 +233,7 @@ private:
     static constexpr unsigned int SCR_WIDTH = 800;
     static constexpr unsigned int SCR_HEIGHT = 600;
     static constexpr std::size_t NPOINTS = 2000;
-    static constexpr int LINE_THICKNESS_PX = 2;
+    static constexpr int LINE_THICKNESS_PX = 4;
 
     GLFWwindow *m_window;
     Program m_shader_program;
