@@ -1,7 +1,7 @@
 #include "shader_utils.hpp"
 #include <glad/glad.h>
 
-Shader::Shader(const std::string &filename, int shader_type)
+ShaderImpl::ShaderImpl(const std::string &filename, int shader_type)
     : m_filename(filename)
 {
     std::ifstream ifs(m_filename, std::ios::in);
@@ -43,12 +43,12 @@ Shader::Shader(const std::string &filename, int shader_type)
     }
 }
 
-Shader::~Shader()
+ShaderImpl::~ShaderImpl()
 {
     glDeleteShader(m_shader_handle);
 }
 
-int Shader::get_handle()
+int ShaderImpl::get_handle() const
 {
     return m_shader_handle;
 }

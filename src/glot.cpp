@@ -186,19 +186,19 @@ private:
 
     void load_shaders()
     {
-        std::vector<std::shared_ptr<Shader>> shaders{
-            std::make_shared<Shader>("shaders/vertex.glsl", GL_VERTEX_SHADER),
-            std::make_shared<Shader>("shaders/geometry.glsl", GL_GEOMETRY_SHADER),
-            std::make_shared<Shader>("shaders/fragment.glsl", GL_FRAGMENT_SHADER)};
+        std::vector<Shader> shaders{
+            Shader("shaders/vertex.glsl", GL_VERTEX_SHADER),
+            Shader("shaders/geometry.glsl", GL_GEOMETRY_SHADER),
+            Shader("shaders/fragment.glsl", GL_FRAGMENT_SHADER)};
 
-        m_shader_program = std::make_unique<ShaderProgram>(std::move(shaders));
+        m_shader_program = Program(shaders);
 
-        m_uniform_offset = m_shader_program->get_uniform_location("offset");
-        m_uniform_scale = m_shader_program->get_uniform_location("scale");
-        m_uniform_viewport_res = m_shader_program->get_uniform_location("viewport_res");
-        m_uniform_line_thickness = m_shader_program->get_uniform_location("line_thickness");
+        m_uniform_offset = m_shader_program.get_uniform_location("offset");
+        m_uniform_scale = m_shader_program.get_uniform_location("scale");
+        m_uniform_viewport_res = m_shader_program.get_uniform_location("viewport_res");
+        m_uniform_line_thickness = m_shader_program.get_uniform_location("line_thickness");
 
-        glUseProgram(m_shader_program->get_handle());
+        m_shader_program.use();
 
         // Set up uniform initial values
         glUniform2f(m_uniform_scale, m_zoom, m_zoom);
@@ -236,7 +236,7 @@ private:
     static constexpr int LINE_THICKNESS_PX = 2;
 
     GLFWwindow *m_window;
-    std::unique_ptr<ShaderProgram> m_shader_program;
+    Program m_shader_program;
     int m_uniform_offset, m_uniform_scale, m_uniform_viewport_res, m_uniform_line_thickness;
     unsigned int m_vertex_array, m_vertex_buffer;
     glm::vec2 m_cursor;

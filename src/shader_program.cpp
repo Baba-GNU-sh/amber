@@ -1,18 +1,18 @@
 #include "shader_utils.hpp"
 #include <glad/glad.h>
 
-ShaderProgram::ShaderProgram(std::vector<std::shared_ptr<Shader>> &&shaders)
+ProgramImpl::ProgramImpl(const std::vector<Shader> &shaders)
 {
     m_program_handle = glCreateProgram();
 
     for (const auto &shader : shaders)
     {
-        glAttachShader(m_program_handle, shader->get_handle());
+        glAttachShader(m_program_handle, shader.get_handle());
     }
 
     glLinkProgram(m_program_handle);
 
-    // Check for linking errors
+    // Check for link errors
     int success;
     glGetProgramiv(m_program_handle, GL_LINK_STATUS, &success);
 
@@ -30,17 +30,22 @@ ShaderProgram::ShaderProgram(std::vector<std::shared_ptr<Shader>> &&shaders)
     }
 }
 
-ShaderProgram::~ShaderProgram()
+ProgramImpl::~ProgramImpl()
 {
     glDeleteProgram(m_program_handle);
 }
 
-int ShaderProgram::get_handle()
+int ProgramImpl::get_handle() const
 {
     return m_program_handle;
 }
 
-int ShaderProgram::get_uniform_location(const char *uniform_name)
+int ProgramImpl::get_uniform_location(const char *uniform_name) const
 {
     return glGetUniformLocation(m_program_handle, uniform_name);
+}
+
+void ProgramImpl::use() const
+{
+    glUseProgram(m_program_handle);
 }
