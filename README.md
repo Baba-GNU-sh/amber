@@ -1,4 +1,4 @@
-Glot in an example project showing how lines of varying thicknesses can be drawn using geometry shaders.
+Glot in an example project showing how graphs can be plotted using arbitrary thickness lines along error (noise) bars can be drawn efficiently using geometry shaders.
 
 ## Debian/Ubuntu
 Install deps:
