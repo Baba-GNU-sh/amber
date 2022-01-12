@@ -1,4 +1,4 @@
-Glot in an example project showing how graphs can be plotted using arbitrary thickness lines along error (noise) bars can be drawn efficiently using geometry shaders.
+Glot in an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness and error bars, all drawn on the GPU using using geometry shaders.
 
 ## Debian/Ubuntu
 Install deps:
