@@ -3,7 +3,7 @@ image: ubuntu:20.04
 build:
   before_script:
     - apt update
-    - DEBIAN_FRONTEND=noninteractive apt install -y git cmake ninja-build build-essential libgl-dev libxinerama-dev libxcursor-dev libxi-dev
+    - DEBIAN_FRONTEND=noninteractive apt install -y git cmake ninja-build build-essential libgl-dev libxinerama-dev libxcursor-dev libxi-dev libxrandr-dev
     - mkdir build && cd build
   script:
     - cmake -G"Ninja" .. && ninja
