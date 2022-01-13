@@ -2,6 +2,7 @@ image: ubuntu:20.04
 
 build:
   before_script:
+    - DEBIAN_FRONTEND=noninteractive apt-get update
     - apt update && apt install -y git cmake ninja-build build-essential libgl-dev libxinerama-dev libxcursor-dev libxi-dev
     - mkdir build && cd build
   script:
