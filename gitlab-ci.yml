@@ -1,0 +1,7 @@
+image: ubuntu:20.04
+
+build:
+  before_script:
+    - mkdir build && cd build
+  script:
+    - cmake .. && make -j2
