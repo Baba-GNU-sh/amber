@@ -2,7 +2,7 @@ image: ubuntu:20.04
 
 build:
   before_script:
-    - apt update && apt install git cmake ninja-build build-essential libgl-dev libxinerama-dev libxcursor-dev libxi-dev
+    - apt update && apt install -y git cmake ninja-build build-essential libgl-dev libxinerama-dev libxcursor-dev libxi-dev
     - mkdir build && cd build
   script:
     - cmake -G"Ninja" .. && ninja
