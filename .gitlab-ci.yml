@@ -1,8 +1,10 @@
-image: ubuntu:20.04
+image: python:bullseye
 
 build:
   before_script:
-    - apt update && sudo apt install git cmake ninja-build build-essential libgl-dev libxinerama-dev libxcursor-dev libxi-dev
+    - apt update && sudo apt install cmake build-essential
+    - pip3 install conan
     - mkdir build && cd build
+    - CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
   script:
-    - cmake -G"Ninja" .. && ninja
+    - cmake .. && cmake --build .
