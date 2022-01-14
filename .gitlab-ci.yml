@@ -31,7 +31,8 @@ test:
   needs:
     - build
   artifacts:
-    - glot
+    paths:
+      - glot
   #   when: always
   #   reports:
   #     junit: build/libs/cpp-tsdb/dump.xml
