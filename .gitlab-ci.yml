@@ -23,6 +23,7 @@ test:
     - apt update
     - DEBIAN_FRONTEND=noninteractive apt install -y cmake
   script:
+    - cd build
     - ctest
   needs:
     - build
