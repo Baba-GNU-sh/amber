@@ -16,6 +16,9 @@ build:
   script:
     - cmake -DCMAKE_MODULE_PATH=${PWD} ..
     - cmake --build .
+  cache:
+    paths:
+      - build/
 
 test:
   stage: test
@@ -27,3 +30,7 @@ test:
     - ctest
   needs:
     - build
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
