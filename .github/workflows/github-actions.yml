@@ -17,6 +17,6 @@ jobs:
 #         working-directory: ./build
         run: |
           cd build
-          CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
+          CONAN_SYSREQUIRES_MODE=enabled conan install ..
           cmake -DCMAKE_MODULE_PATH=${PWD} ..
           cmake --build .
