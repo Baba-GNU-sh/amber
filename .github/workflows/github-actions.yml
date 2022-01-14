@@ -4,7 +4,7 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
-      - run: apt update && DEBIAN_FRONTEND=noninteractive apt install -y cmake build-essential python3-pip
+      - run: sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt install -y cmake build-essential python3-pip
       - run: pip3 install conan
       - run: conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
       - run: mkdir build && cd build
