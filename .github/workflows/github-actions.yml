@@ -1,0 +1,13 @@
+name: GitHub Actions Demo
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: apt update && DEBIAN_FRONTEND=noninteractive apt install -y cmake build-essential python3-pip
+      - run: pip3 install conan
+      - run: conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
+      - run: mkdir build && cd build
+      - run: CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
+      - run: cmake -DCMAKE_MODULE_PATH=${PWD} ..
+      - run: cmake --build .
