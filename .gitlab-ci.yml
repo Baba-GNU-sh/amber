@@ -27,10 +27,10 @@ test:
     - DEBIAN_FRONTEND=noninteractive apt install -y cmake
   script:
     - cd build
-    - ctest
+    - --output-junit dump.xml
   needs:
     - build
-  # artifacts:
-  #   when: always
-  #   reports:
-  #     junit: report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: ./libs/cpp-tsdb/dump.xml
