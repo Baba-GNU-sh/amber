@@ -185,9 +185,9 @@ private:
     void load_shaders()
     {
         std::vector<Shader> shaders{
-            Shader("shaders/vertex.glsl", GL_VERTEX_SHADER),
-            Shader("shaders/geometry.glsl", GL_GEOMETRY_SHADER),
-            Shader("shaders/fragment.glsl", GL_FRAGMENT_SHADER)};
+            Shader("vertex.glsl", GL_VERTEX_SHADER),
+            Shader("geometry.glsl", GL_GEOMETRY_SHADER),
+            Shader("fragment.glsl", GL_FRAGMENT_SHADER)};
 
         m_shader_program = Program(shaders);
 

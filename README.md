@@ -1,20 +1,29 @@
 Glot in an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness and error bars, all drawn on the GPU using using geometry shaders.
 
+Glot uses conan to manage its depedencies.
+
 ## Debian/Ubuntu
-Install deps:
+Install python, then install conan:
 ```
-sudo apt install git cmake build-essential libgl-dev libxinerama-dev libxcursor-dev libxi-dev
+sudo apt install python3-pip build-essential cmake git
+pip3 install conan
 ```
 
+Configure conan to use the C++11 abi compatible version of the standard library.
 ```
-git clone https://github.com/stevegolton/glot.git
-mkdir glot/build && cd glot/build
-cmake .. && make -j`nproc`
+conan profile update settings.compiler.libcxx=libstdc++11 default
+```
+
+Clone this repo then cd into the root:
+```
+mkdir build && cd build
+CONAN_SYSREQUIRES_MODE=enabled conan install ..
+cmake .. && cmake --build .
 ```
 
 Run it with:
 ```
-./glot
+bin/glot
 ```
 
 You should see something like this:
@@ -24,13 +33,17 @@ Use the scroll wheel to zoom in and out, and use the left mouse button to drag t
 
 ## Windows
 
+> Note: This needs testing!
+
 First make sure to install git and cmake & make sure to add them to your path.
 Also install Visual Studio Community edition - has been tested with the 2019 version.
+Install python then install conan. Make sure you can run `conan` from your terminal.
 
+Clone this repo then cd into the root:
 ```
-git clone https://github.com/stevegolton/glot.git
-mkdir glot\build
-cd glot\build
+mkdir build
+cd build
+conan install ..
 cmake -G"Visual Studio 16 2019" ..
 ```
 
@@ -47,5 +60,3 @@ Or of you built it in release mode:
 ```
 
 As in the linux version, the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
-
-

@@ -1,33 +1,17 @@
 cmake_minimum_required(VERSION 3.16)
 project(glot)
 
-find_package(OpenGL REQUIRED)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
-# Build GLFW from source - easier than trying to install the binary package on Windows!
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(libs/glfw-3.3.6)
-
-# Include GLM from source - again ... easier on windows..!
-add_subdirectory(libs/glm-0.9.9.8)
-
-# Build the glot executable
-add_executable(
-	glot
+add_executable(glot
 	src/glot.cpp
 	src/shader.cpp
-	src/shader_program.cpp
-	libs/glad/src/glad.c)
+	src/shader_program.cpp)
 
-target_include_directories(glot
-	PRIVATE
-	libs/glad/include)
+target_link_libraries(glot ${CONAN_LIBS})
 
-file(COPY shaders DESTINATION .)
-
-configure_file(shaders/vertex.glsl shaders/ COPYONLY)
-configure_file(shaders/geometry.glsl shaders/ COPYONLY)
-configure_file(shaders/fragment.glsl shaders/ COPYONLY)
-
-target_link_libraries(glot OpenGL::GL glm::glm glfw)
+# Copy the shaders over to the build dir
+configure_file(shaders/vertex.glsl . COPYONLY)
+configure_file(shaders/geometry.glsl . COPYONLY)
+configure_file(shaders/fragment.glsl . COPYONLY)
