@@ -33,4 +33,4 @@ test:
   artifacts:
     when: always
     reports:
-      junit: ./libs/cpp-tsdb/dump.xml
+      junit: build/libs/cpp-tsdb/dump.xml
