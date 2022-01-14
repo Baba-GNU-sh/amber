@@ -27,7 +27,7 @@ test:
     - DEBIAN_FRONTEND=noninteractive apt install -y cmake
   script:
     - cd build
-    - --output-junit dump.xml
+    - ctest --output-junit dump.xml
   needs:
     - build
   artifacts:
