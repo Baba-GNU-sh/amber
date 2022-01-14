@@ -14,9 +14,11 @@ jobs:
           conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
           mkdir build && cd build
       - name: Build
-#         working-directory: ./build
+        working-directory: ./build
         run: |
-          cd build
           CONAN_SYSREQUIRES_MODE=enabled conan install ..
           cmake -DCMAKE_MODULE_PATH=${PWD} ..
           cmake --build .
+      - name: Test
+        working-directory: ./build
+        run: ctest
