@@ -3,9 +3,10 @@ image: python:bullseye
 build:
   before_script:
     - apt update
-    - DEBIAN_FRONTEND=noninteractive apt install cmake build-essential
+    - DEBIAN_FRONTEND=noninteractive apt install -y cmake build-essential
     - pip3 install conan
     - mkdir build && cd build
     - CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
   script:
-    - cmake .. && cmake --build .
+    - cmake -DCMAKE_MODULE_PATH=${PWD} ..
+    - cmake --build .

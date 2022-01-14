@@ -18,7 +18,9 @@ Clone this repo then cd into the root:
 ```
 mkdir build && cd build
 CONAN_SYSREQUIRES_MODE=enabled conan install ..
-cmake .. && cmake --build .
+cmake -DCMAKE_MODULE_PATH=${PWD} ..
+cmake --build .
+ctest
 ```
 
 Run it with:

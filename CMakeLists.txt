@@ -1,15 +1,19 @@
 cmake_minimum_required(VERSION 3.16)
 project(glot)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+enable_testing()
+
+add_subdirectory(libs/cpp-tsdb)
+
+find_package(glfw3 REQUIRED)
+find_package(glad REQUIRED)
 
 add_executable(glot
 	src/glot.cpp
 	src/shader.cpp
 	src/shader_program.cpp)
 
-target_link_libraries(glot ${CONAN_LIBS})
+target_link_libraries(glot glfw::glfw glad::glad)
 
 # Copy the shaders over to the build dir
 configure_file(shaders/vertex.glsl . COPYONLY)
