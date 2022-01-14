@@ -28,6 +28,7 @@ test:
   script:
     - cd build
     - ctest --output-junit dump.xml
+    - find | grep dump.xml
   needs:
     - build
   artifacts:
