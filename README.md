@@ -43,9 +43,8 @@ Make sure to install Visual Studio (Community Edition will do) - glot has been t
 
 Install conan using the installer https://conan.io/downloads.html or using pip if you have python installed already.
 
-> Note: GTest doesn't appear to work on Windows, so we just disable testing with `-DBUILD_TESTS=OFF`
-
 Clone this repo then cd into the root:
+> Note: GTest doesn't appear to work on Windows, so we just disable testing with `-DBUILD_TESTS=OFF`
 ```ps
 mkdir build
 cd build
