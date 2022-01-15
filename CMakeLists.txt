@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 project(glot)
 
-enable_testing()
+option(BUILD_TESTS "Build test programs" OFF)
+
+if (BUILD_TESTS)
+	enable_testing()
+endif()
 
 add_subdirectory(libs/cpp-tsdb)
 

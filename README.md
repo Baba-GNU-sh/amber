@@ -6,18 +6,18 @@ Glot uses conan to manage its dependencies. The reason I am using using conan ra
 
 ## Debian/Ubuntu
 Install python, then install conan:
-```
+```bash
 sudo apt install python3-pip build-essential cmake git
 pip3 install conan
 ```
 
 Configure conan to use the C++11 abi compatible version of the standard library.
-```
+```bash
 conan profile update settings.compiler.libcxx=libstdc++11 default
 ```
 
 Clone this repo then cd into the root:
-```
+```bash
 mkdir build && cd build
 CONAN_SYSREQUIRES_MODE=enabled conan install ..
 cmake -DCMAKE_MODULE_PATH=${PWD} ..
@@ -37,30 +37,38 @@ Use the scroll wheel to zoom in and out, and use the left mouse button to drag t
 
 ## Windows
 
-> Note: This needs testing!
+First make sure to install `git` and `cmake` and make sure they are in your `PATH`.
 
-First make sure to install git and cmake & make sure to add them to your path.
-Also install Visual Studio Community edition - has been tested with the 2019 version.
-Install python then install conan. Make sure you can run `conan` from your terminal.
+Install `python`, the latest version of python3 will do.
+
+Also make sure to install a working Visual Studio (Community Edition will do) - glot has been tested with the 2019 version.
+
+Install conan using pip:
+```ps
+pip install conan
+```
+
+> Note: GTest doesn't appear to work on Windows, so we just disable testing with `-DBUILD_TESTS=OFF`
 
 Clone this repo then cd into the root:
-```
+```ps
 mkdir build
 cd build
 conan install ..
-cmake -G"Visual Studio 16 2019" ..
+cmake -G"Visual Studio 16 2019" "-DCMAKE_MODULE_PATH=$((pwd).path -replace '\\', '/')" -DBUILD_TESTS=OFF ..
+cmake --build .
 ```
 
-This should generate a VS project in `glot/build`. You should be able to open the `glot.vcxproj` with VS Community and build it with F6.
-However it seems for some reason VS can't find the executable to run, so run it from the command line like so:
-```
+If compilation on the command line isn't your bag, cmake should have generated a VS project in `glot/build/glot.vcxproj` which you can open up in Visual Studio and tinker with.
+
+You can run the executable using:
+```ps
 .\Debug\glot.exe
 ```
 
 Or of you built it in release mode:
-
-```
+```ps
 .\Release\glot.exe
 ```
 
-As in the linux version, the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
+As in the linux version, use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
