@@ -7,6 +7,7 @@ stages:
 build:
   stage: build
   before_script:
+    - cmake --version
     - apt update
     - DEBIAN_FRONTEND=noninteractive apt install -y cmake build-essential
     - pip3 install conan
@@ -32,7 +33,7 @@ test:
     - build
   artifacts:
     paths:
-      - glot
+      - build/glot
   #   when: always
   #   reports:
   #     junit: build/libs/cpp-tsdb/dump.xml
