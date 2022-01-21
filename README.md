@@ -39,23 +39,17 @@ Use the scroll wheel to zoom in and out, and use the left mouse button to drag t
 
 First make sure to install `git` and `cmake` and make sure they are in your `PATH`.
 
-Install `python`, the latest version of python3 will do.
+Make sure to install Visual Studio (Community Edition will do) - glot has been tested with the 2019 version. Cmake should pick this up automatically.
 
-Also make sure to install a working Visual Studio (Community Edition will do) - glot has been tested with the 2019 version.
-
-Install conan using pip:
-```ps
-pip install conan
-```
-
-> Note: GTest doesn't appear to work on Windows, so we just disable testing with `-DBUILD_TESTS=OFF`
+Install conan using the installer https://conan.io/downloads.html or using pip if you have python installed already.
 
 Clone this repo then cd into the root:
+> Note: GTest doesn't appear to work on Windows, so we just disable testing with `-DBUILD_TESTS=OFF`
 ```ps
 mkdir build
 cd build
 conan install ..
-cmake -G"Visual Studio 16 2019" "-DCMAKE_MODULE_PATH=$((pwd).path -replace '\\', '/')" -DBUILD_TESTS=OFF ..
+cmake "-DCMAKE_MODULE_PATH=$((pwd).path -replace '\\', '/')" -DBUILD_TESTS=OFF ..
 cmake --build .
 ```
 
