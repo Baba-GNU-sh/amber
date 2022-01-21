@@ -7,9 +7,9 @@ stages:
 build:
   stage: build
   before_script:
-    - cmake --version
     - apt update
     - DEBIAN_FRONTEND=noninteractive apt install -y cmake build-essential
+    - cmake --version
     - pip3 install conan
     - conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
     - mkdir build && cd build
