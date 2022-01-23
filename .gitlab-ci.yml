@@ -1,39 +1,25 @@
-image: python:bullseye
+image: grouchytoaster/cppbuild:focal
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_DEPTH: 5
+  DOCKER_DRIVER: overlay2
 
 stages:
   - build
-  - test
 
-build:
+focal:
   stage: build
+  coverage: /^\s*lines:\s*\d+.\d+\%/
   before_script:
-    - cmake --version
-    - apt update
-    - DEBIAN_FRONTEND=noninteractive apt install -y cmake build-essential
-    - pip3 install conan
-    - conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
     - mkdir build && cd build
     - CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
   script:
-    - cmake -DCMAKE_MODULE_PATH=${PWD} ..
+    - cmake -GNinja -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=yes -DBUILD_COVERAGE=yes ..
     - cmake --build .
+    - ctest --output-log test.log
+    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
   artifacts:
-    paths:
-      - build/
+    reports:
+      cobertura: build/coverage.xml
 
-test:
-  stage: test
-  before_script:
-    - apt update
-    - DEBIAN_FRONTEND=noninteractive apt install -y cmake
-  script:
-    - cd build
-    - ctest
-  needs:
-    - build
-  artifacts:
-    paths:
-      - build/glot
-  #   when: always
-  #   reports:
-  #     junit: build/libs/cpp-tsdb/dump.xml
