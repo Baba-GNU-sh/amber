@@ -66,3 +66,15 @@ Or of you built it in release mode:
 ```
 
 As in the linux version, use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
+
+# Using with clangd
+```
+cd build
+cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
+```
+
+From the root dir, make a symlink to `compile_commands.json` in the build dir.
+```
+ln -s build/compile_commands.json .
+```
+
