@@ -1,5 +1,8 @@
 ![example workflow](https://github.com/Baba-GNU-sh/glot/actions/workflows/ci.yml/badge.svg)
 
+[![coverage report](https://gitlab.com/tinker3/glot/badges/master/coverage.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
+[![pipeline status](https://gitlab.com/tinker3/glot/badges/master/pipeline.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
+
 Glot is an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness and error bars, all drawn on the GPU using using geometry shaders.
 
 Glot uses conan to manage its dependencies. The reason I am using using conan rather than the package manager is to make it easier / possible to build on Windows and Mac.
