@@ -9,8 +9,7 @@ stages:
   - build
   - pages
 
-# Commented out for now because the job is rather slow...
-.focal:
+focal:
   stage: build
   coverage: /^\s*lines:\s*\d+.\d+\%/
   before_script:
