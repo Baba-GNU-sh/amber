@@ -20,8 +20,8 @@ focal:
     #- cmake --build .
     #- ctest --output-junit test.xml
     #- gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
-    - mkdir public
-    - cp ${CI_PROJECT_DIR}/index.html public/
+    - mkdir ${CI_PROJECT_DIR}/public
+    - cp ${CI_PROJECT_DIR}/index.html ${CI_PROJECT_DIR}/public/
   artifacts:
     paths:
       - build
