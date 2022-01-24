@@ -7,27 +7,34 @@ variables:
 
 stages:
   - build
+  - pages
 
-focal:
+# Commented out for now because the job is rather slow...
+.focal:
   stage: build
   coverage: /^\s*lines:\s*\d+.\d+\%/
   before_script:
     - cmake --version
     - mkdir build && cd build
   script:
-    #- CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
-    #- cmake -GNinja -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=yes -DBUILD_COVERAGE=yes ..
-    #- cmake --build .
-    #- ctest --output-junit test.xml
-    #- gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
-    - mkdir ${CI_PROJECT_DIR}/public
-    - cp ${CI_PROJECT_DIR}/index.html ${CI_PROJECT_DIR}/public/
+    - CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
+    - cmake -GNinja -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=yes -DBUILD_COVERAGE=yes ..
+    - cmake --build .
+    - ctest --output-junit test.xml
+    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
   artifacts:
     paths:
       - build
-      - public
       - screenshot.png
     reports:
       cobertura: build/coverage.xml
       junit: build/test.xml
 
+pages:
+  stage: pages
+  script:
+    - mkdir ${CI_PROJECT_DIR}/public
+    - cp ${CI_PROJECT_DIR}/index.html ${CI_PROJECT_DIR}/public/
+  artifacts:
+    paths:
+      - pages
