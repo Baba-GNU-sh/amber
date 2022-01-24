@@ -3,9 +3,12 @@
 [![coverage report](https://gitlab.com/tinker3/glot/badges/master/coverage.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
 [![pipeline status](https://gitlab.com/tinker3/glot/badges/master/pipeline.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
 
-Glot is an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness and error bars, all drawn on the GPU using using geometry shaders.
+Glot is an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness with error bars, rendered on the GPU using a geometry shader.
 
-Glot uses conan to manage its dependencies. The reason I am using using conan rather than the package manager is to make it easier / possible to build on Windows and Mac.
+Glot uses [conan](http://conan.io/) to manage its dependencies, which makes it easier / possible to build it on Windows (and hopefully MacOS).
+
+# Building
+Glot can be built on Debian/Ubuntu linux as well as Windows 10.
 
 ## Debian/Ubuntu
 Install python, then install conan:
@@ -25,7 +28,6 @@ mkdir build && cd build
 CONAN_SYSREQUIRES_MODE=enabled conan install ..
 cmake -DCMAKE_MODULE_PATH=${PWD} ..
 cmake --build .
-ctest
 ```
 
 Run it with:
