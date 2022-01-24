@@ -25,7 +25,6 @@ focal:
   artifacts:
     paths:
       - build
-      - build/coverge.html
     reports:
       cobertura: build/coverage.xml
       junit: build/test.xml
@@ -36,6 +35,7 @@ pages:
   stage: pages
   script:
     - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/public
+    - cp ${CI_PROJECT_DIR}/build/coverge*html ${CI_PROJECT_DIR}/public
   artifacts:
     paths:
       - public
