@@ -12,6 +12,7 @@ focal:
   stage: build
   coverage: /^\s*lines:\s*\d+.\d+\%/
   before_script:
+    - cmake --version
     - mkdir build && cd build
     - CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
   script:
