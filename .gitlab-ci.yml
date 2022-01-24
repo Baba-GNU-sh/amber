@@ -36,6 +36,8 @@ pages:
   script:
     - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/public
     - cp ${CI_PROJECT_DIR}/build/coverage*html ${CI_PROJECT_DIR}/public
+    - doxygen doxyfile
+    - mv html public/
   artifacts:
     paths:
       - public
