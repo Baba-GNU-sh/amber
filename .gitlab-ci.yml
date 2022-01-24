@@ -17,9 +17,12 @@ focal:
   script:
     - cmake -GNinja -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=yes -DBUILD_COVERAGE=yes ..
     - cmake --build .
-    - ctest --output-log test.log
+    - ctest --output-junit test.xml
     - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
   artifacts:
+    paths:
+      build
     reports:
       cobertura: build/coverage.xml
+      junit: build/test.xml
 
