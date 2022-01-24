@@ -1,3 +1,7 @@
+/**
+ * @file Main include for tsdb.
+ */
+
 #pragma once
 
 #include <string>
