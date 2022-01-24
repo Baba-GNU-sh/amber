@@ -23,6 +23,7 @@ focal:
   artifacts:
     paths:
       - build
+      - screenshot.png
     reports:
       cobertura: build/coverage.xml
       junit: build/test.xml
