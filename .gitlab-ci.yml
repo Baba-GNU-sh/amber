@@ -1,5 +1,3 @@
-image: grouchytoaster/cppbuild:focal
-
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GIT_DEPTH: 5
@@ -10,6 +8,7 @@ stages:
   - pages
 
 focal:
+  image: grouchytoaster/cppbuild:focal
   stage: build
   coverage: /^\s*lines:\s*\d+.\d+\%/
   before_script:
@@ -30,6 +29,7 @@ focal:
       junit: build/test.xml
 
 pages:
+  image: tsgkadot/docker-doxygen
   needs:
     - focal
   stage: pages
