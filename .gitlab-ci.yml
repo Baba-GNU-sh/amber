@@ -21,16 +21,18 @@ focal:
     - cmake --build .
     - ctest --output-junit test.xml
     - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
+    - gcovr --root ${CI_PROJECT_DIR} --html --html-details -o coverage.html
   artifacts:
     paths:
       - build
-      - screenshot.png
+      - build/coverge.html
     reports:
       cobertura: build/coverage.xml
       junit: build/test.xml
 
 pages:
-  needs: focal
+  needs:
+    - focal
   stage: pages
   script:
     - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/public
