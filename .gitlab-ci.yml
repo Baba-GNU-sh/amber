@@ -33,7 +33,7 @@ pages:
   stage: pages
   script:
     - mkdir ${CI_PROJECT_DIR}/public
-    - cp ${CI_PROJECT_DIR}/index.html ${CI_PROJECT_DIR}/public/
+    - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/public
   artifacts:
     paths:
       - public

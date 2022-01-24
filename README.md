@@ -1,7 +1,7 @@
-![example workflow](https://github.com/Baba-GNU-sh/glot/actions/workflows/ci.yml/badge.svg)
-
 [![coverage report](https://gitlab.com/tinker3/glot/badges/master/coverage.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
 [![pipeline status](https://gitlab.com/tinker3/glot/badges/master/pipeline.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
+
+Documentation can be found under [pages](https://tinker3.gitlab.io/glot/).
 
 Glot is an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness with error bars, rendered on the GPU using a geometry shader.
 
