@@ -21,7 +21,7 @@ focal:
     - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
   artifacts:
     paths:
-      build
+      - build
     reports:
       cobertura: build/coverage.xml
       junit: build/test.xml
