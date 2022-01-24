@@ -37,4 +37,4 @@ pages:
     - cp ${CI_PROJECT_DIR}/index.html ${CI_PROJECT_DIR}/public/
   artifacts:
     paths:
-      - pages
+      - public
