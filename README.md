@@ -1,6 +1,7 @@
 [![pipeline status](https://gitlab.com/tinker3/glot/badges/master/pipeline.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
 [![coverage report](https://gitlab.com/tinker3/glot/badges/master/coverage.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
 
+
 Below is a sample image from the latest branch of the build artifacts.
 ![sample image from the](https://gitlab.com/tinker3/glot/-/jobs/artifacts/master/raw/public/html/bdwn.png?job=pages)
 
