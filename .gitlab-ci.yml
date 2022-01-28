@@ -43,7 +43,7 @@ docs:
     paths:
       - reports
   environment:
-      name: Develop
+      name: pages
       url: "https://$CI_PROJECT_NAMESPACE.gitlab.io/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/reports/index.html"
   variables:
     PUBLIC_URL: "/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/reports"
