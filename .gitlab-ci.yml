@@ -28,7 +28,7 @@ focal:
       cobertura: build/coverage.xml
       junit: build/test.xml
 
-pages:
+docs:
   image: tsgkadot/docker-doxygen
   needs:
     - focal
@@ -46,3 +46,7 @@ pages:
       url: "https://$CI_PROJECT_NAMESPACE.gitlab.io/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public/index.html"
   variables:
     PUBLIC_URL: "/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public"
+
+pages:
+  extends:
+    - docs
