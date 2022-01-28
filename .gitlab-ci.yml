@@ -48,5 +48,7 @@ docs:
     PUBLIC_URL: "/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public"
 
 pages:
+  only:
+    - master
   extends:
     - docs
