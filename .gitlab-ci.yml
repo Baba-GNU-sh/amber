@@ -33,7 +33,7 @@ docs:
   image: tsgkadot/docker-doxygen
   needs:
     - focal
-  stage: pages
+  stage: report
   script:
     - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/reports
     - cp ${CI_PROJECT_DIR}/build/coverage*html ${CI_PROJECT_DIR}/reports
@@ -50,6 +50,7 @@ docs:
 
 # We only want to upload docs from the master branch
 pages:
+  stage: pages
   needs:
     - docs
   only:
