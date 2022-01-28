@@ -5,6 +5,7 @@ variables:
 
 stages:
   - build
+  - report
   - pages
 
 focal:
@@ -34,21 +35,27 @@ docs:
     - focal
   stage: pages
   script:
-    - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/public
-    - cp ${CI_PROJECT_DIR}/build/coverage*html ${CI_PROJECT_DIR}/public
+    - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/reports
+    - cp ${CI_PROJECT_DIR}/build/coverage*html ${CI_PROJECT_DIR}/reports
     - doxygen Doxyfile
-    - mv html public/
+    - mv html reports/
+  artifacts:
+    paths:
+      - reports
+  environment:
+      name: Develop
+      url: "https://$CI_PROJECT_NAMESPACE.gitlab.io/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/reports/index.html"
+  variables:
+    PUBLIC_URL: "/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/reports"
+
+# We only want to upload docs from the master branch
+pages:
+  needs:
+    - docs
+  only:
+    - master
+  script:
+    - mv reports public
   artifacts:
     paths:
       - public
-  environment:
-      name: Develop
-      url: "https://$CI_PROJECT_NAMESPACE.gitlab.io/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public/index.html"
-  variables:
-    PUBLIC_URL: "/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public"
-
-pages:
-  only:
-    - master
-  extends:
-    - docs
