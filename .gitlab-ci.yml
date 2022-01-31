@@ -1,16 +1,15 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  GIT_DEPTH: 5
-  DOCKER_DRIVER: overlay2
+  DOCKER_DRIVER: overlay2 # This should make docker run faster
 
 stages:
   - build
-  - test
   - report
 
 build:focal:
   image: grouchytoaster/cppbuild:focal
   stage: build
+  coverage: /^\s*lines:\s*\d+.\d+\%/
   before_script:
     - cmake --version
     - mkdir build && cd build
@@ -18,19 +17,6 @@ build:focal:
     - CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
     - cmake -GNinja -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=yes -DBUILD_COVERAGE=yes ..
     - cmake --build .
-  artifacts:
-    paths:
-      - build
-
-test:focal:
-  image: grouchytoaster/cppbuild:focal
-  stage: test
-  needs:
-    - build:focal
-  coverage: /^\s*lines:\s*\d+.\d+\%/
-  before_script:
-    - cd build
-  script:
     - ctest --output-junit test.xml
     - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
     - gcovr --root ${CI_PROJECT_DIR} --html --html-details -o coverage.html
@@ -46,7 +32,7 @@ pages:
   only:
     - master
   needs:
-    - test:focal
+    - build:focal
   stage: report
   script:
     - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/public
