@@ -5,13 +5,12 @@ variables:
 
 stages:
   - build
+  - test
   - report
-  - pages
 
-focal:
+build:focal:
   image: grouchytoaster/cppbuild:focal
   stage: build
-  coverage: /^\s*lines:\s*\d+.\d+\%/
   before_script:
     - cmake --version
     - mkdir build && cd build
@@ -19,6 +18,17 @@ focal:
     - CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
     - cmake -GNinja -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=yes -DBUILD_COVERAGE=yes ..
     - cmake --build .
+  artifacts:
+    paths:
+      - build
+
+test:focal:
+  image: grouchytoaster/cppbuild:focal
+  stage: test
+  coverage: /^\s*lines:\s*\d+.\d+\%/
+  before_script:
+    - cd build
+  script:
     - ctest --output-junit test.xml
     - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
     - gcovr --root ${CI_PROJECT_DIR} --html --html-details -o coverage.html
