@@ -31,32 +31,16 @@ focal:
 
 docs:
   image: tsgkadot/docker-doxygen
+  only:
+    - master
   needs:
     - focal
   stage: report
   script:
-    - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/reports
-    - cp ${CI_PROJECT_DIR}/build/coverage*html ${CI_PROJECT_DIR}/reports
+    - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/public
+    - cp ${CI_PROJECT_DIR}/build/coverage/*html ${CI_PROJECT_DIR}/public
     - doxygen Doxyfile
-    - mv html reports/
-  artifacts:
-    paths:
-      - reports
-  environment:
-      name: pages
-      url: "https://$CI_PROJECT_NAMESPACE.gitlab.io/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/reports/index.html"
-  variables:
-    PUBLIC_URL: "/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/reports"
-
-# We only want to upload docs from the master branch
-pages:
-  stage: pages
-  needs:
-    - docs
-  only:
-    - master
-  script:
-    - mv reports public
+    - mv html public/
   artifacts:
     paths:
       - public
