@@ -25,6 +25,8 @@ build:focal:
 test:focal:
   image: grouchytoaster/cppbuild:focal
   stage: test
+  needs:
+    - build:focal
   coverage: /^\s*lines:\s*\d+.\d+\%/
   before_script:
     - cd build
@@ -44,7 +46,7 @@ pages:
   only:
     - master
   needs:
-    - focal
+    - test:focal
   stage: report
   script:
     - cp -r ${CI_PROJECT_DIR}/pages ${CI_PROJECT_DIR}/public
