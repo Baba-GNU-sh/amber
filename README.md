@@ -1,12 +1,13 @@
 [![pipeline status](https://gitlab.com/tinker3/glot/badges/master/pipeline.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
 [![coverage report](https://gitlab.com/tinker3/glot/badges/master/coverage.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
 
+
 Below is a sample image from the latest branch of the build artifacts.
 ![sample image from the](https://gitlab.com/tinker3/glot/-/jobs/artifacts/master/raw/public/html/bdwn.png?job=pages)
 
 Documentation can be found under [pages](https://tinker3.gitlab.io/glot/).
 
-Glot is an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness with error bars, rendered on the GPU using shaders.
+Glot is an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness with error bars, rendered on the GPU.
 
 Glot uses [conan](http://conan.io/) to manage its dependencies, which makes it easier / possible to build it on Windows (and hopefully MacOS).
 
