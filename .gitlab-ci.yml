@@ -29,7 +29,7 @@ focal:
       cobertura: build/coverage.xml
       junit: build/test.xml
 
-docs:
+pages:
   image: tsgkadot/docker-doxygen
   only:
     - master
