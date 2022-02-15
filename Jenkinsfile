@@ -1,5 +1,7 @@
 pipeline {
-    docker { image "grouchytoaster/cppbuild:focal" }
+    agent {
+        docker { image "grouchytoaster/cppbuild:focal" }
+    }
     options {
         gitLabConnection("gitlab.com")
         gitlabBuilds builds: ["Build"]
