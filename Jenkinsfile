@@ -26,7 +26,7 @@ pipeline {
                     steps {
                         dir("build") {
                             sh "ctest --output-junit test.xml"
-                            junit
+                            junit "test.xml"
                         }
                     }       
                 }
