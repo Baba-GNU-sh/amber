@@ -35,6 +35,7 @@ pipeline {
             }
         }
     }
+    
     post {
         failure {
             updateGitlabCommitStatus name: 'Build', state: 'failed'
