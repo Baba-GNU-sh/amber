@@ -12,13 +12,16 @@ add_subdirectory(libs/cpp-tsdb)
 find_package(glfw3 REQUIRED)
 find_package(glad REQUIRED)
 find_package(glm REQUIRED)
+find_package(imgui REQUIRED)
 
 add_executable(glot
 	src/glot.cpp
+	src/bindings/imgui_impl_opengl3.cpp
+	src/bindings/imgui_impl_glfw.cpp
 	src/shader.cpp
 	src/shader_program.cpp)
 
-target_link_libraries(glot glfw::glfw glad::glad glm::glm)
+target_link_libraries(glot glfw::glfw glad::glad glm::glm imgui::imgui)
 
 # Copy the shaders over to the build dir
 configure_file(shaders/vertex.glsl . COPYONLY)

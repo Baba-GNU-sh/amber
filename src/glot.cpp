@@ -3,6 +3,10 @@
 #include <glm/glm.hpp>
 #include <random>
 
+#include <imgui.h>
+#include "bindings/imgui_impl_glfw.h"
+#include "bindings/imgui_impl_opengl3.h"
+
 #include "shader_utils.hpp"
 
 #include <random>
@@ -71,6 +75,8 @@ public:
 
         // Set the colour to be a nice dark green
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+        init_imgui();
     }
 
     ~GraphWindow()
@@ -78,6 +84,26 @@ public:
         glDeleteVertexArrays(1, &m_vertex_array);
         glDeleteBuffers(1, &m_vertex_buffer);
         glfwDestroyWindow(m_window);
+    }
+
+    void init_imgui()
+    {
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsClassic();
+
+        // Setup Platform/Renderer backends
+        ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+
+        const char* glsl_version = "#version 130";
+        ImGui_ImplOpenGL3_Init(glsl_version);
     }
 
     void plot_graph()
@@ -97,10 +123,39 @@ public:
         m_time += 0.01;
     }
 
+    void render_imgui()
+    {
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+        // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+        // ImGui::Checkbox("Another Window", &show_another_window);
+
+        // ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+        // if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+        //     counter++;
+        // ImGui::SameLine();
+        // ImGui::Text("counter = %d", counter);
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+
+        ImGui::Render();
+    }
+
     void render()
     {
         // Generate an interesting function
         plot_graph();
+
+        render_imgui();
 
         // Clear the buffer with a nice dark blue/green colour
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -110,6 +165,8 @@ public:
 
         // Draw lines using the VBO data to the backbuffer then swap buffers
         glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, NPOINTS);
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(m_window);
     }
 
