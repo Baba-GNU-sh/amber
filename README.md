@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/stevegolton/glot/workflows/build_and_test/badge.svg?branch=master)](https://github.com/stevegolton/glot/actions)
+[![Actions Status](https://github.com/stevegolton/glot/workflows/ci/badge.svg?branch=master)](https://github.com/stevegolton/glot/actions)
 
 Glot is an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness with error bars, rendered on the GPU.
 
