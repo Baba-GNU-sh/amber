@@ -92,6 +92,7 @@ public:
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
+        // io.ImGuiConfigFlags_WantCaptureMouse |= ImGuiConfigFlags_WantCaptureMouse;
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -130,9 +131,8 @@ public:
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Frame times");                          // Create a window called "Hello, world!" and append into it.
 
-        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
         // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
         // ImGui::Checkbox("Another Window", &show_another_window);
 
@@ -220,6 +220,10 @@ private:
 
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     {
+        ImGuiIO& io = ImGui::GetIO();
+        bool capture = io.WantCaptureMouse;
+        if (capture) return;
+
         GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         {
