@@ -21,6 +21,76 @@ struct Sample
     GLfloat min;
 };
 
+class AxesOverlay
+{
+public:
+    AxesOverlay(bool flip)
+    {
+        glGenVertexArrays(1, &m_vao);
+        glBindVertexArray(m_vao);
+        glGenBuffers(1, &m_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+        if (flip)
+        {
+            m_verticies[0].x = -1;
+            m_verticies[0].y = -1;
+            m_verticies[1].x = 1;
+            m_verticies[1].y = 1;
+        }
+        else
+        {
+            m_verticies[0].x = 1;
+            m_verticies[0].y = -1;
+            m_verticies[1].x = -1;
+            m_verticies[1].y = 1;
+        }
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(m_verticies), m_verticies, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        std::vector<Shader> shaders{
+            Shader("simple_vertex.glsl", GL_VERTEX_SHADER),
+            Shader("simple_fragment.glsl", GL_FRAGMENT_SHADER)};
+
+        m_program = Program(shaders);
+    }
+
+    ~AxesOverlay()
+    {
+        glDeleteBuffers(1, &m_vbo);
+        glDeleteVertexArrays(1, &m_vao);
+    }
+
+    void render()
+    {
+        // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindVertexArray(m_vao);
+        m_program.use();
+
+        glDrawArrays(GL_LINE_STRIP, 0, 2);
+    }
+
+private:
+    GLuint m_vao;
+    GLuint m_vbo;
+    glm::vec2 m_verticies[2];
+    Program m_program;
+};
+
+/**
+ * @brief Draws a signal on the graph.
+ */
+class Graph
+{
+    Graph()
+    {
+        
+    }
+};
+
 class GraphWindow
 {
 public:
@@ -57,33 +127,68 @@ public:
         glEnable(GL_DEPTH_TEST);
 
         load_shaders();
-
-        // Create and bind the Vertex Array Object
-        glGenVertexArrays(1, &m_vertex_array);
-        glBindVertexArray(m_vertex_array);
-
-        // Create and bind the Vertex Buffer Object
-        glGenBuffers(1, &m_vertex_buffer);
-        glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(graph), graph, GL_DYNAMIC_DRAW);
-
-        // Set vertex array attributes such as the element type, and the stride
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
-
-        // Set the colour to be a nice dark green
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
         init_imgui();
+
+
+        axes = std::make_shared<AxesOverlay>(true);
+        axes2 = std::make_shared<AxesOverlay>(false);
+
+
+        // // Create and bind the Vertex Array Object
+        // glGenVertexArrays(1, &m_vertex_array);
+        // glBindVertexArray(m_vertex_array);
+
+        // // Create and bind the Vertex Buffer Object
+        // glGenBuffers(1, &m_vertex_buffer);
+        // glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
+        // glBufferData(GL_ARRAY_BUFFER, sizeof(graph), graph, GL_DYNAMIC_DRAW);
+
+        // // Set vertex array attributes such as the element type, and the stride
+        // glEnableVertexAttribArray(0);
+        // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+        // glEnableVertexAttribArray(1);
+        // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+
+        // // Set the colour to be a nice dark green
+        // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+
+        // glGenVertexArrays(1, &m_axis_buffer);
+        // glBindVertexArray(m_axis_buffer);
+
+        // // Create and bind the Vertex Buffer Object
+        // glGenBuffers(1, &m_axis_vertex_buffer);
+        // glBindBuffer(GL_ARRAY_BUFFER, m_axis_vertex_buffer);
+        // glBufferData(GL_ARRAY_BUFFER, sizeof(m_axis_points), m_axis_points, GL_STATIC_DRAW);
+
+        // glEnableVertexAttribArray(0);
+        // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+
+        // m_axis_points[0] = glm::vec2(-1, -1);
+        // m_axis_points[1] = glm::vec2(-1, 1);
+        // m_axis_points[2] = glm::vec2(1, 1);
+        // m_axis_points[3] = glm::vec2(1, -1);
     }
+
+    std::shared_ptr<AxesOverlay> axes, axes2;
+
+    GLuint m_axis_buffer, m_axis_vertex_buffer;
+    glm::vec2 m_axis_points[4];
 
     ~GraphWindow()
     {
-        glDeleteVertexArrays(1, &m_vertex_array);
-        glDeleteBuffers(1, &m_vertex_buffer);
+        // glDeleteVertexArrays(1, &m_vertex_array);
+        // glDeleteBuffers(1, &m_vertex_buffer);
         glfwDestroyWindow(m_window);
+    }
+
+    void draw_axes()
+    {
+        return;
+
+        // Draw lines using the VBO data to the backbuffer then swap buffers
+        glBindVertexArray(m_axis_buffer);
+        glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, NPOINTS);
     }
 
     void init_imgui()
@@ -131,10 +236,9 @@ public:
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Frame times");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Frame times");
 
-        // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-        // ImGui::Checkbox("Another Window", &show_another_window);
+        ImGui::Checkbox("sin(t)", &sint);      // Edit bools storing our window open/close state
 
         // ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
         // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
@@ -144,7 +248,7 @@ public:
         // ImGui::SameLine();
         // ImGui::Text("counter = %d", counter);
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("Application average %.1f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
 
         ImGui::Render();
@@ -155,16 +259,30 @@ public:
         // Generate an interesting function
         plot_graph();
 
-        render_imgui();
 
         // Clear the buffer with a nice dark blue/green colour
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Swap the data in graph into the VBO
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
+        render_imgui();
 
-        // Draw lines using the VBO data to the backbuffer then swap buffers
-        glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, NPOINTS);
+        axes->render();
+        axes2->render();
+
+        // draw_axes();
+
+        // m_shader_program.use();
+        // glBindVertexArray(m_vertex_array);
+        // glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
+
+        
+
+        // // Swap the data in graph into the VBO
+        // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
+
+        // // Draw lines using the VBO data to the backbuffer then swap buffers
+        // glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, NPOINTS);
+
+
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(m_window);
@@ -304,6 +422,7 @@ private:
     Sample graph[NPOINTS];
     bool m_dragging;
     float m_time;
+    bool sint;
 };
 
 void error_callback(int error, const char *msg)

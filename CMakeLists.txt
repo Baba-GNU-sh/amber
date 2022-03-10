@@ -27,3 +27,6 @@ target_link_libraries(glot glfw::glfw glad::glad glm::glm imgui::imgui)
 configure_file(shaders/vertex.glsl . COPYONLY)
 configure_file(shaders/geometry.glsl . COPYONLY)
 configure_file(shaders/fragment.glsl . COPYONLY)
+
+configure_file(shaders/simple/vertex.glsl simple_vertex.glsl COPYONLY)
+configure_file(shaders/simple/fragment.glsl simple_fragment.glsl COPYONLY)
