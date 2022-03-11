@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <random>
 
@@ -21,32 +22,26 @@ struct Sample
     GLfloat min;
 };
 
+/**
+ * @brief This guy contains and draws a set of axes and tick markers.
+ */
 class AxesOverlay
 {
 public:
-    AxesOverlay(bool flip)
+    AxesOverlay()
     {
         glGenVertexArrays(1, &m_vao);
         glBindVertexArray(m_vao);
+
         glGenBuffers(1, &m_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-        if (flip)
-        {
-            m_verticies[0].x = -1;
-            m_verticies[0].y = -1;
-            m_verticies[1].x = 1;
-            m_verticies[1].y = 1;
-        }
-        else
-        {
-            m_verticies[0].x = 1;
-            m_verticies[0].y = -1;
-            m_verticies[1].x = -1;
-            m_verticies[1].y = 1;
-        }
+        m_verticies[0].x = -1;
+        m_verticies[0].y = -1;
+        m_verticies[1].x = 1;
+        m_verticies[1].y = 1;
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(m_verticies), m_verticies, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(m_verticies), m_verticies, GL_DYNAMIC_DRAW);
 
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
         glEnableVertexAttribArray(0);
@@ -64,31 +59,68 @@ public:
         glDeleteVertexArrays(1, &m_vao);
     }
 
-    void render()
+    void render(glm::vec2 offset, glm::vec2 scale, GLFWwindow *window)
     {
-        // glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBindVertexArray(m_vao);
         m_program.use();
+        glBindVertexArray(m_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-        glDrawArrays(GL_LINE_STRIP, 0, 2);
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+
+        const int margin_px = 30;
+        const int ticks_per_unit = 5;
+        const int tick_len_px = 10;
+
+        draw_line(
+            glm::vec2(margin_px, height - margin_px),
+            glm::vec2(width - margin_px, height - margin_px),
+            width, height);
+
+        draw_line(
+            glm::vec2(margin_px, margin_px),
+            glm::vec2(margin_px, height - margin_px),
+            width, height);
+
+        for (int i = 0; i < ticks_per_unit; i++) {
+            int x = i * (width - margin_px * 2) / (ticks_per_unit - 1);
+            x += margin_px;
+            draw_line(
+                glm::vec2(x, height - margin_px),
+                glm::vec2(x, height - (margin_px - tick_len_px)),
+                width, height);
+        }
     }
 
 private:
+    void draw_line(glm::vec2 tl_win, glm::vec2 tr_win, int width, int height)
+    {
+        glm::vec2 tl_ss(
+            ((2 * tl_win.x) - width) / width,
+            ((-2 * tl_win.y) + height) / height
+        );
+
+        glm::vec2 tr_ss(
+            ((2 * tr_win.x) - width) / width,
+            ((-2 * tr_win.y) + height) / height
+        );
+
+        m_verticies[0] = tl_ss;
+        m_verticies[1] = tr_ss;
+
+        std::cout << m_verticies[0].x << ", " << m_verticies[0].y << '\n';
+        std::cout << m_verticies[1].x << ", " << m_verticies[1].y << '\n';
+
+        // Replace the verticies to be the start and end of each line in the list, then draw it
+        // This is a really inefficient way of doing this!
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_verticies), m_verticies);
+        glDrawArrays(GL_LINES, 0, 2);
+    }
+
     GLuint m_vao;
     GLuint m_vbo;
     glm::vec2 m_verticies[2];
     Program m_program;
-};
-
-/**
- * @brief Draws a signal on the graph.
- */
-class Graph
-{
-    Graph()
-    {
-        
-    }
 };
 
 class GraphWindow
@@ -130,8 +162,8 @@ public:
         init_imgui();
 
 
-        axes = std::make_shared<AxesOverlay>(true);
-        axes2 = std::make_shared<AxesOverlay>(false);
+        axes = std::make_shared<AxesOverlay>();
+        // axes2 = std::make_shared<AxesOverlay>(false);
 
 
         // // Create and bind the Vertex Array Object
@@ -170,7 +202,7 @@ public:
         // m_axis_points[3] = glm::vec2(1, -1);
     }
 
-    std::shared_ptr<AxesOverlay> axes, axes2;
+    std::shared_ptr<AxesOverlay> axes;
 
     GLuint m_axis_buffer, m_axis_vertex_buffer;
     glm::vec2 m_axis_points[4];
@@ -265,8 +297,7 @@ public:
 
         render_imgui();
 
-        axes->render();
-        axes2->render();
+        axes->render(glm::vec2(0, 0), glm::vec2(1, 1), m_window);
 
         // draw_axes();
 
