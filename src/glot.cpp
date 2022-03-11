@@ -23,7 +23,7 @@ struct Sample
 };
 
 /**
- * @brief This guy contains and draws a set of axes and tick markers.
+ * @brief Represents 
  */
 class AxesOverlay
 {
@@ -61,6 +61,14 @@ public:
 
     void render(glm::vec2 offset, glm::vec2 scale, GLFWwindow *window)
     {
+        // Given the zoom level and offset, work out where the axes start and end
+        // The x axis be definition starts at the x offset, same for the y axis
+        // The end of each axis follows the equation:
+        //   end = offset + zoom * c
+        // Where c is the normalized progress along the axis
+        
+        // X axis:
+        // 
         m_program.use();
         glBindVertexArray(m_vao);
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -72,53 +80,57 @@ public:
         const int ticks_per_unit = 5;
         const int tick_len_px = 10;
 
+        const glm::vec2 scaled_ticks = glm::vec2(
+            scale.x * ticks_per_unit,
+            scale.y * ticks_per_unit);
+
+        // Draw the horizontal axis + ticks
         draw_line(
-            glm::vec2(margin_px, height - margin_px),
-            glm::vec2(width - margin_px, height - margin_px),
+            glm::ivec2(margin_px, margin_px),
+            glm::ivec2(width - margin_px, margin_px),
             width, height);
 
-        draw_line(
-            glm::vec2(margin_px, margin_px),
-            glm::vec2(margin_px, height - margin_px),
-            width, height);
-
-        for (int i = 0; i < ticks_per_unit; i++) {
-            int x = i * (width - margin_px * 2) / (ticks_per_unit - 1);
+        for (int i = 0; i < scaled_ticks.x; i++) {
+            int x = i * (width - margin_px * 2) / (scaled_ticks.x - 1);
             x += margin_px;
             draw_line(
-                glm::vec2(x, height - margin_px),
-                glm::vec2(x, height - (margin_px - tick_len_px)),
+                glm::ivec2(x, margin_px),
+                glm::ivec2(x, margin_px - tick_len_px),
                 width, height);
         }
 
-        for (int i = 0; i < ticks_per_unit; i++) {
-            int y = i * (height - margin_px * 2) / (ticks_per_unit - 1);
+        // Draw the vertical axis + ticks
+        draw_line(
+            glm::ivec2(margin_px, margin_px),
+            glm::ivec2(margin_px, height - margin_px),
+            width, height);
+
+        for (int i = 0; i < scaled_ticks.y; i++) {
+            int y = i * (height - margin_px * 2) / (scaled_ticks.y - 1);
             y += margin_px;
             draw_line(
-                glm::vec2(margin_px, y),
-                glm::vec2(margin_px - tick_len_px, y),
+                glm::ivec2(margin_px, y),
+                glm::ivec2(margin_px - tick_len_px, y),
                 width, height);
         }
     }
 
 private:
-    void draw_line(glm::vec2 tl_win, glm::vec2 tr_win, int width, int height)
+    static glm::vec2 px2ss(const glm::ivec2 &coords_px, int width, int height)
     {
-        glm::vec2 tl_ss(
-            ((2 * tl_win.x) - width) / width,
-            ((-2 * tl_win.y) + height) / height
+        return glm::vec2(
+            static_cast<float>((2 * coords_px.x) - width) / width,
+            static_cast<float>((2 * coords_px.y) - height) / height
         );
+    }
 
-        glm::vec2 tr_ss(
-            ((2 * tr_win.x) - width) / width,
-            ((-2 * tr_win.y) + height) / height
-        );
+    void draw_line(glm::ivec2 tl_win, glm::ivec2 tr_win, int width, int height)
+    {
+        glm::vec2 tl_ss = px2ss(tl_win, width, height);
+        glm::vec2 tr_ss = px2ss(tr_win, width, height);
 
         m_verticies[0] = tl_ss;
         m_verticies[1] = tr_ss;
-
-        std::cout << m_verticies[0].x << ", " << m_verticies[0].y << '\n';
-        std::cout << m_verticies[1].x << ", " << m_verticies[1].y << '\n';
 
         // Replace the verticies to be the start and end of each line in the list, then draw it
         // This is a really inefficient way of doing this!
@@ -306,7 +318,10 @@ public:
 
         render_imgui();
 
-        axes->render(glm::vec2(0, 0), glm::vec2(1, 1), m_window);
+        axes->render(
+            glm::vec2(0, 0),
+            glm::vec2(m_zoom, m_zoom),
+            m_window);
 
         // draw_axes();
 
@@ -374,6 +389,8 @@ private:
         obj->m_zoom *= 1.0 + (yoffset / 10);
 
         glUniform2f(obj->m_uniform_scale, obj->m_zoom, obj->m_zoom);
+
+        std::cout << "Zoom: " << obj->m_zoom << '\n';
     }
 
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
