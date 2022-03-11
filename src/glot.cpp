@@ -90,6 +90,15 @@ public:
                 glm::vec2(x, height - (margin_px - tick_len_px)),
                 width, height);
         }
+
+        for (int i = 0; i < ticks_per_unit; i++) {
+            int y = i * (height - margin_px * 2) / (ticks_per_unit - 1);
+            y += margin_px;
+            draw_line(
+                glm::vec2(margin_px, y),
+                glm::vec2(margin_px - tick_len_px, y),
+                width, height);
+        }
     }
 
 private:
