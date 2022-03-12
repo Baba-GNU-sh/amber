@@ -5,16 +5,16 @@
 #include <stdexcept>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include "shader_utils.hpp"
+#include "stb_image.h"
 #include <vector>
 
 class TextRenderer
 {
   public:
 	TextRenderer()
-	  : m_charbox_verts{ 0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  -0.5f, 1.0f, 0.0f,
-		                 -0.5f, -0.5f, 0.0f, 0.0f, -0.5f, 0.5f,  0.0f, 1.0f }
+	  : m_charbox_verts{ 0.5f,  0.5f, 1.0f, 0.0f, 0.5f,  -0.5f, 1.0f, 1.0f,
+		                 -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, -0.5f, 0.0f, 1.0f }
 	{
 		int width, height, nrChannels;
 		m_tex_data = stbi_load("font.png", &width, &height, &nrChannels, 0);
@@ -27,6 +27,12 @@ class TextRenderer
 
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		// glGenerateMipmap(GL_TEXTURE_2D);
 
 		glTexImage2D(GL_TEXTURE_2D,
 		             0,
@@ -46,8 +52,7 @@ class TextRenderer
 		             m_charbox_verts,
 		             GL_STATIC_DRAW);
 
-		glVertexAttribPointer(
-		  0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), m_charbox_verts);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 		glEnableVertexAttribArray(0);
 
 		glVertexAttribPointer(1,
@@ -58,11 +63,11 @@ class TextRenderer
 		                      (void*)(2 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
-		std::vector<Shader> shaders{
-            Shader("char_vert.glsl", GL_VERTEX_SHADER),
-            Shader("char_frag.glsl", GL_FRAGMENT_SHADER)};
+		std::vector<Shader> shaders{ Shader("char_vert.glsl", GL_VERTEX_SHADER),
+			                         Shader("char_frag.glsl",
+			                                GL_FRAGMENT_SHADER) };
 
-        m_program = Program(shaders);
+		m_program = Program(shaders);
 	}
 
 	~TextRenderer()
@@ -70,11 +75,35 @@ class TextRenderer
 		stbi_image_free(m_tex_data);
 	}
 
-	void draw()
+	void draw(char c)
 	{
 		m_program.use();
 		glBindVertexArray(m_vao);
-		glDrawArrays(GL_QUADS, 0, 4);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+		int col = (c) % 16;
+		int row = (c) / 16;
+		// glDrawArrays(GL_LINE_STRIP, 0, 4);
+		select_char(col, row);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
+
+	void select_char(int x, int y)
+	{
+		int tl = x * 32;
+		int y_px = y * 32;
+
+		m_charbox_verts[2] = static_cast<float>(x * 32 + 32) / 512;
+		m_charbox_verts[3] = static_cast<float>(y * 32) / 256;
+		m_charbox_verts[6] = static_cast<float>(x * 32 + 32) / 512;
+		m_charbox_verts[7] = static_cast<float>(y * 32 + 32) / 256;
+		m_charbox_verts[10] = static_cast<float>(x * 32) / 512;
+		m_charbox_verts[11] = static_cast<float>(y * 32) / 256;
+		m_charbox_verts[14] = static_cast<float>(x * 32) / 512;
+		m_charbox_verts[15] = static_cast<float>(y * 32 + 32) / 256;
+
+		glBufferSubData(
+		  GL_ARRAY_BUFFER, 0, sizeof(m_charbox_verts), m_charbox_verts);
 	}
 
   private:

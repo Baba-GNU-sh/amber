@@ -148,7 +148,7 @@ public:
         glBindVertexArray(m_plot_vao);
         glDrawArrays(GL_LINE_STRIP, 0, 1000);
 
-        text.draw();
+        text.draw('a');
     }
 
 private:
