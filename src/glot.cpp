@@ -61,7 +61,7 @@ public:
 
         for (int i = 0; i < m_plot_verticies.size(); i++)
         {
-            m_plot_verticies[i].x = 2 * M_PI * static_cast<float>(i) / m_plot_verticies.size();
+            m_plot_verticies[i].x = 2 * M_PI * static_cast<float>(i) / m_plot_verticies.size() - M_PI;
             m_plot_verticies[i].y = std::sin(m_plot_verticies[i].x);
         }
 
