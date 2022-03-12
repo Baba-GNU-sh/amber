@@ -92,3 +92,6 @@ From the root dir, make a symlink to `compile_commands.json` in the build dir.
 ```
 ln -s build/compile_commands.json .
 ```
+
+## Fonts
+Fonts are from: https://opengameart.org/content/8x8-ascii-bitmap-font-with-c-source

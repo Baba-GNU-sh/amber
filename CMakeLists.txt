@@ -30,3 +30,8 @@ configure_file(shaders/fragment.glsl . COPYONLY)
 
 configure_file(shaders/simple/vertex.glsl simple_vertex.glsl COPYONLY)
 configure_file(shaders/simple/fragment.glsl simple_fragment.glsl COPYONLY)
+
+configure_file(shaders/char_vert.glsl char_vert.glsl COPYONLY)
+configure_file(shaders/char_frag.glsl char_frag.glsl COPYONLY)
+
+configure_file(font.png font.png COPYONLY)

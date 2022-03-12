@@ -16,6 +16,9 @@
 #include <random>
 #include <iostream>
 #include <cmath>
+#include <stdexcept>
+
+#include "font.hpp"
 
 struct Sample
 {
@@ -145,61 +148,7 @@ public:
         glBindVertexArray(m_plot_vao);
         glDrawArrays(GL_LINE_STRIP, 0, 1000);
 
-        // draw_line(
-        //     glm::ivec2(m_position.x + m_size.x, m_position.y),
-        //     m_position + m_size,
-        //     width, height);
-
-        // // Render the ticks
-        // for (float i = offset.y; i < offset.y + 1.0; i += m_tick_spacing)
-        // {
-        //     // Work out what y value this tick should take
-        //     int y = scale.y * i * m_size.y;
-        //     // int x = i * (width - margin_px * 2) / (scaled_ticks.x - 1);
-        //     // x += margin_px;
-        //     draw_line(
-        //         glm::ivec2(0, y),
-        //         glm::ivec2(m_size.x, y),
-        //         width, height);
-        // }
-
-        // const int margin_px = 30;
-        // const int ticks_per_unit = 5;
-        // const int tick_len_px = 10;
-
-        // const glm::vec2 scaled_ticks = glm::vec2(
-        //     scale.x * ticks_per_unit,
-        //     scale.y * ticks_per_unit);
-
-        // // Draw the horizontal axis + ticks
-        // draw_line(
-        //     glm::ivec2(margin_px, margin_px),
-        //     glm::ivec2(width - margin_px, margin_px),
-        //     width, height);
-
-        // for (int i = 0; i < scaled_ticks.x; i++) {
-        //     int x = i * (width - margin_px * 2) / (scaled_ticks.x - 1);
-        //     x += margin_px;
-        //     draw_line(
-        //         glm::ivec2(x, margin_px),
-        //         glm::ivec2(x, margin_px - tick_len_px),
-        //         width, height);
-        // }
-
-        // // Draw the vertical axis + ticks
-        // draw_line(
-        //     glm::ivec2(margin_px, margin_px),
-        //     glm::ivec2(margin_px, height - margin_px),
-        //     width, height);
-
-        // for (int i = 0; i < scaled_ticks.y; i++) {
-        //     int y = i * (height - margin_px * 2) / (scaled_ticks.y - 1);
-        //     y += margin_px;
-        //     draw_line(
-        //         glm::ivec2(margin_px, y),
-        //         glm::ivec2(margin_px - tick_len_px, y),
-        //         width, height);
-        // }
+        text.draw();
     }
 
 private:
@@ -234,6 +183,12 @@ private:
     GLuint m_plot_vao, m_plot_vbo;
     std::array<glm::vec2, 1000> m_plot_verticies;
     GLint m_uniform_view_matrix;
+
+    int width, height, nrChannels;
+    unsigned char *m_tex_data;
+    unsigned int texture;
+
+    TextRenderer text;
 };
 
 class GraphWindow
