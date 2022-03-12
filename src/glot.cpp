@@ -2,8 +2,10 @@
 #include <GLFW/glfw3.h>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
 #include <random>
 
+#include <glm/matrix.hpp>
 #include <imgui.h>
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
@@ -23,23 +25,19 @@ struct Sample
 };
 
 /**
- * @brief Represents 
+ * @brief Draws a vertical axis.
  */
-class AxesOverlay
+class GraphView
 {
 public:
-    AxesOverlay()
+    GraphView(float tick_spacing = 0.1)
+        : m_tick_spacing(tick_spacing)
     {
         glGenVertexArrays(1, &m_vao);
         glBindVertexArray(m_vao);
 
         glGenBuffers(1, &m_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-        m_verticies[0].x = -1;
-        m_verticies[0].y = -1;
-        m_verticies[1].x = 1;
-        m_verticies[1].y = 1;
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(m_verticies), m_verticies, GL_DYNAMIC_DRAW);
 
@@ -53,84 +51,86 @@ public:
         m_program = Program(shaders);
     }
 
-    ~AxesOverlay()
+    ~GraphView()
     {
         glDeleteBuffers(1, &m_vbo);
         glDeleteVertexArrays(1, &m_vao);
     }
 
-    void render(glm::vec2 offset, glm::vec2 scale, GLFWwindow *window)
+    void draw(glm::mat3x3 viewmat, GLFWwindow *window)
     {
-        // Given the zoom level and offset, work out where the axes start and end
-        // The x axis be definition starts at the x offset, same for the y axis
-        // The end of each axis follows the equation:
-        //   end = offset + zoom * c
-        // Where c is the normalized progress along the axis
-        
-        // X axis:
-        // 
         m_program.use();
         glBindVertexArray(m_vao);
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
+        draw_line(viewmat, glm::vec2(-.5f, -.5f), glm::vec2(-.5f, .5f));
+        draw_line(viewmat, glm::vec2(.5f, -.5f), glm::vec2(.5f, .5f));
 
-        const int margin_px = 30;
-        const int ticks_per_unit = 5;
-        const int tick_len_px = 10;
+        // int width, height;
+        // glfwGetWindowSize(window, &width, &height);
 
-        const glm::vec2 scaled_ticks = glm::vec2(
-            scale.x * ticks_per_unit,
-            scale.y * ticks_per_unit);
+        // draw_line(
+        //     glm::ivec2(m_position.x + m_size.x, m_position.y),
+        //     m_position + m_size,
+        //     width, height);
 
-        // Draw the horizontal axis + ticks
-        draw_line(
-            glm::ivec2(margin_px, margin_px),
-            glm::ivec2(width - margin_px, margin_px),
-            width, height);
+        // // Render the ticks
+        // for (float i = offset.y; i < offset.y + 1.0; i += m_tick_spacing)
+        // {
+        //     // Work out what y value this tick should take
+        //     int y = scale.y * i * m_size.y;
+        //     // int x = i * (width - margin_px * 2) / (scaled_ticks.x - 1);
+        //     // x += margin_px;
+        //     draw_line(
+        //         glm::ivec2(0, y),
+        //         glm::ivec2(m_size.x, y),
+        //         width, height);
+        // }
 
-        for (int i = 0; i < scaled_ticks.x; i++) {
-            int x = i * (width - margin_px * 2) / (scaled_ticks.x - 1);
-            x += margin_px;
-            draw_line(
-                glm::ivec2(x, margin_px),
-                glm::ivec2(x, margin_px - tick_len_px),
-                width, height);
-        }
+        // const int margin_px = 30;
+        // const int ticks_per_unit = 5;
+        // const int tick_len_px = 10;
 
-        // Draw the vertical axis + ticks
-        draw_line(
-            glm::ivec2(margin_px, margin_px),
-            glm::ivec2(margin_px, height - margin_px),
-            width, height);
+        // const glm::vec2 scaled_ticks = glm::vec2(
+        //     scale.x * ticks_per_unit,
+        //     scale.y * ticks_per_unit);
 
-        for (int i = 0; i < scaled_ticks.y; i++) {
-            int y = i * (height - margin_px * 2) / (scaled_ticks.y - 1);
-            y += margin_px;
-            draw_line(
-                glm::ivec2(margin_px, y),
-                glm::ivec2(margin_px - tick_len_px, y),
-                width, height);
-        }
+        // // Draw the horizontal axis + ticks
+        // draw_line(
+        //     glm::ivec2(margin_px, margin_px),
+        //     glm::ivec2(width - margin_px, margin_px),
+        //     width, height);
+
+        // for (int i = 0; i < scaled_ticks.x; i++) {
+        //     int x = i * (width - margin_px * 2) / (scaled_ticks.x - 1);
+        //     x += margin_px;
+        //     draw_line(
+        //         glm::ivec2(x, margin_px),
+        //         glm::ivec2(x, margin_px - tick_len_px),
+        //         width, height);
+        // }
+
+        // // Draw the vertical axis + ticks
+        // draw_line(
+        //     glm::ivec2(margin_px, margin_px),
+        //     glm::ivec2(margin_px, height - margin_px),
+        //     width, height);
+
+        // for (int i = 0; i < scaled_ticks.y; i++) {
+        //     int y = i * (height - margin_px * 2) / (scaled_ticks.y - 1);
+        //     y += margin_px;
+        //     draw_line(
+        //         glm::ivec2(margin_px, y),
+        //         glm::ivec2(margin_px - tick_len_px, y),
+        //         width, height);
+        // }
     }
 
 private:
-    static glm::vec2 px2ss(const glm::ivec2 &coords_px, int width, int height)
+    void draw_line(glm::mat3x3 viewmat, glm::vec2 start, glm::vec2 end)
     {
-        return glm::vec2(
-            static_cast<float>((2 * coords_px.x) - width) / width,
-            static_cast<float>((2 * coords_px.y) - height) / height
-        );
-    }
-
-    void draw_line(glm::ivec2 tl_win, glm::ivec2 tr_win, int width, int height)
-    {
-        glm::vec2 tl_ss = px2ss(tl_win, width, height);
-        glm::vec2 tr_ss = px2ss(tr_win, width, height);
-
-        m_verticies[0] = tl_ss;
-        m_verticies[1] = tr_ss;
+        m_verticies[0] = viewmat * glm::vec3(start, 1.0);
+        m_verticies[1] = viewmat * glm::vec3(end, 1.0);
 
         // Replace the verticies to be the start and end of each line in the list, then draw it
         // This is a really inefficient way of doing this!
@@ -138,10 +138,11 @@ private:
         glDrawArrays(GL_LINES, 0, 2);
     }
 
+    float m_tick_spacing;
+    Program m_program;
     GLuint m_vao;
     GLuint m_vbo;
     glm::vec2 m_verticies[2];
-    Program m_program;
 };
 
 class GraphWindow
@@ -149,10 +150,9 @@ class GraphWindow
 public:
     GraphWindow()
         : m_cursor(0.0),
-          m_offset(0.0),
-          m_zoom(1.0),
           m_dragging(false),
-          m_time(0)
+          m_viewmat(1.0f), // Identity matrix
+          m_viewportmat(1.0f)
     {
         m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLOT", NULL, NULL);
         if (m_window == NULL)
@@ -177,71 +177,30 @@ public:
 
         // Optimistically attempt to enable multisampling
         glEnable(GL_MULTISAMPLE);
+
+        // Depths test helps us with the rendering for a small perf penalty
         glEnable(GL_DEPTH_TEST);
 
-        load_shaders();
+        // Set the colour to be a nice dark green
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+        // Initialize the scene
         init_imgui();
 
+        m_graph = std::make_shared<GraphView>();
 
-        axes = std::make_shared<AxesOverlay>();
-        // axes2 = std::make_shared<AxesOverlay>(false);
-
-
-        // // Create and bind the Vertex Array Object
-        // glGenVertexArrays(1, &m_vertex_array);
-        // glBindVertexArray(m_vertex_array);
-
-        // // Create and bind the Vertex Buffer Object
-        // glGenBuffers(1, &m_vertex_buffer);
-        // glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-        // glBufferData(GL_ARRAY_BUFFER, sizeof(graph), graph, GL_DYNAMIC_DRAW);
-
-        // // Set vertex array attributes such as the element type, and the stride
-        // glEnableVertexAttribArray(0);
-        // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-        // glEnableVertexAttribArray(1);
-        // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
-
-        // // Set the colour to be a nice dark green
-        // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-
-        // glGenVertexArrays(1, &m_axis_buffer);
-        // glBindVertexArray(m_axis_buffer);
-
-        // // Create and bind the Vertex Buffer Object
-        // glGenBuffers(1, &m_axis_vertex_buffer);
-        // glBindBuffer(GL_ARRAY_BUFFER, m_axis_vertex_buffer);
-        // glBufferData(GL_ARRAY_BUFFER, sizeof(m_axis_points), m_axis_points, GL_STATIC_DRAW);
-
-        // glEnableVertexAttribArray(0);
-        // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
-
-        // m_axis_points[0] = glm::vec2(-1, -1);
-        // m_axis_points[1] = glm::vec2(-1, 1);
-        // m_axis_points[2] = glm::vec2(1, 1);
-        // m_axis_points[3] = glm::vec2(1, -1);
+        update_viewport_matrix(SCR_WIDTH, SCR_HEIGHT);
     }
-
-    std::shared_ptr<AxesOverlay> axes;
-
-    GLuint m_axis_buffer, m_axis_vertex_buffer;
-    glm::vec2 m_axis_points[4];
 
     ~GraphWindow()
     {
-        // glDeleteVertexArrays(1, &m_vertex_array);
-        // glDeleteBuffers(1, &m_vertex_buffer);
         glfwDestroyWindow(m_window);
     }
 
-    void draw_axes()
+    void update_viewport_matrix(int width, int height)
     {
-        return;
-
-        // Draw lines using the VBO data to the backbuffer then swap buffers
-        glBindVertexArray(m_axis_buffer);
-        glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, NPOINTS);
+        m_viewportmat = glm::scale(glm::mat3x3(1.0f), glm::vec2(width / 2, -height / 2));
+        m_viewportmat = glm::translate(m_viewportmat, glm::vec2(1, -1));
     }
 
     void init_imgui()
@@ -256,7 +215,6 @@ public:
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
-        //ImGui::StyleColorsClassic();
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(m_window, true);
@@ -265,82 +223,39 @@ public:
         ImGui_ImplOpenGL3_Init(glsl_version);
     }
 
-    void plot_graph()
+    void draw()
     {
-        std::random_device dev;
-        std::mt19937 rng(dev());
-        std::uniform_real_distribution<> dist(-1, 1);
+        // Clear the buffer with a nice dark blue/green colour
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (int i = 0; i < NPOINTS; i++)
-        {
-            float x = (i - 1000.0) / 200.0;
-            graph[i].t = x;
-            graph[i].avg = std::sin(m_time + x * 10.0) / (1.0 + x * x) + 0.01 * dist(rng);
-            graph[i].max = graph[i].avg + 0.1 + 0.05 * dist(rng);
-            graph[i].min = graph[i].avg - 0.1 + 0.05 * dist(rng);
-        }
-        m_time += 0.01;
+        m_graph->draw(m_viewmat, m_window);
+
+        render_imgui();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        glfwSwapBuffers(m_window);
     }
 
     void render_imgui()
     {
-        // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
         ImGui::Begin("Frame times");
-
-        ImGui::Checkbox("sin(t)", &sint);      // Edit bools storing our window open/close state
-
-        // ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-        // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-        // if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-        //     counter++;
-        // ImGui::SameLine();
-        // ImGui::Text("counter = %d", counter);
-
         ImGui::Text("Application average %.1f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("ViewMat:");
+        for (int i = 0; i < 3; i++)
+        {
+            ImGui::Text("%f %f %f", m_viewmat[0][i], m_viewmat[1][i], m_viewmat[2][i]);
+        }
+
+        auto cursor_gs = viewport2graph(m_cursor);
+        ImGui::Text("Cursor: %f %f", m_cursor.x, m_cursor.y);
+        ImGui::Text("GSCursor: %f %f", cursor_gs.x, cursor_gs.y);
         ImGui::End();
 
         ImGui::Render();
-    }
-
-    void render()
-    {
-        // Generate an interesting function
-        plot_graph();
-
-
-        // Clear the buffer with a nice dark blue/green colour
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        render_imgui();
-
-        axes->render(
-            glm::vec2(0, 0),
-            glm::vec2(m_zoom, m_zoom),
-            m_window);
-
-        // draw_axes();
-
-        // m_shader_program.use();
-        // glBindVertexArray(m_vertex_array);
-        // glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-
-        
-
-        // // Swap the data in graph into the VBO
-        // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(graph), graph);
-
-        // // Draw lines using the VBO data to the backbuffer then swap buffers
-        // glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, NPOINTS);
-
-
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(m_window);
     }
 
     void spin()
@@ -348,7 +263,7 @@ public:
         while (!glfwWindowShouldClose(m_window))
         {
             process_input();
-            render();
+            draw();
             glfwPollEvents();
         }
     }
@@ -358,39 +273,43 @@ private:
     {
         std::cout << "Resized window " << width << "x" << height << "px\n";
         glViewport(0, 0, width, height);
-
         GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
-        glUniform2i(obj->m_uniform_viewport_res, width, height);
+        obj->update_viewport_matrix(width, height);
     }
 
     static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
     {
         glm::vec2 cursor(xpos, ypos);
 
-        GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
-        if (obj->m_dragging)
+        GraphWindow *win = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
+        if (win->m_dragging)
         {
-            auto offset = cursor - obj->m_cursor;
-            obj->m_offset += obj->win2screen(offset);
+            auto offset = cursor - win->m_cursor;
+            std::cout << "Dragging: " << offset.x << ", " << offset.y << "\n";
 
-            std::cout << "Dragging: " << obj->m_offset.x << ", " << obj->m_offset.y << "\n";
+            auto cursor_gs_old = win->viewport2graph(win->m_cursor);
+            auto cursor_gs_new = win->viewport2graph(cursor);
+            auto cursor_gs_delta = cursor_gs_new - cursor_gs_old;
 
-            glUniform2f(obj->m_uniform_offset, obj->m_offset.x, obj->m_offset.y);
+            win->m_viewmat = glm::translate(win->m_viewmat, cursor_gs_delta);
         }
 
-        obj->m_cursor = cursor;
+        win->m_cursor = cursor;
     }
 
     static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
     {
         std::cout << "Scrolling: " << yoffset << '\n';
+        GraphWindow *win = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
 
-        GraphWindow *obj = static_cast<GraphWindow *>(glfwGetWindowUserPointer(window));
-        obj->m_zoom *= 1.0 + (yoffset / 10);
+        // Work out where the pointer is in graph space
+        auto cursor_in_gs_old = win->viewport2graph(win->m_cursor);
+        float zoom_delta = 1.0 + (yoffset / 10);
+        win->m_viewmat = glm::scale(win->m_viewmat, glm::vec2(zoom_delta, zoom_delta));
+        auto cursor_in_gs_new = win->viewport2graph(win->m_cursor);
+        auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
 
-        glUniform2f(obj->m_uniform_scale, obj->m_zoom, obj->m_zoom);
-
-        std::cout << "Zoom: " << obj->m_zoom << '\n';
+        win->m_viewmat = glm::translate(win->m_viewmat, cursor_delta);
     }
 
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
@@ -418,50 +337,15 @@ private:
         }
     }
 
-    void load_shaders()
+    glm::vec2 viewport2graph(const glm::vec2 &viewport_coord)
     {
-        std::vector<Shader> shaders{
-            Shader("vertex.glsl", GL_VERTEX_SHADER),
-            Shader("geometry.glsl", GL_GEOMETRY_SHADER),
-            Shader("fragment.glsl", GL_FRAGMENT_SHADER)};
+        auto viewportmat_inv = glm::inverse(m_viewportmat);
+        auto clipspace_coord = viewportmat_inv * glm::vec3(viewport_coord, 1.0f);
 
-        m_shader_program = Program(shaders);
+        auto viewmat_inv = glm::inverse(m_viewmat);
+        auto graphspace_coord = viewmat_inv * clipspace_coord;
 
-        m_uniform_offset = m_shader_program.get_uniform_location("offset");
-        m_uniform_scale = m_shader_program.get_uniform_location("scale");
-        m_uniform_viewport_res = m_shader_program.get_uniform_location("viewport_res_px");
-        m_uniform_line_thickness = m_shader_program.get_uniform_location("line_thickness_px");
-
-        m_shader_program.use();
-
-        // Set up uniform initial values
-        glUniform2f(m_uniform_scale, m_zoom, m_zoom);
-        glUniform2f(m_uniform_offset, m_offset.x, m_offset.y);
-        glUniform1f(m_uniform_line_thickness, LINE_THICKNESS_PX);
-
-        // Set up the line window size uniform
-        int width, height;
-        glfwGetWindowSize(m_window, &width, &height);
-        glUniform2i(m_uniform_viewport_res, width, height);
-    }
-
-    /**
-     * @brief Converts from window coordinates )e.g. pixels) to screen space.
-     * Screen space is -1->1 in both axis with the origin in the bottom left.
-     *
-     * @param win Windows coordinates in px.
-     * @return glm::vec2 The screen space vector.
-     */
-    glm::vec2 win2screen(const glm::vec2 &win)
-    {
-        int width, height;
-        glfwGetWindowSize(m_window, &width, &height);
-
-        glm::vec2 ret;
-        ret.x = 2 * win.x / width;
-        ret.y = -2 * win.y / height;
-
-        return ret;
+        return graphspace_coord;
     }
 
     static constexpr unsigned int SCR_WIDTH = 800;
@@ -470,16 +354,11 @@ private:
     static constexpr int LINE_THICKNESS_PX = 4;
 
     GLFWwindow *m_window;
-    Program m_shader_program;
-    int m_uniform_offset, m_uniform_scale, m_uniform_viewport_res, m_uniform_line_thickness;
-    unsigned int m_vertex_array, m_vertex_buffer;
     glm::vec2 m_cursor;
-    glm::vec2 m_offset;
-    double m_zoom;
-    Sample graph[NPOINTS];
     bool m_dragging;
-    float m_time;
-    bool sint;
+    glm::mat3x3 m_viewmat; // Converts from graph-space to clip-space
+    glm::mat3x3 m_viewportmat; // Converts from clip-space to viewport-space
+    std::shared_ptr<GraphView> m_graph;
 };
 
 void error_callback(int error, const char *msg)
