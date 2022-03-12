@@ -3,6 +3,7 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <random>
 
 #include <glm/matrix.hpp>
@@ -25,7 +26,7 @@ struct Sample
 };
 
 /**
- * @brief Draws a vertical axis.
+ * @brief Draws the graph.
  */
 class GraphView
 {
@@ -49,6 +50,25 @@ public:
             Shader("simple_fragment.glsl", GL_FRAGMENT_SHADER)};
 
         m_program = Program(shaders);
+        m_uniform_view_matrix = m_program.get_uniform_location("view_matrix");
+
+        // Generate buffers for the actual plot
+        glGenVertexArrays(1, &m_plot_vao);
+        glBindVertexArray(m_plot_vao);
+
+        glGenBuffers(1, &m_plot_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_plot_vbo);
+
+        for (int i = 0; i < m_plot_verticies.size(); i++)
+        {
+            m_plot_verticies[i].x = 2 * M_PI * static_cast<float>(i) / m_plot_verticies.size();
+            m_plot_verticies[i].y = std::sin(m_plot_verticies[i].x);
+        }
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(m_plot_verticies), m_plot_verticies.data(), GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+        glEnableVertexAttribArray(0);
     }
 
     ~GraphView()
@@ -57,17 +77,73 @@ public:
         glDeleteVertexArrays(1, &m_vao);
     }
 
-    void draw(glm::mat3x3 viewmat, GLFWwindow *window)
+    void draw(glm::mat3x3 view_matrix, glm::mat3x3 viewport_matrix, GLFWwindow *window)
     {
         m_program.use();
         glBindVertexArray(m_vao);
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-        draw_line(viewmat, glm::vec2(-.5f, -.5f), glm::vec2(-.5f, .5f));
-        draw_line(viewmat, glm::vec2(.5f, -.5f), glm::vec2(.5f, .5f));
+        glm::mat3 indent(1.0);
+        glUniformMatrix3fv(m_uniform_view_matrix, 1, GL_FALSE, glm::value_ptr(indent[0]));
 
-        // int width, height;
-        // glfwGetWindowSize(window, &width, &height);
+        // // Draw something in the screen, just to have something to look at
+        // draw_line(view_matrix, glm::vec2(-.5f, -.5f), glm::vec2(-.5f, .5f));
+        // draw_line(view_matrix, glm::vec2(.5f, -.5f), glm::vec2(.5f, .5f));
+
+        auto viewport_matrix_inv = glm::inverse(viewport_matrix);
+        auto view_matrix_inv = glm::inverse(view_matrix);
+
+        int margin_px = 30;
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+
+        {
+            // draw a line from margin_px to height - margin_px
+            glm::vec2 start_px(margin_px, margin_px);
+            glm::vec2 end_px(margin_px, height - margin_px);
+            auto start_clipspace = viewport_matrix_inv * glm::vec3(start_px, 1.0);;
+            auto end_clipspace = viewport_matrix_inv * glm::vec3(end_px, 1.0);
+            draw_line_clipspace(start_clipspace, end_clipspace);
+
+            // Work out where (in graph space) margin and height-margin is
+            auto top_gs = view_matrix_inv * (viewport_matrix_inv * glm::vec3(0, margin_px, 1.0));
+            auto bottom_gs = view_matrix_inv * (viewport_matrix_inv * glm::vec3(0, height - margin_px, 1.0));
+            auto start = (bottom_gs.y > 0)? static_cast<int>(bottom_gs.y) + 1 : static_cast<int>(bottom_gs.y);
+
+            // Place a tick at every unit up the y axis
+            for (int i = start; i < top_gs.y; i++) {
+                auto tick_y_vpspace = viewport_matrix * (view_matrix * glm::vec3(0.0f, static_cast<float>(i), 1.0f));
+                auto tick_start = viewport_matrix_inv * glm::vec3(20, tick_y_vpspace.y, 1);
+                auto tick_end = viewport_matrix_inv * glm::vec3(margin_px, tick_y_vpspace.y, 1);
+                draw_line_clipspace(tick_start, tick_end);
+            }
+        }
+
+        {
+            // draw a line from margin_px to height - margin_px
+            glm::vec2 start_px(margin_px, height - margin_px);
+            glm::vec2 end_px(width - margin_px, height - margin_px);
+            auto start_clipspace = viewport_matrix_inv * glm::vec3(start_px, 1.0);;
+            auto end_clipspace = viewport_matrix_inv * glm::vec3(end_px, 1.0);
+            draw_line_clipspace(start_clipspace, end_clipspace);
+
+            auto left_gs = view_matrix_inv * (viewport_matrix_inv * glm::vec3(margin_px, 0.0f, 1.0f));
+            auto right_gs = view_matrix_inv * (viewport_matrix_inv * glm::vec3(width - margin_px, 0.0f, 1.0f));
+            auto start = (left_gs.x > 0)? static_cast<int>(left_gs.x) + 1 : static_cast<int>(left_gs.x);
+
+            // Place a tick at every unit up the y axis
+            for (int i = start; i < right_gs.x; i++) {
+                auto tick_x_vpspace = viewport_matrix * (view_matrix * glm::vec3(static_cast<float>(i), 0.0f, 1.0f));
+                auto tick_start = viewport_matrix_inv * glm::vec3(tick_x_vpspace.x, height - 20, 1);
+                auto tick_end = viewport_matrix_inv * glm::vec3(tick_x_vpspace.x, height - margin_px, 1);
+                draw_line_clipspace(tick_start, tick_end);
+            }
+        }
+
+        glUniformMatrix3fv(m_uniform_view_matrix, 1, GL_FALSE, glm::value_ptr(view_matrix[0]));
+
+        glBindVertexArray(m_plot_vao);
+        glDrawArrays(GL_LINE_STRIP, 0, 1000);
 
         // draw_line(
         //     glm::ivec2(m_position.x + m_size.x, m_position.y),
@@ -127,6 +203,17 @@ public:
     }
 
 private:
+    void draw_line_clipspace(glm::vec2 start, glm::vec2 end)
+    {
+        m_verticies[0] = start;
+        m_verticies[1] = end;
+
+        // Replace the verticies to be the start and end of each line in the list, then draw it
+        // This is a really inefficient way of doing this!
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_verticies), m_verticies);
+        glDrawArrays(GL_LINES, 0, 2);
+    }
+
     void draw_line(glm::mat3x3 viewmat, glm::vec2 start, glm::vec2 end)
     {
         m_verticies[0] = viewmat * glm::vec3(start, 1.0);
@@ -143,6 +230,10 @@ private:
     GLuint m_vao;
     GLuint m_vbo;
     glm::vec2 m_verticies[2];
+
+    GLuint m_plot_vao, m_plot_vbo;
+    std::array<glm::vec2, 1000> m_plot_verticies;
+    GLint m_uniform_view_matrix;
 };
 
 class GraphWindow
@@ -228,7 +319,7 @@ public:
         // Clear the buffer with a nice dark blue/green colour
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_graph->draw(m_viewmat, m_window);
+        m_graph->draw(m_viewmat, m_viewportmat, m_window);
 
         render_imgui();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -251,8 +342,7 @@ public:
         }
 
         auto cursor_gs = viewport2graph(m_cursor);
-        ImGui::Text("Cursor: %f %f", m_cursor.x, m_cursor.y);
-        ImGui::Text("GSCursor: %f %f", cursor_gs.x, cursor_gs.y);
+        ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
         ImGui::End();
 
         ImGui::Render();

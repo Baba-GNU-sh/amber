@@ -2,7 +2,10 @@
 
 layout (location = 0) in vec2 coord2d;
 
+uniform mat3 view_matrix;
+
 void main()
 {
-    gl_Position = vec4(coord2d, 0, 1);
+    vec3 txformed_coord = view_matrix * vec3(coord2d, 1.0);
+    gl_Position = vec4(txformed_coord.xy, 0, 1);
 }
