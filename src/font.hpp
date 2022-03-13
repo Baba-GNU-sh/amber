@@ -90,17 +90,21 @@ class TextRenderer
 
 	void select_char(int x, int y)
 	{
-		int tl = x * 32;
-		int y_px = y * 32;
+		const int WIDTH = 128;
+		const int HEIGHT = 64;
+		const int CHARSZ = 8;
 
-		m_charbox_verts[2] = static_cast<float>(x * 32 + 32) / 512;
-		m_charbox_verts[3] = static_cast<float>(y * 32) / 256;
-		m_charbox_verts[6] = static_cast<float>(x * 32 + 32) / 512;
-		m_charbox_verts[7] = static_cast<float>(y * 32 + 32) / 256;
-		m_charbox_verts[10] = static_cast<float>(x * 32) / 512;
-		m_charbox_verts[11] = static_cast<float>(y * 32) / 256;
-		m_charbox_verts[14] = static_cast<float>(x * 32) / 512;
-		m_charbox_verts[15] = static_cast<float>(y * 32 + 32) / 256;
+		int tl = x * CHARSZ;
+		int y_px = y * CHARSZ;
+
+		m_charbox_verts[2] = static_cast<float>(x * CHARSZ + CHARSZ) / WIDTH;
+		m_charbox_verts[3] = static_cast<float>(y * CHARSZ) / HEIGHT;
+		m_charbox_verts[6] = static_cast<float>(x * CHARSZ + CHARSZ) / WIDTH;
+		m_charbox_verts[7] = static_cast<float>(y * CHARSZ + CHARSZ) / HEIGHT;
+		m_charbox_verts[10] = static_cast<float>(x * CHARSZ) / WIDTH;
+		m_charbox_verts[11] = static_cast<float>(y * CHARSZ) / HEIGHT;
+		m_charbox_verts[14] = static_cast<float>(x * CHARSZ) / WIDTH;
+		m_charbox_verts[15] = static_cast<float>(y * CHARSZ + CHARSZ) / HEIGHT;
 
 		glBufferSubData(
 		  GL_ARRAY_BUFFER, 0, sizeof(m_charbox_verts), m_charbox_verts);
