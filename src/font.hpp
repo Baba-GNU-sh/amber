@@ -68,6 +68,7 @@ class TextRenderer
 			                                GL_FRAGMENT_SHADER) };
 
 		m_program = Program(shaders);
+		m_uniform_view_matrix = m_program.get_uniform_location("view_matrix");
 	}
 
 	~TextRenderer()
@@ -75,11 +76,13 @@ class TextRenderer
 		stbi_image_free(m_tex_data);
 	}
 
-	void draw(char c)
+	void draw(char c, glm::mat3x3 view_matrix)
 	{
 		m_program.use();
 		glBindVertexArray(m_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+		glUniformMatrix3fv(m_uniform_view_matrix, 1, GL_FALSE, glm::value_ptr(view_matrix[0]));
 
 		int col = (c) % 16;
 		int row = (c) / 16;
@@ -93,13 +96,14 @@ class TextRenderer
 		const int WIDTH = 128;
 		const int HEIGHT = 64;
 		const int CHARSZ = 8;
+		const int CHARWD = 4;
 
 		int tl = x * CHARSZ;
 		int y_px = y * CHARSZ;
 
-		m_charbox_verts[2] = static_cast<float>(x * CHARSZ + CHARSZ) / WIDTH;
+		m_charbox_verts[2] = static_cast<float>(x * CHARSZ + CHARWD) / WIDTH;
 		m_charbox_verts[3] = static_cast<float>(y * CHARSZ) / HEIGHT;
-		m_charbox_verts[6] = static_cast<float>(x * CHARSZ + CHARSZ) / WIDTH;
+		m_charbox_verts[6] = static_cast<float>(x * CHARSZ + CHARWD) / WIDTH;
 		m_charbox_verts[7] = static_cast<float>(y * CHARSZ + CHARSZ) / HEIGHT;
 		m_charbox_verts[10] = static_cast<float>(x * CHARSZ) / WIDTH;
 		m_charbox_verts[11] = static_cast<float>(y * CHARSZ) / HEIGHT;
@@ -116,4 +120,5 @@ class TextRenderer
 	float m_charbox_verts[16];
 	GLuint m_vao, m_vbo;
 	Program m_program;
+	GLint m_uniform_view_matrix;
 };
