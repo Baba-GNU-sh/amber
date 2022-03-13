@@ -13,14 +13,16 @@ class TextRenderer
 {
   public:
 	TextRenderer()
-	  : m_charbox_verts{ 0.5f,  0.5f, 1.0f, 0.0f, 0.5f,  -0.5f, 1.0f, 1.0f,
-		                 -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, -0.5f, 0.0f, 1.0f }
+	  : m_charbox_verts{ 0.5f,  1.0f,  1.0f, 0.0f,  0.5f,  -1.0f,  1.0f, 1.0f,
+		                 -0.5f, 1.0f,  0.0f, 0.0f,  -0.5f, -1.0f,  0.0f, 1.0f }
 	{
 		int width, height, nrChannels;
 		m_tex_data = stbi_load("font.png", &width, &height, &nrChannels, 0);
 		if (!m_tex_data) {
 			throw std::runtime_error("Unable to load font");
 		}
+
+		std::cout << "NChannels: " << nrChannels << '\n';
 
 		glGenVertexArrays(1, &m_vao);
 		glBindVertexArray(m_vao);
@@ -36,11 +38,11 @@ class TextRenderer
 
 		glTexImage2D(GL_TEXTURE_2D,
 		             0,
-		             GL_RGB,
+		             GL_RED,
 		             width,
 		             height,
 		             0,
-		             GL_RGB,
+		             GL_RED,
 		             GL_UNSIGNED_BYTE,
 		             m_tex_data);
 

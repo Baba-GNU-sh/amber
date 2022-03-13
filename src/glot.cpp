@@ -227,6 +227,9 @@ public:
         // Depths test helps us with the rendering for a small perf penalty
         glEnable(GL_DEPTH_TEST);
 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+
         // Set the colour to be a nice dark green
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
