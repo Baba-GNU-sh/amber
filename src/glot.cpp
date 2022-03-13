@@ -96,7 +96,9 @@ public:
         auto viewport_matrix_inv = glm::inverse(viewport_matrix);
         auto view_matrix_inv = glm::inverse(view_matrix);
 
-        int margin_px = 30;
+        int margin_px = 60;
+        const int TICKLEN = 6;
+        const int TEXT_SPACING = 30;
         int width, height;
         glfwGetWindowSize(window, &width, &height);
 
@@ -115,14 +117,39 @@ public:
 
             // Place a tick at every unit up the y axis
             for (int i = start; i < top_gs.y; i++) {
+                m_program.use();
+                glBindVertexArray(m_vao);
+                glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
                 auto tick_y_vpspace = viewport_matrix * (view_matrix * glm::vec3(0.0f, static_cast<float>(i), 1.0f));
-                auto tick_start = viewport_matrix_inv * glm::vec3(20, tick_y_vpspace.y, 1);
+                auto tick_start = viewport_matrix_inv * glm::vec3(margin_px - TICKLEN, tick_y_vpspace.y, 1);
                 auto tick_end = viewport_matrix_inv * glm::vec3(margin_px, tick_y_vpspace.y, 1);
                 draw_line_clipspace(tick_start, tick_end);
+
+                char buf[16];
+                std::snprintf(buf, 15, "%.1f", static_cast<float>(i));
+
+                // Glyphs should be 8*16 pixels
+                glm::vec2 text_position(margin_px - TICKLEN - TEXT_SPACING, tick_y_vpspace.y);
+                glm::vec2 glyph_size(8.0f, -8.0f);
+
+                auto text_position_tl = viewport_matrix_inv * glm::vec3(text_position, 1.0);
+                auto text_position_tr = viewport_matrix_inv * glm::vec3((text_position + glyph_size), 1.0);
+
+                auto scale = text_position_tr - text_position_tl;
+
+                glm::mat3x3 m(1.0);
+                m = glm::translate(m, glm::vec2(text_position_tl.x, text_position_tl.y));
+                m = glm::scale(m, glm::vec2(scale.x, scale.y));
+                text.draw_text(buf, m);
             }
         }
 
         {
+            m_program.use();
+            glBindVertexArray(m_vao);
+            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
             // draw a line from margin_px to height - margin_px
             glm::vec2 start_px(margin_px, height - margin_px);
             glm::vec2 end_px(width - margin_px, height - margin_px);
@@ -136,19 +163,39 @@ public:
 
             // Place a tick at every unit up the y axis
             for (int i = start; i < right_gs.x; i++) {
+                m_program.use();
+                glBindVertexArray(m_vao);
+                glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
                 auto tick_x_vpspace = viewport_matrix * (view_matrix * glm::vec3(static_cast<float>(i), 0.0f, 1.0f));
-                auto tick_start = viewport_matrix_inv * glm::vec3(tick_x_vpspace.x, height - 20, 1);
+                auto tick_start = viewport_matrix_inv * glm::vec3(tick_x_vpspace.x, height - (margin_px - TICKLEN), 1);
                 auto tick_end = viewport_matrix_inv * glm::vec3(tick_x_vpspace.x, height - margin_px, 1);
                 draw_line_clipspace(tick_start, tick_end);
+
+                char buf[16];
+                std::snprintf(buf, 15, "%.1f", static_cast<float>(i));
+
+                // Glyphs should be 8*16 pixels
+                glm::vec2 text_position(tick_x_vpspace.x, (height - margin_px) + TEXT_SPACING);
+                glm::vec2 glyph_size(8.0f, -8.0f);
+
+                auto text_position_tl = viewport_matrix_inv * glm::vec3(text_position, 1.0);
+                auto text_position_tr = viewport_matrix_inv * glm::vec3((text_position + glyph_size), 1.0);
+
+                auto scale = text_position_tr - text_position_tl;
+
+                glm::mat3x3 m(1.0);
+                m = glm::translate(m, glm::vec2(text_position_tl.x, text_position_tl.y));
+                m = glm::scale(m, glm::vec2(scale.x, scale.y));
+                text.draw_text(buf, m);
             }
         }
 
+        m_program.use();
         glUniformMatrix3fv(m_uniform_view_matrix, 1, GL_FALSE, glm::value_ptr(view_matrix[0]));
 
         glBindVertexArray(m_plot_vao);
         glDrawArrays(GL_LINE_STRIP, 0, 1000);
-
-        text.draw('g', view_matrix);
     }
 
 private:

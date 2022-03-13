@@ -3,11 +3,13 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <stdexcept>
+#include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "shader_utils.hpp"
 #include "stb_image.h"
 #include <vector>
+#include <string_view>
 
 class TextRenderer
 {
@@ -17,7 +19,7 @@ class TextRenderer
 		                 -0.5f, 1.0f,  0.0f, 0.0f,  -0.5f, -1.0f,  0.0f, 1.0f }
 	{
 		int width, height, nrChannels;
-		m_tex_data = stbi_load("font.png", &width, &height, &nrChannels, 0);
+		m_tex_data = stbi_load("font.tga", &width, &height, &nrChannels, 0);
 		if (!m_tex_data) {
 			throw std::runtime_error("Unable to load font");
 		}
@@ -78,11 +80,22 @@ class TextRenderer
 		stbi_image_free(m_tex_data);
 	}
 
+	void draw_text(std::string_view text, glm::mat3x3 view_matrix)
+	{
+		for (auto c : text)
+		{
+			draw(c, view_matrix);
+			view_matrix = glm::translate(view_matrix, glm::vec2(1, 0));
+		}
+	}
+
 	void draw(char c, glm::mat3x3 view_matrix)
 	{
 		m_program.use();
 		glBindVertexArray(m_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+		view_matrix = glm::translate(view_matrix, glm::vec2(0, 0));
 
 		glUniformMatrix3fv(m_uniform_view_matrix, 1, GL_FALSE, glm::value_ptr(view_matrix[0]));
 

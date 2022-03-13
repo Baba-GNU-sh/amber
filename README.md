@@ -94,4 +94,4 @@ ln -s build/compile_commands.json .
 ```
 
 ## Fonts
-Fonts are from: https://opengameart.org/content/8x8-ascii-bitmap-font-with-c-source
+Font is `/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf`

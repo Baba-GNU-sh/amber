@@ -1,11 +1,15 @@
 #include "fontgen.hpp"
+#include <iostream>
 
 int
-main(void)
+main(int argc, char *argv[])
 {
+	const char *filename = "font.png";
 	BitmapFontGenerator generator;
-	generator.generate("/usr/share/fonts/truetype/freefont/FreeMono.ttf",
-	                   48,
-	                   "font.png",
-	                   "font.txt");
+	generator.generate(argv[1],
+	                   12,
+	                   "fontmap.bmp",
+	                   "fontmap.txt");
+	
+	std::cout << "Rendered to " << filename << '\n';
 }

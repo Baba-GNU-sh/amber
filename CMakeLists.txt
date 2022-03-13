@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(glot)
 
+set (CMAKE_CXX_STANDARD 17)
+
 option(BUILD_TESTS "Build test programs" OFF)
 
 if (BUILD_TESTS)
@@ -34,6 +36,6 @@ configure_file(shaders/simple/fragment.glsl simple_fragment.glsl COPYONLY)
 configure_file(shaders/char_vert.glsl char_vert.glsl COPYONLY)
 configure_file(shaders/char_frag.glsl char_frag.glsl COPYONLY)
 
-configure_file(font.png font.png COPYONLY)
+configure_file(font.tga font.tga COPYONLY)
 
 add_subdirectory(src/fontgen)
