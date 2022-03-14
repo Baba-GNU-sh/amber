@@ -112,9 +112,9 @@ public:
 
         auto delta = b_ss - a_ss;
 
-        const float ONSCREEN_TICKS = 1.0f;
+        const float ONSCREEN_TICKS = 0.2f;
         float tick_spacing = (ONSCREEN_TICKS / delta.y);
-        tick_spacing = powf(10.0f, floorf(log10f(tick_spacing)));
+        tick_spacing = powf(2.0f, floorf(log2f(tick_spacing)));
 
         {
             // draw a line from margin_px to height - margin_px
@@ -143,7 +143,7 @@ public:
                 draw_line_clipspace(tick_start, tick_end);
 
                 char buf[16];
-                std::snprintf(buf, 15, "%.3f", static_cast<float>(i));
+                std::snprintf(buf, 15, "%f", static_cast<float>(i));
 
                 // Glyphs should be 8*16 pixels
                 glm::vec2 text_position(margin_px - TICKLEN - TEXT_SPACING, tick_y_vpspace.y);
@@ -191,7 +191,7 @@ public:
                 draw_line_clipspace(tick_start, tick_end);
 
                 char buf[16];
-                std::snprintf(buf, 15, "%.3f", static_cast<float>(i));
+                std::snprintf(buf, 15, "%f", static_cast<float>(i));
 
                 // Glyphs should be 8*16 pixels
                 glm::vec2 text_position(tick_x_vpspace.x, (height - margin_px) + TEXT_SPACING);
