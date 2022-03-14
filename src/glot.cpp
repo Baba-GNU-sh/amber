@@ -131,7 +131,7 @@ public:
 
                 // Glyphs should be 8*16 pixels
                 glm::vec2 text_position(margin_px - TICKLEN - TEXT_SPACING, tick_y_vpspace.y);
-                glm::vec2 glyph_size(8.0f, -8.0f);
+                glm::vec2 glyph_size(8.0f, 16.0f);
 
                 auto text_position_tl = viewport_matrix_inv * glm::vec3(text_position, 1.0);
                 auto text_position_tr = viewport_matrix_inv * glm::vec3((text_position + glyph_size), 1.0);
@@ -177,7 +177,7 @@ public:
 
                 // Glyphs should be 8*16 pixels
                 glm::vec2 text_position(tick_x_vpspace.x, (height - margin_px) + TEXT_SPACING);
-                glm::vec2 glyph_size(8.0f, -8.0f);
+                glm::vec2 glyph_size(8.0f, 16.0f);
 
                 auto text_position_tl = viewport_matrix_inv * glm::vec3(text_position, 1.0);
                 auto text_position_tr = viewport_matrix_inv * glm::vec3((text_position + glyph_size), 1.0);
