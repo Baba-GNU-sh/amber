@@ -102,6 +102,20 @@ public:
         int width, height;
         glfwGetWindowSize(window, &width, &height);
 
+
+        // TODO workout what the tick spacing should be
+        glm::vec3 a(0.0f, 0.0f, 1.0f);
+        glm::vec3 b(1.0f, 1.0f, 1.0f);
+
+        auto a_ss = view_matrix * a;
+        auto b_ss = view_matrix * b;
+
+        auto delta = b_ss - a_ss;
+
+        const float ONSCREEN_TICKS = 1.0f;
+        float tick_spacing = (ONSCREEN_TICKS / delta.y);
+        tick_spacing = powf(10.0f, floorf(log10f(tick_spacing)));
+
         {
             // draw a line from margin_px to height - margin_px
             glm::vec2 start_px(margin_px, margin_px);
@@ -113,10 +127,12 @@ public:
             // Work out where (in graph space) margin and height-margin is
             auto top_gs = view_matrix_inv * (viewport_matrix_inv * glm::vec3(0, margin_px, 1.0));
             auto bottom_gs = view_matrix_inv * (viewport_matrix_inv * glm::vec3(0, height - margin_px, 1.0));
-            auto start = (bottom_gs.y > 0)? static_cast<int>(bottom_gs.y) + 1 : static_cast<int>(bottom_gs.y);
+
+            float start = ceilf(bottom_gs.y / tick_spacing) * tick_spacing;
+            float end = ceilf(top_gs.y / tick_spacing) * tick_spacing;
 
             // Place a tick at every unit up the y axis
-            for (int i = start; i < top_gs.y; i++) {
+            for (float i = start; i < end; i+=tick_spacing) {
                 m_program.use();
                 glBindVertexArray(m_vao);
                 glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -127,7 +143,7 @@ public:
                 draw_line_clipspace(tick_start, tick_end);
 
                 char buf[16];
-                std::snprintf(buf, 15, "%.1f", static_cast<float>(i));
+                std::snprintf(buf, 15, "%.3f", static_cast<float>(i));
 
                 // Glyphs should be 8*16 pixels
                 glm::vec2 text_position(margin_px - TICKLEN - TEXT_SPACING, tick_y_vpspace.y);
@@ -159,10 +175,12 @@ public:
 
             auto left_gs = view_matrix_inv * (viewport_matrix_inv * glm::vec3(margin_px, 0.0f, 1.0f));
             auto right_gs = view_matrix_inv * (viewport_matrix_inv * glm::vec3(width - margin_px, 0.0f, 1.0f));
-            auto start = (left_gs.x > 0)? static_cast<int>(left_gs.x) + 1 : static_cast<int>(left_gs.x);
+
+            float start = ceilf(left_gs.x / tick_spacing) * tick_spacing;
+            float end = ceilf(right_gs.x / tick_spacing) * tick_spacing;
 
             // Place a tick at every unit up the y axis
-            for (int i = start; i < right_gs.x; i++) {
+            for (float i = start; i < end; i+=tick_spacing) {
                 m_program.use();
                 glBindVertexArray(m_vao);
                 glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -173,7 +191,7 @@ public:
                 draw_line_clipspace(tick_start, tick_end);
 
                 char buf[16];
-                std::snprintf(buf, 15, "%.1f", static_cast<float>(i));
+                std::snprintf(buf, 15, "%.3f", static_cast<float>(i));
 
                 // Glyphs should be 8*16 pixels
                 glm::vec2 text_position(tick_x_vpspace.x, (height - margin_px) + TEXT_SPACING);
