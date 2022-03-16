@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <glm/gtx/matrix_transform_2d.hpp>
 #include <iostream>
 #include <stdexcept>
 

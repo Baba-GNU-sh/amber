@@ -7,7 +7,7 @@ main(int argc, char *argv[])
 	const char *filename = "font.png";
 	BitmapFontGenerator generator;
 	generator.generate(argv[1],
-	                   12,
+	                   16,
 	                   "fontmap.bmp",
 	                   "fontmap.txt");
 	
