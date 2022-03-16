@@ -2,13 +2,13 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/fwd.hpp>
+#include <glm/matrix.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <random>
 
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
-#include <glm/matrix.hpp>
 #include <imgui.h>
 
 #include "shader_utils.hpp"

@@ -3,74 +3,20 @@
 #include <glad/glad.h> // Keep this one before glfw to avoid errors
 
 #include <GLFW/glfw3.h>
+#include <glm/fwd.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 
 #include "font.hpp"
+#include <glm/glm.hpp>
 
 /**
- * @brief Draws the graph.
+ * @brief Stores and renders a graph with axes and zoom and pan mouse controls.
  */
 class GraphView
 {
   public:
-	GraphView(float tick_spacing = 0.1)
-	  : _position(0, 0) // This is completely arbitrary
-	  , _size(100, 100) // This is completely arbitrary
-	  , _tick_spacing(tick_spacing)
-	  , _dragging(false)
-	{
-		_update_view_matrix(glm::mat3x3(1.0f));
-		update_viewport_matrix(glm::mat3x3(1.0f));
-
-		glGenVertexArrays(1, &m_vao);
-		glBindVertexArray(m_vao);
-
-		glGenBuffers(1, &m_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-		glBufferData(
-		  GL_ARRAY_BUFFER, sizeof(m_verticies), m_verticies, GL_DYNAMIC_DRAW);
-
-		glVertexAttribPointer(
-		  0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		std::vector<Shader> shaders{
-			Shader("simple_vertex.glsl", GL_VERTEX_SHADER),
-			Shader("simple_fragment.glsl", GL_FRAGMENT_SHADER)
-		};
-
-		m_program = Program(shaders);
-		m_uniform_view_matrix = m_program.get_uniform_location("view_matrix");
-
-		// Generate buffers for the actual plot
-		glGenVertexArrays(1, &m_plot_vao);
-		glBindVertexArray(m_plot_vao);
-
-		glGenBuffers(1, &m_plot_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, m_plot_vbo);
-
-		for (int i = 0; i < m_plot_verticies.size(); i++) {
-			m_plot_verticies[i].x =
-			  2 * M_PI * static_cast<float>(i) / m_plot_verticies.size() - M_PI;
-			m_plot_verticies[i].y = std::sin(m_plot_verticies[i].x);
-		}
-
-		glBufferData(GL_ARRAY_BUFFER,
-		             sizeof(m_plot_verticies),
-		             m_plot_verticies.data(),
-		             GL_STATIC_DRAW);
-
-		glVertexAttribPointer(
-		  0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-		glEnableVertexAttribArray(0);
-	}
-
-	~GraphView()
-	{
-		glDeleteBuffers(1, &m_vbo);
-		glDeleteVertexArrays(1, &m_vao);
-	}
+	GraphView();
+	~GraphView();
 
 	/**
 	 * @brief Update the size of the graph in the viewport.
@@ -117,6 +63,10 @@ class GraphView
 		return _position;
 	}
 
+	/**
+	 * @brief Call this to pass mouse button events through from GLFW to control
+	 * the graph.
+	 */
 	void mouse_button(int button, int action, int mods)
 	{
 		(void)mods;
@@ -127,6 +77,10 @@ class GraphView
 			_dragging = false;
 	}
 
+	/**
+	 * @brief Call this to pass through cursor move events from GLFW to control
+	 * the graph.
+	 */
 	void cursor_move(double xpos, double ypos)
 	{
 		glm::ivec2 new_cursor(xpos, ypos);
@@ -147,6 +101,10 @@ class GraphView
 		_cursor = new_cursor;
 	}
 
+	/**
+	 * @brief Call this to pass through mouse scroll events from GLFW to control
+	 * the graph.
+	 */
 	void mouse_scroll(double xoffset, double yoffset)
 	{
 		// Work out where the pointer is in graph space
@@ -162,6 +120,12 @@ class GraphView
 		_update_view_matrix(glm::translate(_view_matrix, cursor_delta));
 	}
 
+	/**
+	 * @brief Updat the viewport matrix - this should only happen when the view
+	 * is resized.
+	 *
+	 * @param viewport_matrix The new value of the viewport matrix.
+	 */
 	void update_viewport_matrix(const glm::mat3x3& viewport_matrix)
 	{
 		_viewport_matrix = viewport_matrix;
@@ -170,7 +134,9 @@ class GraphView
 
 	void draw()
 	{
-		m_program.use();
+		_draw_lines();
+		return;
+
 		glBindVertexArray(m_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
@@ -390,6 +356,10 @@ class GraphView
 		_view_matrix_inv = glm::inverse(value);
 	}
 
+	void _init_line_buffers();
+	void _draw_lines();
+	glm::vec2 _get_tick_spacing() const;
+
 	glm::ivec2 _position;
 	glm::ivec2 _size;
 	glm::vec2 _cursor;
@@ -401,7 +371,12 @@ class GraphView
 	glm::mat3x3 _viewport_matrix; // Transform from clip space to screen space
 	glm::mat3x3 _viewport_matrix_inv;
 
-	float _tick_spacing;
+
+	// Line buffers
+	GLuint _linebuf_vao;
+	GLuint _linebuf_vbo;
+	Program _lines_shader;
+
 	Program m_program;
 	GLuint m_vao;
 	GLuint m_vbo;
