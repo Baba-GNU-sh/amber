@@ -1,5 +1,8 @@
 #include "graph.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 GraphView::GraphView()
   : _position(0, 0)
   , _size(100, 100) // This is completely arbitrary
@@ -53,6 +56,7 @@ GraphView::GraphView()
 	glEnableVertexAttribArray(0);
 
 	_init_line_buffers();
+	_init_glyph_buffers();
 }
 
 GraphView::~GraphView()
@@ -79,7 +83,55 @@ void GraphView::_init_line_buffers()
 	_lines_shader = Program(shaders);
 }
 
-void GraphView::_draw_lines()
+void GraphView::_init_glyph_buffers()
+{
+	glGenVertexArrays(1, &_glyphbuf_vao);
+	glBindVertexArray(_glyphbuf_vao);
+
+	glGenBuffers(1, &_glyphbuf_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _glyphbuf_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 128, nullptr, GL_STREAM_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	std::vector<Shader> shaders{ Shader("char_vertex.glsl", GL_VERTEX_SHADER),
+		                         Shader("char_fragment.glsl",
+		                                GL_FRAGMENT_SHADER) };
+	_glyph_shader = Program(shaders);
+
+	int width, height, nrChannels;
+	unsigned char *tex_data = stbi_load("font.tga", &width, &height, &nrChannels, 0);
+	if (!m_tex_data) {
+		throw std::runtime_error("Unable to load font");
+	}
+
+	glGenTextures(1, &_glyph_texture);
+	glBindTexture(GL_TEXTURE_2D, _glyph_texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// glGenerateMipmap(GL_TEXTURE_2D);
+
+	glTexImage2D(GL_TEXTURE_2D,
+	             0,
+	             GL_RED,
+	             width,
+	             height,
+	             0,
+	             GL_RED,
+	             GL_UNSIGNED_BYTE,
+	             tex_data);
+	
+	stbi_image_free(tex_data);
+}
+
+void GraphView::_draw_lines() const
 {
 	const int margin_px = 60;
 	int offset = 0;
@@ -135,6 +187,11 @@ void GraphView::_draw_lines()
 	int uniform_id = _lines_shader.get_uniform_location("view_matrix");
 	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
 	glDrawArrays(GL_LINES, 0, offset);
+}
+
+void GraphView::_draw_glyphs() const
+{
+
 }
 
 glm::vec2 GraphView::_get_tick_spacing() const
