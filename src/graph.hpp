@@ -6,6 +6,8 @@
 #include <glm/fwd.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 
+#include "shader_utils.hpp"
+
 // #include "font.hpp"
 #include <glm/glm.hpp>
 
@@ -135,7 +137,7 @@ class GraphView
 	void draw() const
 	{
 		_draw_lines();
-		_draw_glyphs();
+		_draw_labels();
 		return;
 
 		// glBindVertexArray(m_vao);
@@ -360,8 +362,10 @@ class GraphView
 	void _init_line_buffers();
 	void _init_glyph_buffers();
 	void _draw_lines() const;
-	void _draw_glyphs() const;
-	glm::vec2 _get_tick_spacing() const;
+	void _draw_labels() const;
+	void _draw_label(const std::string_view text, const glm::vec2 &pos, float size) const;
+	void _draw_glyph(char c, const glm::vec2 &pos, float height) const;
+	std::pair<glm::vec2, glm::vec2> _get_tick_spacing() const;
 
 	glm::ivec2 _position;
 	glm::ivec2 _size;
@@ -397,4 +401,7 @@ class GraphView
 	int width, height, nrChannels;
 	unsigned char* m_tex_data;
 	unsigned int texture;
+
+	const int GUTTER_SIZE_PX = 60;
+	const int TICKLEN = 10;
 };

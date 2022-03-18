@@ -1,7 +1,18 @@
 #include "graph.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+#include <iomanip>
+#include <sstream>
+#include <iostream>
+
+struct GlyphData
+{
+	glm::vec2 verts[4]; // Order: [TL, TR, BL, BR]
+	glm::vec2 tex_coords[4]; // Same order as verts
+};
 
 GraphView::GraphView()
   : _position(0, 0)
@@ -72,7 +83,7 @@ void GraphView::_init_line_buffers()
 
 	glGenBuffers(1, &_linebuf_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 128, nullptr, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 1024, nullptr, GL_STREAM_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -90,23 +101,27 @@ void GraphView::_init_glyph_buffers()
 
 	glGenBuffers(1, &_glyphbuf_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _glyphbuf_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 128, nullptr, GL_STREAM_DRAW);
 
+	// A glyph is rendered as a quad so we only need 4 verts and 4 texture lookups
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GlyphData), nullptr, GL_STREAM_DRAW);
+
+	// Define an attribute for the glyph verticies
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	// Define an attribute for the texture lookups
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)offsetof(GlyphData, tex_coords));
 	glEnableVertexAttribArray(1);
 
-	std::vector<Shader> shaders{ Shader("char_vertex.glsl", GL_VERTEX_SHADER),
-		                         Shader("char_fragment.glsl",
+	std::vector<Shader> shaders{ Shader("char_vert.glsl", GL_VERTEX_SHADER),
+		                         Shader("char_frag.glsl",
 		                                GL_FRAGMENT_SHADER) };
 	_glyph_shader = Program(shaders);
 
 	int width, height, nrChannels;
 	unsigned char *tex_data = stbi_load("font.tga", &width, &height, &nrChannels, 0);
 	if (!m_tex_data) {
-		throw std::runtime_error("Unable to load font");
+		throw std::runtime_error("Unable to load font map");
 	}
 
 	glGenTextures(1, &_glyph_texture);
@@ -114,8 +129,8 @@ void GraphView::_init_glyph_buffers()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexImage2D(GL_TEXTURE_2D,
@@ -133,52 +148,63 @@ void GraphView::_init_glyph_buffers()
 
 void GraphView::_draw_lines() const
 {
-	const int margin_px = 60;
 	int offset = 0;
-	const int TICKLEN = 10;
 
 	auto tick_spacing = _get_tick_spacing();
+	auto tick_spacing_major = tick_spacing.first;
+	auto tick_spacing_minor = tick_spacing.second;
 
 	glBindVertexArray(_linebuf_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
 
 	// Get a pointer to the underlying buffer
 	void *raw_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	auto *ptr = reinterpret_cast<glm::vec2 *>(raw_ptr);
 
+	glm::vec2 tl(GUTTER_SIZE_PX, 0);
+	glm::vec2 bl(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX);
+	glm::vec2 br(_size.x, _size.y - GUTTER_SIZE_PX);
+
 	// Draw the y axis line
-	ptr[offset++] = glm::vec2(margin_px, margin_px);
-	ptr[offset++] = glm::vec2(margin_px, _size.y - margin_px);
-
-	// Draw the y-axis ticks
-	// Work out where (in graph space) margin and height-margin is
-	auto top_gs = screen2graph(glm::vec2(margin_px, margin_px));
-	auto bottom_gs = screen2graph(glm::vec2(margin_px, _size.y - margin_px));
-	float start = ceilf(bottom_gs.y / tick_spacing.y) * tick_spacing.y;
-	float end = ceilf(top_gs.y / tick_spacing.y) * tick_spacing.y;
-
-	// Place a tick at every unit up the y axis
-	for (float i = start; i < end; i += tick_spacing.y) {
-		auto tick_y_vpspace = _viewport_matrix * (_view_matrix * glm::vec3(0.0f, i, 1.0f));
-		ptr[offset++] = glm::vec2(margin_px - TICKLEN, tick_y_vpspace.y);
-		ptr[offset++] = glm::vec2(margin_px, tick_y_vpspace.y);
-	}
+	ptr[offset++] = tl;
+	ptr[offset++] = bl;
 
 	// Draw the x axis line
-	ptr[offset++] = glm::vec2(margin_px, _size.y - margin_px);
-	ptr[offset++] = glm::vec2(_size.x - margin_px, _size.y - margin_px);
+	ptr[offset++] = bl;
+	ptr[offset++] = br;
 
-	// Draw the y axis ticks
-	auto left_gs = screen2graph(glm::vec2(margin_px, _size.y - margin_px));
-	auto right_gs = screen2graph(glm::vec2(_size.x - margin_px, _size.y - margin_px));
-	start = ceilf(left_gs.x / tick_spacing.x) * tick_spacing.x;
-	end = ceilf(right_gs.x / tick_spacing.x) * tick_spacing.x;
+	auto draw_ticks = [&](const glm::vec2 &tick_spacing, const glm::vec2 &tick_size_y, const glm::vec2 &tick_size_x)
+	{
+		// Draw the y-axis ticks
+		// Work out where (in graph space) margin and height-margin is
+		auto top_gs = screen2graph(tl);
+		auto bottom_gs = screen2graph(bl);
+		float start = ceilf(bottom_gs.y / tick_spacing.y) * tick_spacing.y;
+		float end = ceilf(top_gs.y / tick_spacing.y) * tick_spacing.y;
 
-	// Place a tick at every unit along the x axis
-	for (float i = start; i < end; i += tick_spacing.x) {
-		auto tick_x_vpspace = _viewport_matrix * (_view_matrix * glm::vec3(i, 0.0f, 1.0f));
-		ptr[offset++] = glm::vec2(tick_x_vpspace.x, _size.y - margin_px + TICKLEN);
-		ptr[offset++] = glm::vec2(tick_x_vpspace.x, _size.y - margin_px);
-	}
+		// Place a tick at every unit up the y axis
+		for (float i = start; i < end; i += tick_spacing.y) {
+			auto tick_y_vpspace = _viewport_matrix * (_view_matrix * glm::vec3(0.0f, i, 1.0f));
+			ptr[offset++] = glm::vec2(GUTTER_SIZE_PX, tick_y_vpspace.y) + tick_size_y;
+			ptr[offset++] = glm::vec2(GUTTER_SIZE_PX, tick_y_vpspace.y);
+		}
+
+		// Draw the y axis ticks
+		auto left_gs = screen2graph(bl);
+		auto right_gs = screen2graph(br);
+		start = ceilf(left_gs.x / tick_spacing.x) * tick_spacing.x;
+		end = ceilf(right_gs.x / tick_spacing.x) * tick_spacing.x;
+
+		// Place a tick at every unit along the x axis
+		for (float i = start; i < end; i += tick_spacing.x) {
+			auto tick_x_vpspace = _viewport_matrix * (_view_matrix * glm::vec3(i, 0.0f, 1.0f));
+			ptr[offset++] = glm::vec2(tick_x_vpspace.x, _size.y - GUTTER_SIZE_PX) + tick_size_x;
+			ptr[offset++] = glm::vec2(tick_x_vpspace.x, _size.y - GUTTER_SIZE_PX);
+		}
+	};
+
+	draw_ticks(tick_spacing_major, glm::vec2(-TICKLEN, 0), glm::vec2(0, TICKLEN));
+	draw_ticks(tick_spacing_minor, glm::vec2(-TICKLEN/2, 0), glm::vec2(0, TICKLEN/2));
 
 	// make sure to tell OpenGL we're done with the pointer
 	glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -189,24 +215,110 @@ void GraphView::_draw_lines() const
 	glDrawArrays(GL_LINES, 0, offset);
 }
 
-void GraphView::_draw_glyphs() const
+void GraphView::_draw_labels() const
 {
+	glm::vec2 tl(GUTTER_SIZE_PX, 0);
+	glm::vec2 bl(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX);
+	glm::vec2 br(_size.x, _size.y - GUTTER_SIZE_PX);
+	auto tick_spacing = _get_tick_spacing();
+	auto tick_spacing_major = tick_spacing.first;
+	auto tick_spacing_minor = tick_spacing.second;
 
+	// Draw one label per tick on the y axis
+	auto top_gs = screen2graph(tl);
+	auto bottom_gs = screen2graph(bl);
+	float start = ceilf(bottom_gs.y / tick_spacing_major.y) * tick_spacing_major.y;
+	float end = ceilf(top_gs.y / tick_spacing_major.y) * tick_spacing_major.y;
+
+	// Place a tick at every unit up the y axis
+	for (float i = start; i < end; i += tick_spacing_major.y) {
+		auto tick_y_vpspace = _viewport_matrix * (_view_matrix * glm::vec3(0.0f, i, 1.0f));
+		glm::vec2 point(GUTTER_SIZE_PX - TICKLEN, tick_y_vpspace.y);
+
+		std::stringstream ss;
+		ss << std::fixed << std::setprecision(3) << i;
+		_draw_label(ss.str(), point, 16);
+	}
+
+	// Draw the y axis ticks
+	auto left_gs = screen2graph(bl);
+	auto right_gs = screen2graph(br);
+	start = ceilf(left_gs.x / tick_spacing_major.x) * tick_spacing_major.x;
+	end = ceilf(right_gs.x / tick_spacing_major.x) * tick_spacing_major.x;
+
+	// Place a tick at every unit along the x axis
+	for (float i = start; i < end; i += tick_spacing_major.x) {
+		auto tick_x_vpspace = _viewport_matrix * (_view_matrix * glm::vec3(i, 0.0f, 1.0f));
+		glm::vec2 point(tick_x_vpspace.x, _size.y - GUTTER_SIZE_PX + TICKLEN);
+
+		std::stringstream ss;
+		ss << std::fixed << std::setprecision(3) << i;
+		_draw_label(ss.str(), point, 16);
+	}
 }
 
-glm::vec2 GraphView::_get_tick_spacing() const
+void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, float size) const
 {
-	glm::vec3 a(0.0f, 0.0f, 1.0f);
-	glm::vec3 b(1.0f, 1.0f, 1.0f);
+	glm::vec2 offset = pos;
+	glm::vec2 delta = glm::vec2(size/2, 0);
 
-	auto a_ss = _view_matrix * a;
-	auto b_ss = _view_matrix * b;
+	for (auto c : text)
+	{
+		_draw_glyph(c, offset, size);
+		offset += delta;
+	}
+}
 
-	auto delta = b_ss - a_ss;
+void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size) const
+{
+	const float WIDTH = size / 2;
+	GlyphData data;
+	data.verts[0] = pos;
+	data.verts[1] = pos + glm::vec2(WIDTH, 0.0f);
+	data.verts[2] = pos + glm::vec2(0.0f, size);
+	data.verts[3] = pos + glm::vec2(WIDTH, size);
 
-	const float ONSCREEN_TICKS = 0.2f;
-	float tick_spacing = (ONSCREEN_TICKS / delta.y);
-	tick_spacing = powf(2.0f, floorf(log2f(tick_spacing)));
+	// Look up the texture coordinate for the character
+	const int COLS = 16;
+	const int ROWS = 8;
+	int col = c % COLS;
+	int row = c / COLS;
+	const float COL_STRIDE = 1.0f / COLS;
+	const float GLYPH_WIDTH = 0.5f / COLS;
+	const float ROW_STRIDE = 1.0f / ROWS;
+	const float GLYPH_HEIGHT = 1.0f / ROWS;
 
-	return glm::vec2(tick_spacing, tick_spacing);
+	data.tex_coords[0] = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row);
+	data.tex_coords[1] = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row);
+	data.tex_coords[2] = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row + GLYPH_HEIGHT);
+	data.tex_coords[3] = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row + GLYPH_HEIGHT);
+
+	glBindVertexArray(_glyphbuf_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _glyphbuf_vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), &data);
+
+	_glyph_shader.use();
+	int uniform_id = _glyph_shader.get_uniform_location("view_matrix");
+	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
+	
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+std::pair<glm::vec2, glm::vec2> GraphView::_get_tick_spacing() const
+{
+	const float min_tick_spacing_px = 50;
+
+	// Create a graph space vector which represents the minimum tick spacing allowed
+	const glm::vec2 square_gs = 
+		screen2graph(glm::vec2(0.0f, 0.0f)) 
+		- screen2graph(glm::vec2(min_tick_spacing_px, min_tick_spacing_px));
+
+	// Throw away the sign
+	auto gs = glm::abs(square_gs);
+
+	// Round this size up to the nearest power of 10
+	gs.x = powf(10.0f, ceilf(log10f(gs.x)));
+	gs.y = powf(10.0f, ceilf(log10f(gs.y)));
+
+	return std::pair(gs, gs/10.0f);
 }

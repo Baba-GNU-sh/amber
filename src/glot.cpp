@@ -176,7 +176,6 @@ class Window
 	                            double xoffset,
 	                            double yoffset)
 	{
-		std::cout << "Scrolling: " << yoffset << '\n';
 		Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
 		win->m_graph->mouse_scroll(xoffset, yoffset);
 	}

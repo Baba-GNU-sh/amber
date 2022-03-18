@@ -22,8 +22,7 @@ add_executable(glot
 	src/bindings/imgui_impl_glfw.cpp
 	src/shader.cpp
 	src/shader_program.cpp
-	src/graph.cpp
-	src/font.cpp)
+	src/graph.cpp)
 
 target_link_libraries(glot glfw::glfw glad::glad glm::glm imgui::imgui)
 
