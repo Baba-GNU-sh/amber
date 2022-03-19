@@ -365,7 +365,7 @@ class GraphView
 	void _draw_labels() const;
 	void _draw_label(const std::string_view text, const glm::vec2 &pos, float size) const;
 	void _draw_glyph(char c, const glm::vec2 &pos, float height) const;
-	std::pair<glm::vec2, glm::vec2> _get_tick_spacing() const;
+	std::tuple<glm::vec2, glm::vec2, glm::ivec2> _get_tick_spacing() const;
 
 	glm::ivec2 _position;
 	glm::ivec2 _size;

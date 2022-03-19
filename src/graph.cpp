@@ -151,8 +151,8 @@ void GraphView::_draw_lines() const
 	int offset = 0;
 
 	auto tick_spacing = _get_tick_spacing();
-	auto tick_spacing_major = tick_spacing.first;
-	auto tick_spacing_minor = tick_spacing.second;
+	auto tick_spacing_major = std::get<0>(tick_spacing);
+	auto tick_spacing_minor = std::get<1>(tick_spacing);
 
 	glBindVertexArray(_linebuf_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
@@ -221,8 +221,9 @@ void GraphView::_draw_labels() const
 	glm::vec2 bl(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX);
 	glm::vec2 br(_size.x, _size.y - GUTTER_SIZE_PX);
 	auto tick_spacing = _get_tick_spacing();
-	auto tick_spacing_major = tick_spacing.first;
-	auto tick_spacing_minor = tick_spacing.second;
+	auto tick_spacing_major = std::get<0>(tick_spacing);
+	auto tick_spacing_minor = std::get<1>(tick_spacing);
+	auto precision = std::get<2>(tick_spacing);
 
 	// Draw one label per tick on the y axis
 	auto top_gs = screen2graph(tl);
@@ -236,7 +237,7 @@ void GraphView::_draw_labels() const
 		glm::vec2 point(GUTTER_SIZE_PX - TICKLEN, tick_y_vpspace.y);
 
 		std::stringstream ss;
-		ss << std::fixed << std::setprecision(3) << i;
+		ss << std::fixed << std::setprecision(precision.y) << i;
 		_draw_label(ss.str(), point, 16);
 	}
 
@@ -252,7 +253,7 @@ void GraphView::_draw_labels() const
 		glm::vec2 point(tick_x_vpspace.x, _size.y - GUTTER_SIZE_PX + TICKLEN);
 
 		std::stringstream ss;
-		ss << std::fixed << std::setprecision(3) << i;
+		ss << std::fixed << std::setprecision(precision.x) << i;
 		_draw_label(ss.str(), point, 16);
 	}
 }
@@ -304,7 +305,7 @@ void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size) const
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-std::pair<glm::vec2, glm::vec2> GraphView::_get_tick_spacing() const
+std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() const
 {
 	const float min_tick_spacing_px = 50;
 
@@ -316,9 +317,31 @@ std::pair<glm::vec2, glm::vec2> GraphView::_get_tick_spacing() const
 	// Throw away the sign
 	auto gs = glm::abs(square_gs);
 
-	// Round this size up to the nearest power of 10
-	gs.x = powf(10.0f, ceilf(log10f(gs.x)));
-	gs.y = powf(10.0f, ceilf(log10f(gs.y)));
+	glm::ivec2 precision(1);
 
-	return std::pair(gs, gs/10.0f);
+	// Round this size up to the nearest power of 10
+	glm::vec2 gs2(1.0f, 1.0f);
+	gs2.x = powf(10.0f, ceilf(log10f(gs.x)));
+	gs2.y = powf(10.0f, ceilf(log10f(gs.y)));
+
+	precision.x = -ceilf(log10f(gs2.x));
+	precision.y = -ceilf(log10f(gs2.y));
+
+	auto scale = gs / gs2;
+	if (scale.x < 0.5f)
+	{
+		gs2.x /= 2;
+		precision.x ++;
+	}
+
+	if (scale.y < 0.5f)
+	{
+		gs2.y /= 2;
+		precision.y ++;
+	}
+
+	if (precision.x < 0) precision.x = 0;
+	if (precision.y < 0) precision.y = 0;
+
+	return std::tuple(gs2, gs2/10.0f, precision);
 }
