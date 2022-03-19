@@ -307,41 +307,40 @@ void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size) const
 
 std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() const
 {
-	const float min_tick_spacing_px = 50;
+	const glm::vec2 MIN_TICK_SPACING_PX(100, 100);
 
-	// Create a graph space vector which represents the minimum tick spacing allowed
-	const glm::vec2 square_gs = 
+	// Calc the size of this vector in graph space (ignoring translation & sign)
+	const glm::vec2 min_tick_spacing_gs = glm::abs(
 		screen2graph(glm::vec2(0.0f, 0.0f)) 
-		- screen2graph(glm::vec2(min_tick_spacing_px, min_tick_spacing_px));
-
-	// Throw away the sign
-	auto gs = glm::abs(square_gs);
-
-	glm::ivec2 precision(1);
+		- screen2graph(MIN_TICK_SPACING_PX));
 
 	// Round this size up to the nearest power of 10
-	glm::vec2 gs2(1.0f, 1.0f);
-	gs2.x = powf(10.0f, ceilf(log10f(gs.x)));
-	gs2.y = powf(10.0f, ceilf(log10f(gs.y)));
+	glm::vec2 tick_spacing;
+	tick_spacing.x = powf(10.0f, ceilf(log10f(min_tick_spacing_gs.x)));
+	tick_spacing.y = powf(10.0f, ceilf(log10f(min_tick_spacing_gs.y)));
+	glm::vec2 minor_tick_spacing = tick_spacing / 2.0f;
 
-	precision.x = -ceilf(log10f(gs2.x));
-	precision.y = -ceilf(log10f(gs2.y));
+	glm::ivec2 precision;
+	precision.x = -ceilf(log10f(min_tick_spacing_gs.x));
+	precision.y = -ceilf(log10f(min_tick_spacing_gs.y));
 
-	auto scale = gs / gs2;
+	auto scale = min_tick_spacing_gs / tick_spacing;
 	if (scale.x < 0.5f)
 	{
-		gs2.x /= 2;
-		precision.x ++;
+		tick_spacing.x /= 2;
+		++precision.x;
+		minor_tick_spacing.x = tick_spacing.x / 10;
 	}
 
 	if (scale.y < 0.5f)
 	{
-		gs2.y /= 2;
-		precision.y ++;
+		tick_spacing.y /= 2;
+		++precision.y;
+		minor_tick_spacing.y = tick_spacing.y / 10;
 	}
 
 	if (precision.x < 0) precision.x = 0;
 	if (precision.y < 0) precision.y = 0;
 
-	return std::tuple(gs2, gs2/10.0f, precision);
+	return std::tuple(tick_spacing, minor_tick_spacing, precision);
 }
