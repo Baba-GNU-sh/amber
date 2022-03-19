@@ -138,6 +138,7 @@ class GraphView
 	{
 		_draw_lines();
 		_draw_labels();
+		_draw_plot();
 		return;
 
 		// glBindVertexArray(m_vao);
@@ -361,10 +362,13 @@ class GraphView
 
 	void _init_line_buffers();
 	void _init_glyph_buffers();
+	void _init_plot_buffers();
 	void _draw_lines() const;
 	void _draw_labels() const;
 	void _draw_label(const std::string_view text, const glm::vec2 &pos, float size) const;
 	void _draw_glyph(char c, const glm::vec2 &pos, float height) const;
+	void _draw_plot() const;
+	
 	std::tuple<glm::vec2, glm::vec2, glm::ivec2> _get_tick_spacing() const;
 
 	glm::ivec2 _position;
@@ -388,6 +392,11 @@ class GraphView
 	GLuint _glyphbuf_vbo;
 	Program _glyph_shader;
 	GLuint _glyph_texture;
+
+	// Plot renderer
+	GLuint _plot_vao;
+	GLuint _plot_vbo;
+	glm::vec2 _plot_data[1024];
 
 	Program m_program;
 	GLuint m_vao;

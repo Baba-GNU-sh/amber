@@ -68,6 +68,7 @@ GraphView::GraphView()
 
 	_init_line_buffers();
 	_init_glyph_buffers();
+	_init_plot_buffers();
 }
 
 GraphView::~GraphView()
@@ -144,6 +145,19 @@ void GraphView::_init_glyph_buffers()
 	             tex_data);
 	
 	stbi_image_free(tex_data);
+}
+
+void GraphView::_init_plot_buffers()
+{
+	glGenVertexArrays(1, &_plot_vao);
+	glBindVertexArray(_plot_vao);
+
+	glGenBuffers(1, &_plot_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
+	glBufferData(GL_ARRAY_BUFFER,  sizeof(_plot_data), nullptr, GL_STREAM_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+	glEnableVertexAttribArray(0);
 }
 
 void GraphView::_draw_lines() const
@@ -303,6 +317,26 @@ void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size) const
 	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
 	
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void GraphView::_draw_plot() const
+{
+	glBindVertexArray(_plot_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
+
+	_lines_shader.use();
+	int uniform_id = _lines_shader.get_uniform_location("view_matrix");
+	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_view_matrix[0]));
+
+	glm::vec2 plot_data[1024];
+	for (int i = 0; i < 1024; i++)
+	{
+		plot_data[i].x = static_cast<float>(i)/100;
+		plot_data[i].y = sinf(static_cast<float>(i)/100);
+	}
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(plot_data), &plot_data);
+	glDrawArrays(GL_LINE_STRIP, 0, 1024);
 }
 
 std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() const
