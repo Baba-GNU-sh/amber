@@ -107,12 +107,28 @@ class GraphView
 	 */
 	void mouse_scroll(double xoffset, double yoffset)
 	{
+		const float zoom_delta = 1.0f + (yoffset / 10.0f);
+		glm::vec2 zoom_delta_vec(1.0);
+
+		// Is the cursor in the gutter?
+		if (_hittest(_cursor, glm::vec2(0, 0), glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX)))
+		{
+			// We are in the y gutter
+			zoom_delta_vec.y = zoom_delta;
+		}
+		else if (_hittest(_cursor, glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX), glm::vec2(_size.x, _size.y)))
+		{
+			zoom_delta_vec.x = zoom_delta;
+		}
+		else if (_hittest(_cursor, glm::vec2(GUTTER_SIZE_PX, 0), glm::vec2(_size.x, _size.y - GUTTER_SIZE_PX)))
+		{
+			zoom_delta_vec = glm::vec2(zoom_delta);
+		}
+
 		// Work out where the pointer is in graph space
 		auto cursor_in_gs_old = screen2graph(_cursor);
-		float zoom_delta = 1.0 + (yoffset / 10);
-
-		_update_view_matrix(
-		  glm::scale(_view_matrix, glm::vec2(zoom_delta, zoom_delta)));
+		
+		_update_view_matrix(glm::scale(_view_matrix, zoom_delta_vec));
 
 		auto cursor_in_gs_new = screen2graph(_cursor);
 		auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
@@ -137,166 +153,6 @@ class GraphView
 		_draw_lines();
 		_draw_labels();
 		_draw_plot();
-		return;
-
-		// glBindVertexArray(m_vao);
-		// glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-		// glm::mat3 ident(1.0);
-		// glUniformMatrix3fv(
-		//   m_uniform_view_matrix, 1, GL_FALSE, glm::value_ptr(ident[0]));
-
-		// int margin_px = 60;
-		// const int TICKLEN = 6;
-		// const int TEXT_SPACING = 30;
-		// int width = _size.x;
-		// int height = _size.y;
-
-		// // TODO workout what the tick spacing should be
-		// glm::vec3 a(0.0f, 0.0f, 1.0f);
-		// glm::vec3 b(1.0f, 1.0f, 1.0f);
-
-		// auto a_ss = _view_matrix * a;
-		// auto b_ss = _view_matrix * b;
-
-		// auto delta = b_ss - a_ss;
-
-		// const float ONSCREEN_TICKS = 0.2f;
-		// float tick_spacing = (ONSCREEN_TICKS / delta.y);
-		// tick_spacing = powf(2.0f, floorf(log2f(tick_spacing)));
-
-		// {
-		// 	// draw a line from margin_px to height - margin_px
-		// 	glm::vec2 start_px(margin_px, margin_px);
-		// 	glm::vec2 end_px(margin_px, height - margin_px);
-		// 	auto start_clipspace =
-		// 	  _viewport_matrix_inv * glm::vec3(start_px, 1.0);
-		// 	;
-		// 	auto end_clipspace = _viewport_matrix_inv * glm::vec3(end_px, 1.0);
-		// 	draw_line_clipspace(start_clipspace, end_clipspace);
-
-		// 	// Work out where (in graph space) margin and height-margin is
-		// 	auto top_gs = _view_matrix_inv *
-		// 	              (_viewport_matrix_inv * glm::vec3(0, margin_px, 1.0));
-		// 	auto bottom_gs =
-		// 	  _view_matrix_inv *
-		// 	  (_viewport_matrix_inv * glm::vec3(0, height - margin_px, 1.0));
-
-		// 	float start = ceilf(bottom_gs.y / tick_spacing) * tick_spacing;
-		// 	float end = ceilf(top_gs.y / tick_spacing) * tick_spacing;
-
-		// 	// Place a tick at every unit up the y axis
-		// 	for (float i = start; i < end; i += tick_spacing) {
-		// 		m_program.use();
-		// 		glBindVertexArray(m_vao);
-		// 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-		// 		auto tick_y_vpspace =
-		// 		  _viewport_matrix *
-		// 		  (_view_matrix * glm::vec3(0.0f, static_cast<float>(i), 1.0f));
-		// 		auto tick_start =
-		// 		  _viewport_matrix_inv *
-		// 		  glm::vec3(margin_px - TICKLEN, tick_y_vpspace.y, 1);
-		// 		auto tick_end = _viewport_matrix_inv *
-		// 		                glm::vec3(margin_px, tick_y_vpspace.y, 1);
-		// 		draw_line_clipspace(tick_start, tick_end);
-
-		// 		char buf[16];
-		// 		std::snprintf(buf, 15, "%f", static_cast<float>(i));
-
-		// 		// Glyphs should be 8*16 pixels
-		// 		glm::vec2 text_position(margin_px - TICKLEN - TEXT_SPACING,
-		// 		                        tick_y_vpspace.y);
-		// 		glm::vec2 glyph_size(8.0f, 16.0f);
-
-		// 		auto text_position_tl =
-		// 		  _viewport_matrix_inv * glm::vec3(text_position, 1.0);
-		// 		auto text_position_tr =
-		// 		  _viewport_matrix_inv *
-		// 		  glm::vec3((text_position + glyph_size), 1.0);
-
-		// 		auto scale = text_position_tr - text_position_tl;
-
-		// 		glm::mat3x3 m(1.0);
-		// 		m = glm::translate(
-		// 		  m, glm::vec2(text_position_tl.x, text_position_tl.y));
-		// 		m = glm::scale(m, glm::vec2(scale.x, scale.y));
-		// 		text.draw_text(buf, m);
-		// 	}
-		// }
-
-		// {
-		// 	m_program.use();
-		// 	glBindVertexArray(m_vao);
-		// 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-		// 	// draw a line from margin_px to height - margin_px
-		// 	glm::vec2 start_px(margin_px, height - margin_px);
-		// 	glm::vec2 end_px(width - margin_px, height - margin_px);
-		// 	auto start_clipspace =
-		// 	  _viewport_matrix_inv * glm::vec3(start_px, 1.0);
-		// 	;
-		// 	auto end_clipspace = _viewport_matrix_inv * glm::vec3(end_px, 1.0);
-		// 	draw_line_clipspace(start_clipspace, end_clipspace);
-
-		// 	auto left_gs =
-		// 	  _view_matrix_inv *
-		// 	  (_viewport_matrix_inv * glm::vec3(margin_px, 0.0f, 1.0f));
-		// 	auto right_gs =
-		// 	  _view_matrix_inv *
-		// 	  (_viewport_matrix_inv * glm::vec3(width - margin_px, 0.0f, 1.0f));
-
-		// 	float start = ceilf(left_gs.x / tick_spacing) * tick_spacing;
-		// 	float end = ceilf(right_gs.x / tick_spacing) * tick_spacing;
-
-		// 	// Place a tick at every unit up the y axis
-		// 	for (float i = start; i < end; i += tick_spacing) {
-		// 		m_program.use();
-		// 		glBindVertexArray(m_vao);
-		// 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-		// 		auto tick_x_vpspace =
-		// 		  _viewport_matrix *
-		// 		  (_view_matrix * glm::vec3(static_cast<float>(i), 0.0f, 1.0f));
-		// 		auto tick_start = _viewport_matrix_inv *
-		// 		                  glm::vec3(tick_x_vpspace.x,
-		// 		                            height - (margin_px - TICKLEN),
-		// 		                            1);
-		// 		auto tick_end =
-		// 		  _viewport_matrix_inv *
-		// 		  glm::vec3(tick_x_vpspace.x, height - margin_px, 1);
-		// 		draw_line_clipspace(tick_start, tick_end);
-
-		// 		char buf[16];
-		// 		std::snprintf(buf, 15, "%f", static_cast<float>(i));
-
-		// 		// Glyphs should be 8*16 pixels
-		// 		glm::vec2 text_position(tick_x_vpspace.x,
-		// 		                        (height - margin_px) + TEXT_SPACING);
-		// 		glm::vec2 glyph_size(8.0f, 16.0f);
-
-		// 		auto text_position_tl =
-		// 		  _viewport_matrix_inv * glm::vec3(text_position, 1.0);
-		// 		auto text_position_tr =
-		// 		  _viewport_matrix_inv *
-		// 		  glm::vec3((text_position + glyph_size), 1.0);
-
-		// 		auto scale = text_position_tr - text_position_tl;
-
-		// 		glm::mat3x3 m(1.0);
-		// 		m = glm::translate(
-		// 		  m, glm::vec2(text_position_tl.x, text_position_tl.y));
-		// 		m = glm::scale(m, glm::vec2(scale.x, scale.y));
-		// 		text.draw_text(buf, m);
-		// 	}
-		// }
-
-		// m_program.use();
-		// glUniformMatrix3fv(
-		//   m_uniform_view_matrix, 1, GL_FALSE, glm::value_ptr(_view_matrix[0]));
-
-		// glBindVertexArray(m_plot_vao);
-		// glDrawArrays(GL_LINE_STRIP, 0, 1000);
 	}
 
 	glm::mat3x3 get_view_matrix() const
@@ -315,6 +171,16 @@ class GraphView
 	}
 
   private:
+
+    bool _hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br)
+	{
+		if (value.x < tl.x) return false;
+		if (value.x > br.x) return false;
+		if (value.y < tl.y) return false;
+		if (value.y > br.y) return false;
+		return true;
+	}
+
 	/**
 	 * @brief Converts a vector from viewport space (pixels w/ origin at TL) to
 	 * graph space.
@@ -372,16 +238,6 @@ class GraphView
 	// Plot renderer
 	GLuint _plot_vao;
 	GLuint _plot_vbo;
-	glm::vec2 _plot_data[1024];
-
-	// Program m_program;
-	// GLuint m_vao;
-	// GLuint m_vbo;
-	// glm::vec2 m_verticies[2];
-
-	// GLuint m_plot_vao, m_plot_vbo;
-	// std::array<glm::vec2, 1000> m_plot_verticies;
-	// GLint m_uniform_view_matrix;
 
 	const int GUTTER_SIZE_PX = 60;
 	const int TICKLEN = 10;

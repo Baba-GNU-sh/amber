@@ -118,7 +118,7 @@ void GraphView::_init_plot_buffers()
 
 	glGenBuffers(1, &_plot_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
-	glBufferData(GL_ARRAY_BUFFER,  sizeof(_plot_data), nullptr, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER,  sizeof(float) * 4 * 1024, nullptr, GL_STREAM_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
 	glEnableVertexAttribArray(0);
