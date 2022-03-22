@@ -22,6 +22,20 @@ struct GlyphData
 	GlyphVertex verts[4]; // Order: [TL, TR, BL, BR]
 };
 
+enum class LabelAlignment
+{
+	Left,
+	Right,
+	Center
+};
+
+enum class LabelAlignmentVertical
+{
+	Top,
+	Center,
+	Bottom
+};
+
 /**
  * @brief Stores and renders a graph with axes and zoom and pan mouse controls.
  */
@@ -212,7 +226,7 @@ class GraphView
 	void _init_plot_buffers();
 	void _draw_lines() const;
 	void _draw_labels() const;
-	void _draw_label(const std::string_view text, const glm::vec2 &pos, float size) const;
+	void _draw_label(const std::string_view text, const glm::vec2 &pos, float size, LabelAlignment align, LabelAlignmentVertical valign) const;
 	void _draw_glyph(char c, const glm::vec2 &pos, float height, GlyphData **buf) const;
 	void _draw_plot() const;
 	

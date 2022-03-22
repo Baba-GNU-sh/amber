@@ -233,7 +233,7 @@ void GraphView::_draw_labels() const
 
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(precision.y) << i;
-		_draw_label(ss.str(), point, 16);
+		_draw_label(ss.str(), point, 16, LabelAlignment::Right, LabelAlignmentVertical::Center);
 	}
 
 	// Draw the y axis ticks
@@ -249,14 +249,32 @@ void GraphView::_draw_labels() const
 
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(precision.x) << i;
-		_draw_label(ss.str(), point, 16);
+		_draw_label(ss.str(), point, 16, LabelAlignment::Center, LabelAlignmentVertical::Top);
 	}
 }
 
-void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, float size) const
+void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, float size, LabelAlignment align, LabelAlignmentVertical valign) const
 {
 	glm::vec2 offset = pos;
 	glm::vec2 delta = glm::vec2(size/2, 0);
+
+	if (align == LabelAlignment::Right)
+	{
+		offset -= delta * static_cast<float>(text.size());
+	}
+	else if (align == LabelAlignment::Center)
+	{
+		offset -= delta * static_cast<float>(text.size()) / 2.0f;
+	}
+
+	if (valign == LabelAlignmentVertical::Center)
+	{
+		offset -= glm::vec2(0, size/2);
+	}
+	else if (valign == LabelAlignmentVertical::Bottom)
+	{
+		offset -= glm::vec2(0, size);
+	}
 
 	GlyphData buffer[128];
 	GlyphData *bufptr = &buffer[0];
