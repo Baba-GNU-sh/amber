@@ -331,8 +331,9 @@ void GraphView::_draw_plot() const
 	glm::vec2 plot_data[1024];
 	for (int i = 0; i < 1024; i++)
 	{
-		plot_data[i].x = static_cast<float>(i)/100;
-		plot_data[i].y = sinf(static_cast<float>(i)/100);
+		const float x = static_cast<float>(i-512) / 100.0f;
+		plot_data[i].x = x;
+		plot_data[i].y = sinf(10.0f * x) * 1.0f/x;
 	}
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(plot_data), &plot_data);
