@@ -137,8 +137,7 @@ class GraphView
 	}
 
 	/**
-	 * @brief Updat the viewport matrix - this should only happen when the view
-	 * is resized.
+	 * @brief Update the matrix describing the transform from screen space to pixels.
 	 *
 	 * @param viewport_matrix The new value of the viewport matrix.
 	 */
@@ -148,12 +147,7 @@ class GraphView
 		_viewport_matrix_inv = glm::inverse(viewport_matrix);
 	}
 
-	void draw() const
-	{
-		_draw_lines();
-		_draw_labels();
-		_draw_plot();
-	}
+	void draw() const;
 
 	glm::mat3x3 get_view_matrix() const
 	{

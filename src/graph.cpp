@@ -124,6 +124,13 @@ void GraphView::_init_plot_buffers()
 	glEnableVertexAttribArray(0);
 }
 
+void GraphView::draw() const
+{
+	_draw_lines();
+	_draw_labels();
+	_draw_plot();
+}
+
 void GraphView::_draw_lines() const
 {
 	int offset = 0;
