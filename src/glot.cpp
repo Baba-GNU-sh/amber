@@ -43,14 +43,16 @@ class Window
 			throw std::runtime_error("Failed to initialize GLAD");
 		}
 
-		// Optimistically attempt to enable multisampling
-		glEnable(GL_MULTISAMPLE);
+		glDisable(GL_MULTISAMPLE);
 
 		// Depths test helps us with the rendering for a small perf penalty
 		glEnable(GL_DEPTH_TEST);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
+
+		// Disable vsync
+		glfwSwapInterval(0);
 
 		// Set the colour to be a nice dark green
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -71,8 +73,7 @@ class Window
 
 	void update_viewport_matrix(int width, int height)
 	{
-		auto vp_matrix =
-		  glm::scale(glm::mat3x3(1.0f), glm::vec2(width / 2, -height / 2));
+		auto vp_matrix = glm::scale(glm::mat3x3(1.0f), glm::vec2(width / 2, -height / 2));
 		vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
 
 		m_graph->update_viewport_matrix(vp_matrix);
@@ -104,7 +105,6 @@ class Window
 
 	void draw()
 	{
-		// Clear the buffer with a nice dark blue/green colour
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_graph->draw();
@@ -121,7 +121,7 @@ class Window
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin("Frame times");
+		ImGui::Begin("Debug Info");
 		ImGui::Text("Application average %.1f ms/frame (%.1f FPS)",
 		            1000.0f / ImGui::GetIO().Framerate,
 		            ImGui::GetIO().Framerate);
@@ -135,6 +135,23 @@ class Window
 
 		auto cursor_gs = m_graph->get_cursor_graphspace();
 		ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
+
+		if (ImGui::Checkbox("Enable VSync", &_enable_vsync))
+		{
+			if (_enable_vsync)
+				glfwSwapInterval( 1 );
+			else
+				glfwSwapInterval(0);
+		}
+
+		if (ImGui::Checkbox("Multisampling", &_enable_multisampling))
+		{
+			if (_enable_multisampling)
+				glEnable(GL_MULTISAMPLE);
+			else {
+				glDisable(GL_MULTISAMPLE);
+			}
+		}
 
 		ImGui::End();
 
@@ -206,6 +223,9 @@ class Window
 
 	GLFWwindow* m_window;
 	std::shared_ptr<GraphView> m_graph;
+
+	bool _enable_vsync = false;
+	bool _enable_multisampling = false;
 };
 
 void
