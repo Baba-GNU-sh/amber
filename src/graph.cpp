@@ -120,9 +120,9 @@ void GraphView::_init_glyph_buffers()
 	_glyph_shader = Program(shaders);
 
 	int width, height, nrChannels;
-	unsigned char *tex_data = stbi_load("font.tga", &width, &height, &nrChannels, 0);
-	if (!m_tex_data) {
-		throw std::runtime_error("Unable to load font map");
+	unsigned char *tex_data = stbi_load("font.png", &width, &height, &nrChannels, 0);
+	if (!tex_data) {
+		throw std::runtime_error("Unable to load font map: " + std::string(stbi_failure_reason()));
 	}
 
 	glGenTextures(1, &_glyph_texture);
