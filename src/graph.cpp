@@ -31,41 +31,6 @@ GraphView::GraphView()
 	// to the GPU, then two draw calls are made, one to render the lines,
 	// and one to render the glyphs.
 
-	glGenVertexArrays(1, &m_vao);
-	glBindVertexArray(m_vao);
-
-	glGenBuffers(1, &m_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-	glBufferData(
-	  GL_ARRAY_BUFFER, sizeof(m_verticies), m_verticies, GL_DYNAMIC_DRAW);
-
-	glVertexAttribPointer(
-	  0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// Generate buffers for the actual plot
-	glGenVertexArrays(1, &m_plot_vao);
-	glBindVertexArray(m_plot_vao);
-
-	glGenBuffers(1, &m_plot_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, m_plot_vbo);
-
-	for (int i = 0; i < m_plot_verticies.size(); i++) {
-		m_plot_verticies[i].x =
-		  2 * M_PI * static_cast<float>(i) / m_plot_verticies.size() - M_PI;
-		m_plot_verticies[i].y = std::sin(m_plot_verticies[i].x);
-	}
-
-	glBufferData(GL_ARRAY_BUFFER,
-	             sizeof(m_plot_verticies),
-	             m_plot_verticies.data(),
-	             GL_STATIC_DRAW);
-
-	glVertexAttribPointer(
-	  0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-	glEnableVertexAttribArray(0);
-
 	_init_line_buffers();
 	_init_glyph_buffers();
 	_init_plot_buffers();
@@ -73,8 +38,7 @@ GraphView::GraphView()
 
 GraphView::~GraphView()
 {
-	glDeleteBuffers(1, &m_vbo);
-	glDeleteVertexArrays(1, &m_vao);
+
 }
 
 void GraphView::_init_line_buffers()
@@ -342,7 +306,7 @@ void GraphView::_draw_plot() const
 
 std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() const
 {
-	const glm::vec2 MIN_TICK_SPACING_PX(100, 100);
+	const glm::vec2 MIN_TICK_SPACING_PX(80, 50);
 
 	// Calc the size of this vector in graph space (ignoring translation & sign)
 	const glm::vec2 min_tick_spacing_gs = glm::abs(
@@ -364,14 +328,14 @@ std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() cons
 	{
 		tick_spacing.x /= 2;
 		++precision.x;
-		minor_tick_spacing.x = tick_spacing.x / 10;
+		minor_tick_spacing.x = tick_spacing.x / 5;
 	}
 
 	if (scale.y < 0.5f)
 	{
 		tick_spacing.y /= 2;
 		++precision.y;
-		minor_tick_spacing.y = tick_spacing.y / 10;
+		minor_tick_spacing.y = tick_spacing.y / 5;
 	}
 
 	if (precision.x < 0) precision.x = 0;

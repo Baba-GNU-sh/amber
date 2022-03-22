@@ -28,8 +28,7 @@ class GraphView
 	 */
 	void set_size(int width, int height)
 	{
-		_size.x = width;
-		_size.y = height;
+		_size = glm::vec2(width, height);
 	}
 
 	/**
@@ -50,8 +49,7 @@ class GraphView
 	 */
 	void set_position(int x, int y)
 	{
-		_position.x = width;
-		_position.y = height;
+		_position = glm::vec2(x, y);
 	}
 
 	/**
@@ -317,28 +315,6 @@ class GraphView
 	}
 
   private:
-	void draw_line_clipspace(glm::vec2 start, glm::vec2 end)
-	{
-		m_verticies[0] = start;
-		m_verticies[1] = end;
-
-		// Replace the verticies to be the start and end of each line in the
-		// list, then draw it This is a really inefficient way of doing this!
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_verticies), m_verticies);
-		glDrawArrays(GL_LINES, 0, 2);
-	}
-
-	void draw_line(glm::mat3x3 viewmat, glm::vec2 start, glm::vec2 end)
-	{
-		m_verticies[0] = viewmat * glm::vec3(start, 1.0);
-		m_verticies[1] = viewmat * glm::vec3(end, 1.0);
-
-		// Replace the verticies to be the start and end of each line in the
-		// list, then draw it This is a really inefficient way of doing this!
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_verticies), m_verticies);
-		glDrawArrays(GL_LINES, 0, 2);
-	}
-
 	/**
 	 * @brief Converts a vector from viewport space (pixels w/ origin at TL) to
 	 * graph space.
@@ -398,18 +374,14 @@ class GraphView
 	GLuint _plot_vbo;
 	glm::vec2 _plot_data[1024];
 
-	Program m_program;
-	GLuint m_vao;
-	GLuint m_vbo;
-	glm::vec2 m_verticies[2];
+	// Program m_program;
+	// GLuint m_vao;
+	// GLuint m_vbo;
+	// glm::vec2 m_verticies[2];
 
-	GLuint m_plot_vao, m_plot_vbo;
-	std::array<glm::vec2, 1000> m_plot_verticies;
-	GLint m_uniform_view_matrix;
-
-	int width, height, nrChannels;
-	unsigned char* m_tex_data;
-	unsigned int texture;
+	// GLuint m_plot_vao, m_plot_vbo;
+	// std::array<glm::vec2, 1000> m_plot_verticies;
+	// GLint m_uniform_view_matrix;
 
 	const int GUTTER_SIZE_PX = 60;
 	const int TICKLEN = 10;
