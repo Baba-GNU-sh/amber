@@ -8,12 +8,6 @@
 #include <sstream>
 #include <iostream>
 
-struct GlyphData
-{
-	glm::vec2 verts[4]; // Order: [TL, TR, BL, BR]
-	glm::vec2 tex_coords[4]; // Same order as verts
-};
-
 GraphView::GraphView()
   : _position(0, 0)
   , _size(100, 100) // This is completely arbitrary
@@ -67,20 +61,36 @@ void GraphView::_init_glyph_buffers()
 	glGenBuffers(1, &_glyphbuf_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _glyphbuf_vbo);
 
+	glGenBuffers(1, &_glyphbuf_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glyphbuf_ebo);
+
+	const int sz = 6 * 128 / 4;
+	unsigned int indices[sz];
+	for (int i = 0, j=0; j < sz; i+=4, j+=6)
+	{
+		indices[j] = i;
+		indices[j+1] = i+1;
+		indices[j+2] = i+2;
+		indices[j+3] = i+1;
+		indices[j+4] = i+2;
+		indices[j+5] = i+3;
+	}
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); 
+
 	// A glyph is rendered as a quad so we only need 4 verts and 4 texture lookups
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GlyphData), nullptr, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 128 * sizeof(GlyphData), nullptr, GL_STREAM_DRAW);
 
 	// Define an attribute for the glyph verticies
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	// Define an attribute for the texture lookups
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)offsetof(GlyphData, tex_coords));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void*)offsetof(GlyphVertex, tex_coords));
 	glEnableVertexAttribArray(1);
 
 	std::vector<Shader> shaders{ Shader("char_vert.glsl", GL_VERTEX_SHADER),
-		                         Shader("char_frag.glsl",
-		                                GL_FRAGMENT_SHADER) };
+		                         Shader("char_frag.glsl", GL_FRAGMENT_SHADER) };
 	_glyph_shader = Program(shaders);
 
 	int width, height, nrChannels;
@@ -248,21 +258,38 @@ void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, f
 	glm::vec2 offset = pos;
 	glm::vec2 delta = glm::vec2(size/2, 0);
 
+	GlyphData buffer[128];
+	GlyphData *bufptr = &buffer[0];
+
 	for (auto c : text)
 	{
-		_draw_glyph(c, offset, size);
+		_draw_glyph(c, offset, size, &bufptr);
 		offset += delta;
 	}
+
+	std::size_t count = (bufptr - buffer);
+
+	glBindVertexArray(_glyphbuf_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _glyphbuf_vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphData) * count, buffer);
+
+	_glyph_shader.use();
+	int uniform_id = _glyph_shader.get_uniform_location("view_matrix");
+	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glyphbuf_ebo);
+	glDrawElements(GL_TRIANGLES, 6 * count, GL_UNSIGNED_INT, 0);
+	// glDrawArrays(GL_TRIANGLES, 0, 4 * (bufptr - buffer));
 }
 
-void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size) const
+void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size, GlyphData **buf) const
 {
 	const float WIDTH = size / 2;
-	GlyphData data;
-	data.verts[0] = pos;
-	data.verts[1] = pos + glm::vec2(WIDTH, 0.0f);
-	data.verts[2] = pos + glm::vec2(0.0f, size);
-	data.verts[3] = pos + glm::vec2(WIDTH, size);
+	GlyphData *data = *buf;
+	data->verts[0].vert = pos;
+	data->verts[1].vert = pos + glm::vec2(WIDTH, 0.0f);
+	data->verts[2].vert = pos + glm::vec2(0.0f, size);
+	data->verts[3].vert = pos + glm::vec2(WIDTH, size);
 
 	// Look up the texture coordinate for the character
 	const int COLS = 16;
@@ -274,20 +301,12 @@ void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size) const
 	const float ROW_STRIDE = 1.0f / ROWS;
 	const float GLYPH_HEIGHT = 1.0f / ROWS;
 
-	data.tex_coords[0] = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row);
-	data.tex_coords[1] = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row);
-	data.tex_coords[2] = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row + GLYPH_HEIGHT);
-	data.tex_coords[3] = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row + GLYPH_HEIGHT);
+	data->verts[0].tex_coords = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row);
+	data->verts[1].tex_coords = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row);
+	data->verts[2].tex_coords = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row + GLYPH_HEIGHT);
+	data->verts[3].tex_coords = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row + GLYPH_HEIGHT);
 
-	glBindVertexArray(_glyphbuf_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _glyphbuf_vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), &data);
-
-	_glyph_shader.use();
-	int uniform_id = _glyph_shader.get_uniform_location("view_matrix");
-	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
-	
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	*buf = data + 1;
 }
 
 void GraphView::_draw_plot() const

@@ -11,6 +11,17 @@
 // #include "font.hpp"
 #include <glm/glm.hpp>
 
+struct GlyphVertex
+{
+	glm::vec2 vert;
+	glm::vec2 tex_coords;
+};
+
+struct GlyphData
+{
+	GlyphVertex verts[4]; // Order: [TL, TR, BL, BR]
+};
+
 /**
  * @brief Stores and renders a graph with axes and zoom and pan mouse controls.
  */
@@ -202,7 +213,7 @@ class GraphView
 	void _draw_lines() const;
 	void _draw_labels() const;
 	void _draw_label(const std::string_view text, const glm::vec2 &pos, float size) const;
-	void _draw_glyph(char c, const glm::vec2 &pos, float height) const;
+	void _draw_glyph(char c, const glm::vec2 &pos, float height, GlyphData **buf) const;
 	void _draw_plot() const;
 	
 	std::tuple<glm::vec2, glm::vec2, glm::ivec2> _get_tick_spacing() const;
@@ -226,8 +237,10 @@ class GraphView
 	// Glyph renderer
 	GLuint _glyphbuf_vao;
 	GLuint _glyphbuf_vbo;
+	GLuint _glyphbuf_ebo;
 	Program _glyph_shader;
 	GLuint _glyph_texture;
+	int _glyph_offset = 0;
 
 	// Plot renderer
 	GLuint _plot_vao;
