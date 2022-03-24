@@ -12,6 +12,7 @@ GraphView::GraphView()
   : _position(0, 0)
   , _size(100, 100) // This is completely arbitrary
   , _dragging(false)
+  , _plot(_view_matrix)
 {
 	update_viewport_matrix(glm::mat3x3(1.0f));
 	_update_view_matrix(glm::mat3x3(1.0f));
@@ -27,7 +28,6 @@ GraphView::GraphView()
 
 	_init_line_buffers();
 	_init_glyph_buffers();
-	_init_plot_buffers();
 }
 
 GraphView::~GraphView()
@@ -121,24 +121,11 @@ void GraphView::_init_glyph_buffers()
 	stbi_image_free(tex_data);
 }
 
-void GraphView::_init_plot_buffers()
-{
-	glGenVertexArrays(1, &_plot_vao);
-	glBindVertexArray(_plot_vao);
-
-	glGenBuffers(1, &_plot_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
-	glBufferData(GL_ARRAY_BUFFER,  sizeof(float) * 4 * SAMPLE_COUNT, nullptr, GL_STREAM_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-	glEnableVertexAttribArray(0);
-}
-
 void GraphView::draw() const
 {
 	_draw_lines();
 	_draw_labels();
-	_draw_plot();
+	_plot.draw();
 }
 
 void GraphView::_draw_lines() const
@@ -325,28 +312,6 @@ void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size, GlyphData 
 	data->verts[3].tex_coords = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row + GLYPH_HEIGHT);
 
 	*buf = data + 1;
-}
-
-void GraphView::_draw_plot() const
-{
-	glBindVertexArray(_plot_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
-
-	_lines_shader.use();
-	int uniform_id = _lines_shader.get_uniform_location("view_matrix");
-	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_view_matrix[0]));
-	
-	auto time = glfwGetTime();
-	glm::vec2 plot_data[SAMPLE_COUNT];
-	for (int i = 0; i < SAMPLE_COUNT; i++)
-	{
-		const float x = static_cast<float>(i-SAMPLE_COUNT/2) / 400.0f;
-		plot_data[i].x = x;
-		plot_data[i].y = sinf(100.0f * x + time) * sinf(1.0f * x);
-	}
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(plot_data), &plot_data);
-	glDrawArrays(GL_LINE_STRIP, 0, SAMPLE_COUNT);
 }
 
 std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() const

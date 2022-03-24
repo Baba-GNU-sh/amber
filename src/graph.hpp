@@ -7,6 +7,7 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
 
 #include "shader_utils.hpp"
+#include "plot.hpp"
 
 // #include "font.hpp"
 #include <glm/glm.hpp>
@@ -223,12 +224,10 @@ class GraphView
 
 	void _init_line_buffers();
 	void _init_glyph_buffers();
-	void _init_plot_buffers();
 	void _draw_lines() const;
 	void _draw_labels() const;
 	void _draw_label(const std::string_view text, const glm::vec2 &pos, float size, LabelAlignment align, LabelAlignmentVertical valign) const;
 	void _draw_glyph(char c, const glm::vec2 &pos, float height, GlyphData **buf) const;
-	void _draw_plot() const;
 	
 	std::tuple<glm::vec2, glm::vec2, glm::ivec2> _get_tick_spacing() const;
 
@@ -256,11 +255,9 @@ class GraphView
 	GLuint _glyph_texture;
 	int _glyph_offset = 0;
 
-	// Plot renderer
-	GLuint _plot_vao;
-	GLuint _plot_vbo;
-
 	const int GUTTER_SIZE_PX = 60;
 	const int TICKLEN = 10;
 	const int SAMPLE_COUNT = 4096;
+
+	Plot _plot;
 };
