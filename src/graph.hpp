@@ -262,4 +262,5 @@ class GraphView
 
 	const int GUTTER_SIZE_PX = 60;
 	const int TICKLEN = 10;
+	const int SAMPLE_COUNT = 4096;
 };

@@ -128,7 +128,7 @@ void GraphView::_init_plot_buffers()
 
 	glGenBuffers(1, &_plot_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
-	glBufferData(GL_ARRAY_BUFFER,  sizeof(float) * 4 * 1024, nullptr, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER,  sizeof(float) * 4 * SAMPLE_COUNT, nullptr, GL_STREAM_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -335,17 +335,18 @@ void GraphView::_draw_plot() const
 	_lines_shader.use();
 	int uniform_id = _lines_shader.get_uniform_location("view_matrix");
 	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_view_matrix[0]));
-
-	glm::vec2 plot_data[1024];
-	for (int i = 0; i < 1024; i++)
+	
+	auto time = glfwGetTime();
+	glm::vec2 plot_data[SAMPLE_COUNT];
+	for (int i = 0; i < SAMPLE_COUNT; i++)
 	{
-		const float x = static_cast<float>(i-512) / 100.0f;
+		const float x = static_cast<float>(i-SAMPLE_COUNT/2) / 400.0f;
 		plot_data[i].x = x;
-		plot_data[i].y = sinf(10.0f * x) * 1.0f/x;
+		plot_data[i].y = sinf(100.0f * x + time) * sinf(1.0f * x);
 	}
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(plot_data), &plot_data);
-	glDrawArrays(GL_LINE_STRIP, 0, 1024);
+	glDrawArrays(GL_LINE_STRIP, 0, SAMPLE_COUNT);
 }
 
 std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() const
