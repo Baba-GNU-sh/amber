@@ -171,6 +171,7 @@ class GraphView
 	{
 		_viewport_matrix = viewport_matrix;
 		_viewport_matrix_inv = glm::inverse(viewport_matrix);
+		_plot.update_viewport_matrix(viewport_matrix);
 	}
 
 	void draw() const;
@@ -188,6 +189,16 @@ class GraphView
 	glm::vec2 get_cursor_graphspace() const
 	{
 		return screen2graph(_cursor);
+	}
+
+	void set_plot_thickness(int thickness_px)
+	{
+		_plot.set_line_thickness(thickness_px);
+	}
+
+	int *get_plot_thickness()
+	{
+		return _plot.get_line_thickness();
 	}
 
   private:

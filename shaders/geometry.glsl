@@ -22,21 +22,23 @@ the shade is given the locations of the two verticies either side of the pair as
 well. In this shader we use the value of the next vertex to render the bevel 
 correctly.
 
-In the case of the example line strip above, this shader will be run twice with
-the values of "gl_in" populated like so:
+In the case of the example line strip above, this shader will be run several 
+times with the values of "gl_in" populated like so:
 1. gl_in = [A, B, C, D]
 2. gl_in = [B, C, D, E]
-2. gl_in = [C, D, E, F]
-2. gl_in = [D, E, F, G]
+3. gl_in = [C, D, E, F]
+4. gl_in = [D, E, F, G]
 
 Note: that minmax is arranged in the same order.
 */
 
 // We need the resolution of the viewport in order to scale the line thickness
-uniform ivec2 viewport_res_px;
+uniform mat3 viewport_matrix;
+uniform mat3 viewport_matrix_inv;
+
 
 // This gives us the thickness of the line in pixels
-uniform float line_thickness_px;
+uniform int line_thickness_px;
 
 // Tell the shader we expect a line strip as primitives with adjacency info
 layout (lines_adjacency) in;
@@ -58,7 +60,8 @@ flat out vec4 fColor;
 // Define this if you want the shader to draw the 3 triangles that make up the
 // thicc line to be rendered using different colours. Otherwise it's drawn in
 // one solid colour.
-// #define MULTICOLOURED_LINE_SEGMENTS
+#define MULTICOLOURED_LINE_SEGMENTS
+uniform bool multicoloured_line_segments;
 
 // I can't beleive GLSL doesn't have a PI definition
 const float PI = 3.1415926535897932384626433832795;
@@ -96,13 +99,21 @@ float angle_between(vec4 line_start, vec4 line_end)
     return atan(delta.x, delta.y);
 }
 
-// Gets the vector which is normal to the line defined by two verticies
-// The vector has a magitude of 1px on the viewport
-vec4 get_line_normal(vec4 line_start, vec4 line_end)
+// Gets the normal (in viewport space) vector to a line
+// The normal has magnitude of 1px on the viewport
+vec2 get_line_normal(vec2 start, vec2 end)
 {
-    vec4 delta = line_start - line_end;
-    float angle = atan(delta.x * viewport_res_px.x, delta.y * viewport_res_px.y);
-    return vec4(cos(angle) / viewport_res_px.x, -sin(angle) / viewport_res_px.y, 0, 0);
+    vec3 start_vp = viewport_matrix * vec3(start, 1.0);
+    vec3 end_vp = viewport_matrix * vec3(end, 1.0);
+    vec2 delta_vp = start_vp.xy - end_vp.xy;
+
+    float angle = atan(delta_vp.x, delta_vp.y);
+    vec2 normal_vp = vec2(cos(angle), -sin(angle));
+
+    vec3 normal_start = viewport_matrix_inv * vec3(0.0, 0.0, 1.0);
+    vec3 normal_end = viewport_matrix_inv * vec3(normal_vp, 1.0);
+
+    return (normal_end - normal_start).xy;
 }
 
 // Draws the minmax box
@@ -126,7 +137,7 @@ void draw_minmax_box(vec4 line_start, vec4 line_end, vec2 minmax_start, vec2 min
 void draw_line_segment(vec4 line_start, vec4 line_end, vec4 next_start)
 {
      // Work out the angle between this point and the next point
-    vec4 normal_a = line_thickness_px * get_line_normal(line_end, line_start);
+    vec4 normal_a = vec4(0.5 * line_thickness_px * get_line_normal(line_end.xy, line_start.xy), 0.0, 0.0);
 
     // The bulk of the line segment is drawn using two triangles to make a
     // rectangle
@@ -142,34 +153,37 @@ void draw_line_segment(vec4 line_start, vec4 line_end, vec4 next_start)
     gl_Position = line_end + normal_a;
     EmitVertex();
 
-#ifdef MULTICOLOURED_LINE_SEGMENTS
     // Colour the upper triangle of the line segment green
-    fColor = GREEN;
-#endif
+    if (multicoloured_line_segments)
+    {
+        fColor = GREEN;
+    }
+
     // This is the bottom half of the segment
     gl_Position = line_end - normal_a;
     EmitVertex();
 
-#ifdef MULTICOLOURED_LINE_SEGMENTS
     // Colour the third triangle (the bevel bit) blue
-    fColor = BLUE;
-#endif
+    if (multicoloured_line_segments)
+    {
+        fColor = BLUE;
+    }
 
     float a = angle_between(line_end, line_start);
-    float b = angle_between(line_end, line_end);
+    float b = angle_between(next_start, line_end);
     float c = shortest_angular_distance(a, b);
 
-    vec4 normal_b = line_thickness_px * get_line_normal(line_end, line_end);
-    if (c > 0.0)
+    vec2 normal_b = 0.5 * line_thickness_px * get_line_normal(next_start.xy, line_end.xy);
+    if (c < 0.0)
     {
         // The next line bends down, draw the triangle above
-        gl_Position = line_end - normal_b;
+        gl_Position = line_end - vec4(normal_b, 0.0, 0.0);
         EmitVertex();
     }
     else
     {
         // The next line bends up, draw the triangle below
-        gl_Position = line_end + normal_b;
+        gl_Position = line_end + vec4(normal_b, 0.0, 0.0);
         EmitVertex();
     }
 

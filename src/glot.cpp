@@ -153,6 +153,8 @@ class Window
 			}
 		}
 
+		ImGui::SliderInt("Plot Thickness", m_graph->get_plot_thickness(), 1, 8);
+
 		ImGui::End();
 
 		ImGui::Render();
@@ -226,6 +228,7 @@ class Window
 
 	bool _enable_vsync = false;
 	bool _enable_multisampling = false;
+	int _plot_thickness = 1;
 };
 
 void

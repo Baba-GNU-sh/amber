@@ -14,7 +14,8 @@ struct Sample
 };
 
 Plot::Plot(const glm::mat3x3& view_matrix)
-  : _view_matrix(view_matrix)
+  : _view_matrix(view_matrix),
+    _line_thickness_px(2.0)
 {
 	glGenVertexArrays(1, &_plot_vao);
 	glBindVertexArray(_plot_vao);
@@ -58,15 +59,21 @@ Plot::draw() const
 	int uniform_id = _lines_shader.get_uniform_location("view_matrix");
 	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_view_matrix[0]));
 
-    uniform_id = _lines_shader.get_uniform_location("viewport_res_px");
-    // glm::ivec2 sz(1.0);
-    // glfwGetWindowSize(win, &sz.x, &sz.y);
-	glUniform2i(uniform_id, 800, 600);
+    uniform_id = _lines_shader.get_uniform_location("viewport_matrix");
+	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix[0]));
+
+    uniform_id = _lines_shader.get_uniform_location("viewport_matrix_inv");
+	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
 
     uniform_id = _lines_shader.get_uniform_location("line_thickness_px");
     // glm::ivec2 sz(1.0);
     // glfwGetWindowSize(win, &sz.x, &sz.y);
-	glUniform1f(uniform_id, 3.0f);
+	glUniform1i(uniform_id, _line_thickness_px);
+
+    uniform_id = _lines_shader.get_uniform_location("multicoloured_line_segments");
+    // glm::ivec2 sz(1.0);
+    // glfwGetWindowSize(win, &sz.x, &sz.y);
+	glUniform1i(uniform_id, false);
 
 	auto time = glfwGetTime();
 	Sample plot_data[SAMPLE_COUNT];
@@ -81,4 +88,20 @@ Plot::draw() const
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(plot_data), &plot_data);
 	glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, SAMPLE_COUNT);
+}
+
+void Plot::update_viewport_matrix(const glm::mat3x3 &viewport_matrix)
+{
+    _viewport_matrix = viewport_matrix;
+	_viewport_matrix_inv = glm::inverse(viewport_matrix);
+}
+
+void Plot::set_line_thickness(int line_thickness_px)
+{
+    _line_thickness_px = line_thickness_px;
+}
+
+int *Plot::get_line_thickness()
+{
+    return &_line_thickness_px;
 }
