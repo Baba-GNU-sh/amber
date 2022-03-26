@@ -9,8 +9,8 @@ struct Sample
 {
     float x;
     float y;
-    // float min;
-    // float max;
+    float min;
+    float max;
 };
 
 Plot::Plot(const glm::mat3x3& view_matrix)
@@ -28,10 +28,10 @@ Plot::Plot(const glm::mat3x3& view_matrix)
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Sample), (void*)0);
 	glEnableVertexAttribArray(0);
-    // glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(Sample), (void*)offsetof(Sample, min));
-	// glEnableVertexAttribArray(1);
-    // glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Sample), (void*)offsetof(Sample, max));
-	// glEnableVertexAttribArray(2);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(Sample), (void*)offsetof(Sample, min));
+	glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Sample), (void*)offsetof(Sample, max));
+	glEnableVertexAttribArray(2);
 
 	std::vector<Shader> shaders{
         Shader("vertex.glsl", GL_VERTEX_SHADER),
@@ -75,8 +75,8 @@ Plot::draw() const
 		const float x = static_cast<float>(i - SAMPLE_COUNT / 2) / 400.0f;
 		plot_data[i].x = x;
 		plot_data[i].y = sinf(100.0f * x + time) * sinf(1.0f * x);
-        // plot_data[i].min = plot_data[i].y;
-        // plot_data[i].max = plot_data[i].y;
+        plot_data[i].min = plot_data[i].y - .1;
+        plot_data[i].max = plot_data[i].y + .1;
 	}
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(plot_data), &plot_data);
