@@ -123,9 +123,9 @@ void GraphView::_init_glyph_buffers()
 
 void GraphView::draw() const
 {
+	_plot.draw();
 	_draw_lines();
 	_draw_labels();
-	_plot.draw();
 }
 
 void GraphView::_draw_lines() const
