@@ -119,7 +119,7 @@ vec2 get_line_normal(vec2 start, vec2 end)
 // Draws the minmax box
 void draw_minmax_box(vec4 line_start, vec4 line_end, vec2 minmax_start, vec2 minmax_end)
 {
-    fColor = vec4(minmax_colour, 1.0);
+    fColor = vec4(minmax_colour, 0.5);
     float depth = 0.1;
 
     gl_Position = vec4(line_start.x, minmax_start[0], MINMAX_BOX_Z, 1);

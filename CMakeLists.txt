@@ -18,13 +18,14 @@ find_package(imgui REQUIRED)
 find_package(spdlog REQUIRED)
 
 add_executable(glot
-	src/glot.cpp
 	src/bindings/imgui_impl_opengl3.cpp
 	src/bindings/imgui_impl_glfw.cpp
 	src/shader.cpp
 	src/shader_program.cpp
 	src/graph.cpp
-	src/plot.cpp)
+	src/plot.cpp
+	src/main.cpp
+)
 
 target_link_libraries(
 	glot
