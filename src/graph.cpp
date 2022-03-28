@@ -189,8 +189,8 @@ void GraphView::_draw_lines() const
 	draw_ticks(tick_spacing_minor, glm::vec2(-TICKLEN/2, 0), glm::vec2(0, TICKLEN/2));
 
 	for (int i = 0; i < offset; i++) {
-		ptr[i].x = roundf(ptr[i].x) + 0.5f;
-		ptr[i].y = roundf(ptr[i].y) + 0.5f;
+		ptr[i].x = roundf(ptr[i].x - 0.5f) + 0.5f;
+		ptr[i].y = roundf(ptr[i].y - 0.5f) + 0.5f;
 	}
 
 	// make sure to tell OpenGL we're done with the pointer
