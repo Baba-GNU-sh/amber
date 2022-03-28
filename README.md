@@ -14,6 +14,9 @@ GLot is designed to fill a hole that I have personally encountered so many times
 
 So far, GLot is far from complete. It's just an example project which I am using to test the graph renderer using OpenGL, and the best way to draw other UI elements such as menus and buttons, for which I am currently using imgui.
 
+## Eye Candy
+![screenshot](screenshot.png)
+
 ## Building
 Glot uses [Conan](http://conan.io/) to manage its dependencies, which makes it easier to build on Windows (and hopefully MacOS). So far, GLot has been tested on Ubuntu 20.04 and Windows 10, but it may well work on other distros and Windowses thanks to Conan.
 
@@ -41,9 +44,6 @@ Run GLot with:
 ```
 ./glot
 ```
-
-You should see something like this:
-![screenshot](screenshot.png)
 
 Use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
 
