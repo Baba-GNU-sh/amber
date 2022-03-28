@@ -237,8 +237,8 @@ class GraphView
 	void _init_glyph_buffers();
 	void _draw_lines() const;
 	void _draw_labels() const;
-	void _draw_label(const std::string_view text, const glm::vec2 &pos, float size, LabelAlignment align, LabelAlignmentVertical valign) const;
-	void _draw_glyph(char c, const glm::vec2 &pos, float height, GlyphData **buf) const;
+	void _draw_label(const std::string_view text, const glm::vec2 &pos, float height, float width, LabelAlignment align, LabelAlignmentVertical valign) const;
+	void _draw_glyph(char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const;
 	
 	std::tuple<glm::vec2, glm::vec2, glm::ivec2> _get_tick_spacing() const;
 
