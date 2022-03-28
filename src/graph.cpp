@@ -104,8 +104,8 @@ void GraphView::_init_glyph_buffers()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	// glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexImage2D(GL_TEXTURE_2D,
@@ -220,7 +220,7 @@ void GraphView::_draw_labels() const
 
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(precision.y) << i;
-		_draw_label(ss.str(), point, 16, LabelAlignment::Right, LabelAlignmentVertical::Center);
+		_draw_label(ss.str(), point, 18, LabelAlignment::Right, LabelAlignmentVertical::Center);
 	}
 
 	// Draw the y axis ticks
@@ -236,7 +236,7 @@ void GraphView::_draw_labels() const
 
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(precision.x) << i;
-		_draw_label(ss.str(), point, 16, LabelAlignment::Center, LabelAlignmentVertical::Top);
+		_draw_label(ss.str(), point, 18, LabelAlignment::Center, LabelAlignmentVertical::Top);
 	}
 }
 
@@ -265,6 +265,9 @@ void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, f
 
 	GlyphData buffer[128];
 	GlyphData *bufptr = &buffer[0];
+
+	offset.x = roundf(offset.x);
+	offset.y = roundf(offset.y);
 
 	for (auto c : text)
 	{
