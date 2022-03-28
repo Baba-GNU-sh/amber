@@ -129,7 +129,7 @@ class Window
 		            ImGui::GetIO().Framerate);
 
 		auto viewmat = m_graph->get_view_matrix();
-		ImGui::Text("ViewMat:");
+		ImGui::Text("View Matrix:");
 		for (int i = 0; i < 3; i++) {
 			ImGui::Text(
 			  "%f %f %f", viewmat[0][i], viewmat[1][i], viewmat[2][i]);
