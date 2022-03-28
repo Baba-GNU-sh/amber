@@ -29,6 +29,6 @@ class Plot
 	GLuint _plot_vao;
 	GLuint _plot_vbo;
 	Program _lines_shader;
-	const int SAMPLE_COUNT = 4096;
+	static constexpr int SAMPLE_COUNT = 4096;
 	int _line_thickness_px;
 };
