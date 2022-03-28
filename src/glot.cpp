@@ -43,13 +43,15 @@ class Window
 			throw std::runtime_error("Failed to initialize GLAD");
 		}
 
-		glDisable(GL_MULTISAMPLE);
+		glEnable(GL_MULTISAMPLE);
+		//glEnable(GL_LINE_SMOOTH);
+		glLineWidth(2.0f);
 
 		// Depths test helps us with the rendering for a small perf penalty
 		glEnable(GL_DEPTH_TEST);
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Disable vsync
 		glfwSwapInterval(0);
@@ -227,7 +229,7 @@ class Window
 	std::shared_ptr<GraphView> m_graph;
 
 	bool _enable_vsync = false;
-	bool _enable_multisampling = false;
+	bool _enable_multisampling = true;
 	int _plot_thickness = 1;
 };
 

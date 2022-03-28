@@ -188,6 +188,11 @@ void GraphView::_draw_lines() const
 	draw_ticks(tick_spacing_major, glm::vec2(-TICKLEN, 0), glm::vec2(0, TICKLEN));
 	draw_ticks(tick_spacing_minor, glm::vec2(-TICKLEN/2, 0), glm::vec2(0, TICKLEN/2));
 
+	for (int i = 0; i < offset; i++) {
+		ptr[i].x = roundf(ptr[i].x);
+		ptr[i].y = roundf(ptr[i].y);
+	}
+
 	// make sure to tell OpenGL we're done with the pointer
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 
