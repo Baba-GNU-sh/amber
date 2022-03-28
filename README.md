@@ -4,18 +4,21 @@
 > :warning: **This project is still in its feasibility phase, and thus is not much more than an experiment right now!**
 
 ## Intro
-GLot is (going to be) a GPU-accelerated, oscilloscope-like desktop application for Windows, Linux and Mac, used for displaying, logging, and exploring high-frequency signals (i.e. time series data) from arbitrary sources such as robots, servers, data loggers, sound cards, and microcontrollers.
+GLot is (going to be) an OpenGL oscilloscope-like desktop application for Windows, Linux and Mac, used for displaying, logging, and exploring high-frequency signals from arbitrary sources such as robots, servers, data loggers, sound cards, USB oscillioscopes, USB logic analyzers, and custom microcontrollers.
 
 Much like an oscilloscope, GLot will display these signals as a 2D graph view with time along the X axis, and signal value up the Y axis. GLot will provide intuitive controls for navigating the graph (e.g. scrolling around, zooming in and out on combined & individual axes, zooming in on specific events with a selection tool), and will be fast and responsive even when displaying very high frequency data. The graph display will be designed to give you as much information about the signal as possible at every zoom level without making any assumptions, for example, by showing average value + error bars when there is more than data point per pixel.
 
 Ultimately, data sources shall be provided via plugins, allowing users to easily get data from custom sources into GLot.
 
-GLot is designed to fill a hole that I have personally encountered so many times while working as an embedded software engineer: I can get data off my embedded device but have no decent way to view and explore it! There are alternatives (see the [Alternatives](#alternatives) section for a list), and while there are plenty of quality tools out there, I've found all of them to be lacking in at least one important manner.
+GLot is designed to fill a hole that I have personally encountered so many times while working as an embedded software engineer: I can get data off my embedded device but have no decent way to view and explore it! There are alternatives (see the [Alternatives](#alternatives) section for a list), and while there are plenty of quality tools out there, I've found all of them to be missing at least one important factor.
 
-So far, GLot is far from complete. It's just an example project which I am using to test the graph renderer using OpenGL, and the best way to draw other UI elements such as menus and buttons which is currently using imgui.
+So far, GLot is far from complete. It's just an example project which I am using to test the graph renderer using OpenGL, and the best way to draw other UI elements such as menus and buttons, for which I am currently using imgui.
+
+## Eye Candy
+![screenshot](screenshot.png)
 
 ## Building
-Glot uses [Conan](http://conan.io/) to manage its dependencies, which makes it easier to build on Windows (and hopefully MacOS). So far, GLot has been tested on Ubuntu 20.04 and Windows 10, but it may well work on other Ubuntu/Debian versions and Windowses thanks to Conan.
+Glot uses [Conan](http://conan.io/) to manage its dependencies, which makes it easier to build on Windows (and hopefully MacOS). So far, GLot has been tested on Ubuntu 20.04 and Windows 10, but it may well work on other distros and Windowses thanks to Conan.
 
 ### Ubuntu 20.04
 Install python, then install conan:
@@ -41,9 +44,6 @@ Run GLot with:
 ```
 ./glot
 ```
-
-You should see something like this:
-![screenshot](screenshot.png)
 
 Use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
 
@@ -94,4 +94,4 @@ ln -s build/compile_commands.json .
 ```
 
 ## Fonts
-Font is `/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf`
+GLot uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in `font.png`.

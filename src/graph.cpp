@@ -104,8 +104,8 @@ void GraphView::_init_glyph_buffers()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	// glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexImage2D(GL_TEXTURE_2D,
@@ -123,9 +123,9 @@ void GraphView::_init_glyph_buffers()
 
 void GraphView::draw() const
 {
+	_plot.draw();
 	_draw_lines();
 	_draw_labels();
-	_plot.draw();
 }
 
 void GraphView::_draw_lines() const
@@ -188,6 +188,13 @@ void GraphView::_draw_lines() const
 	draw_ticks(tick_spacing_major, glm::vec2(-TICKLEN, 0), glm::vec2(0, TICKLEN));
 	draw_ticks(tick_spacing_minor, glm::vec2(-TICKLEN/2, 0), glm::vec2(0, TICKLEN/2));
 
+	auto line_round = [](float value) { return roundf(value - 0.5f) + 0.5f; };
+
+	for (int i = 0; i < offset; i++) {
+		ptr[i].x = line_round(ptr[i].x);
+		ptr[i].y = line_round(ptr[i].y);
+	}
+
 	// make sure to tell OpenGL we're done with the pointer
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 
@@ -220,7 +227,7 @@ void GraphView::_draw_labels() const
 
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(precision.y) << i;
-		_draw_label(ss.str(), point, 16, LabelAlignment::Right, LabelAlignmentVertical::Center);
+		_draw_label(ss.str(), point, 18, 7, LabelAlignment::Right, LabelAlignmentVertical::Center);
 	}
 
 	// Draw the y axis ticks
@@ -236,14 +243,14 @@ void GraphView::_draw_labels() const
 
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(precision.x) << i;
-		_draw_label(ss.str(), point, 16, LabelAlignment::Center, LabelAlignmentVertical::Top);
+		_draw_label(ss.str(), point, 18, 7, LabelAlignment::Center, LabelAlignmentVertical::Top);
 	}
 }
 
-void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, float size, LabelAlignment align, LabelAlignmentVertical valign) const
+void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, float height, float width, LabelAlignment align, LabelAlignmentVertical valign) const
 {
 	glm::vec2 offset = pos;
-	glm::vec2 delta = glm::vec2(size/2, 0);
+	glm::vec2 delta = glm::vec2(width, 0);
 
 	if (align == LabelAlignment::Right)
 	{
@@ -256,19 +263,22 @@ void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, f
 
 	if (valign == LabelAlignmentVertical::Center)
 	{
-		offset -= glm::vec2(0, size/2);
+		offset -= glm::vec2(0, width);
 	}
 	else if (valign == LabelAlignmentVertical::Bottom)
 	{
-		offset -= glm::vec2(0, size);
+		offset -= glm::vec2(0, height);
 	}
 
 	GlyphData buffer[128];
 	GlyphData *bufptr = &buffer[0];
 
+	offset.x = roundf(offset.x);
+	offset.y = roundf(offset.y);
+
 	for (auto c : text)
 	{
-		_draw_glyph(c, offset, size, &bufptr);
+		_draw_glyph(c, offset, height, width, &bufptr);
 		offset += delta;
 	}
 
@@ -287,14 +297,13 @@ void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, f
 	// glDrawArrays(GL_TRIANGLES, 0, 4 * (bufptr - buffer));
 }
 
-void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size, GlyphData **buf) const
+void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const
 {
-	const float WIDTH = size / 2;
 	GlyphData *data = *buf;
 	data->verts[0].vert = pos;
-	data->verts[1].vert = pos + glm::vec2(WIDTH, 0.0f);
-	data->verts[2].vert = pos + glm::vec2(0.0f, size);
-	data->verts[3].vert = pos + glm::vec2(WIDTH, size);
+	data->verts[1].vert = pos + glm::vec2(width, 0.0f);
+	data->verts[2].vert = pos + glm::vec2(0.0f, height);
+	data->verts[3].vert = pos + glm::vec2(width, height);
 
 	// Look up the texture coordinate for the character
 	const int COLS = 16;
@@ -302,7 +311,7 @@ void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float size, GlyphData 
 	int col = c % COLS;
 	int row = c / COLS;
 	const float COL_STRIDE = 1.0f / COLS;
-	const float GLYPH_WIDTH = 0.5f / COLS;
+	const float GLYPH_WIDTH = (width / height) / COLS;
 	const float ROW_STRIDE = 1.0f / ROWS;
 	const float GLYPH_HEIGHT = 1.0f / ROWS;
 
