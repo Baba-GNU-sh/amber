@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "resources.hpp"
+
 GraphView::GraphView()
   : _position(0, 0)
   , _size(100, 100) // This is completely arbitrary
@@ -47,8 +49,8 @@ void GraphView::_init_line_buffers()
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	std::vector<Shader> shaders{ Shader("simple_vertex.glsl", GL_VERTEX_SHADER),
-		                         Shader("simple_fragment.glsl",
+	std::vector<Shader> shaders{ Shader(Resources::find_shader("line/vertex.glsl"), GL_VERTEX_SHADER),
+		                         Shader(Resources::find_shader("line/fragment.glsl"),
 		                                GL_FRAGMENT_SHADER) };
 	_lines_shader = Program(shaders);
 }
@@ -89,12 +91,12 @@ void GraphView::_init_glyph_buffers()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void*)offsetof(GlyphVertex, tex_coords));
 	glEnableVertexAttribArray(1);
 
-	std::vector<Shader> shaders{ Shader("char_vert.glsl", GL_VERTEX_SHADER),
-		                         Shader("char_frag.glsl", GL_FRAGMENT_SHADER) };
+	std::vector<Shader> shaders{ Shader(Resources::find_shader("glyph/vertex.glsl"), GL_VERTEX_SHADER),
+		                         Shader(Resources::find_shader("glyph/fragment.glsl"), GL_FRAGMENT_SHADER) };
 	_glyph_shader = Program(shaders);
 
 	int width, height, nrChannels;
-	unsigned char *tex_data = stbi_load("font.png", &width, &height, &nrChannels, 0);
+	unsigned char *tex_data = stbi_load(Resources::find_font("proggy_clean.png").c_str(), &width, &height, &nrChannels, 0);
 	if (!tex_data) {
 		throw std::runtime_error("Unable to load font map: " + std::string(stbi_failure_reason()));
 	}

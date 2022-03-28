@@ -20,6 +20,8 @@
 
 #include "graph.hpp"
 
+#include "spdlog/spdlog.h"
+
 class Window
 {
   public:

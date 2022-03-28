@@ -5,6 +5,7 @@ glad/0.1.34
 boost/1.78.0
 gtest/cci.20210126
 imgui/1.87
+spdlog/1.9.2
 
 freetype/2.11.1
 

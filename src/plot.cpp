@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "resources.hpp"
+
 struct Sample
 {
     float x;
@@ -37,9 +39,9 @@ Plot::Plot(const glm::mat3x3& view_matrix)
 	glEnableVertexAttribArray(2);
 
 	std::vector<Shader> shaders{
-        Shader("vertex.glsl", GL_VERTEX_SHADER),
-        Shader("fragment.glsl", GL_FRAGMENT_SHADER),
-        Shader("geometry.glsl", GL_GEOMETRY_SHADER)
+        Shader(Resources::find_shader("plot/vertex.glsl"), GL_VERTEX_SHADER),
+        Shader(Resources::find_shader("plot/fragment.glsl"), GL_FRAGMENT_SHADER),
+        Shader(Resources::find_shader("plot/geometry.glsl"), GL_GEOMETRY_SHADER)
     };
 
 	_lines_shader = Program(shaders);
