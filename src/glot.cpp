@@ -45,7 +45,7 @@ class Window
 
 		glEnable(GL_MULTISAMPLE);
 		//glEnable(GL_LINE_SMOOTH);
-		glLineWidth(2.0f);
+		glLineWidth(1.0f);
 
 		// Depths test helps us with the rendering for a small perf penalty
 		glEnable(GL_DEPTH_TEST);

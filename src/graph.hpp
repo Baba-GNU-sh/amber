@@ -267,7 +267,7 @@ class GraphView
 	int _glyph_offset = 0;
 
 	const int GUTTER_SIZE_PX = 60;
-	const int TICKLEN = 10;
+	const int TICKLEN = 8;
 	const int SAMPLE_COUNT = 4096;
 
 	Plot _plot;
