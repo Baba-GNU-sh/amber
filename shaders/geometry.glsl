@@ -35,7 +35,8 @@ Note: that minmax is arranged in the same order.
 // We need the resolution of the viewport in order to scale the line thickness
 uniform mat3 viewport_matrix;
 uniform mat3 viewport_matrix_inv;
-
+uniform vec3 plot_colour;
+uniform vec3 minmax_colour;
 
 // This gives us the thickness of the line in pixels
 uniform int line_thickness_px;
@@ -60,7 +61,6 @@ flat out vec4 fColor;
 // Define this if you want the shader to draw the 3 triangles that make up the
 // thicc line to be rendered using different colours. Otherwise it's drawn in
 // one solid colour.
-#define MULTICOLOURED_LINE_SEGMENTS
 uniform bool multicoloured_line_segments;
 
 // I can't beleive GLSL doesn't have a PI definition
@@ -119,7 +119,7 @@ vec2 get_line_normal(vec2 start, vec2 end)
 // Draws the minmax box
 void draw_minmax_box(vec4 line_start, vec4 line_end, vec2 minmax_start, vec2 minmax_end)
 {
-    fColor = WHITE;
+    fColor = vec4(minmax_colour, 1.0);
     float depth = 0.1;
 
     gl_Position = vec4(line_start.x, minmax_start[0], MINMAX_BOX_Z, 1);
@@ -142,8 +142,8 @@ void draw_line_segment(vec4 line_start, vec4 line_end, vec4 next_start)
     // The bulk of the line segment is drawn using two triangles to make a
     // rectangle
 
-    // Always set the colour to orange to begin with
-    fColor = ORANGE;
+    // If multicoloured line segments are enabled, Always set the colour to orange to begin with
+    fColor = multicoloured_line_segments? ORANGE : vec4(plot_colour, 1.0);
 
     // Emit the three verticies that make up the first triangle
     gl_Position = line_start + normal_a;
@@ -154,20 +154,14 @@ void draw_line_segment(vec4 line_start, vec4 line_end, vec4 next_start)
     EmitVertex();
 
     // Colour the upper triangle of the line segment green
-    if (multicoloured_line_segments)
-    {
-        fColor = GREEN;
-    }
+    fColor = multicoloured_line_segments? GREEN : vec4(plot_colour, 1.0);
 
     // This is the bottom half of the segment
     gl_Position = line_end - normal_a;
     EmitVertex();
 
     // Colour the third triangle (the bevel bit) blue
-    if (multicoloured_line_segments)
-    {
-        fColor = BLUE;
-    }
+    fColor = multicoloured_line_segments? BLUE : vec4(plot_colour, 1.0);
 
     float a = angle_between(line_end, line_start);
     float b = angle_between(next_start, line_end);

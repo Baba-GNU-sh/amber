@@ -155,6 +155,12 @@ class Window
 
 		ImGui::SliderInt("Plot Thickness", m_graph->get_plot_thickness(), 1, 8);
 
+		auto *colour = m_graph->get_plot_colour();
+		ImGui::ColorEdit3("Plot Colour", &(colour->x));
+
+		colour = m_graph->get_minmax_colour();
+		ImGui::ColorEdit3("MinMax Colour", &(colour->x));
+
 		ImGui::End();
 
 		ImGui::Render();

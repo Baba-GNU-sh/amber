@@ -15,7 +15,9 @@ struct Sample
 
 Plot::Plot(const glm::mat3x3& view_matrix)
   : _view_matrix(view_matrix),
-    _line_thickness_px(2.0)
+    _line_thickness_px(2.0),
+	_plot_colour(1.0f, 0.5f, 0.2f),
+	_minmax_colour(0.5f, 0.5f, 0.5f)
 {
 	glGenVertexArrays(1, &_plot_vao);
 	glBindVertexArray(_plot_vao);
@@ -75,6 +77,11 @@ Plot::draw() const
     // glfwGetWindowSize(win, &sz.x, &sz.y);
 	glUniform1i(uniform_id, false);
 
+	uniform_id = _lines_shader.get_uniform_location("plot_colour");
+	glUniform3f(uniform_id, _plot_colour.r, _plot_colour.g, _plot_colour.b);
+	uniform_id = _lines_shader.get_uniform_location("minmax_colour");
+	glUniform3f(uniform_id, _minmax_colour.r, _minmax_colour.g, _minmax_colour.b);
+
 	auto time = glfwGetTime();
 	Sample plot_data[SAMPLE_COUNT];
 	for (int i = 0; i < SAMPLE_COUNT; i++)
@@ -96,12 +103,17 @@ void Plot::update_viewport_matrix(const glm::mat3x3 &viewport_matrix)
 	_viewport_matrix_inv = glm::inverse(viewport_matrix);
 }
 
-void Plot::set_line_thickness(int line_thickness_px)
-{
-    _line_thickness_px = line_thickness_px;
-}
-
 int *Plot::get_line_thickness()
 {
     return &_line_thickness_px;
+}
+
+glm::vec3 *Plot::get_plot_colour()
+{
+	return &_plot_colour;
+}
+
+glm::vec3 *Plot::get_minmax_colour()
+{
+	return &_minmax_colour;
 }

@@ -191,14 +191,19 @@ class GraphView
 		return screen2graph(_cursor);
 	}
 
-	void set_plot_thickness(int thickness_px)
-	{
-		_plot.set_line_thickness(thickness_px);
-	}
-
 	int *get_plot_thickness()
 	{
 		return _plot.get_line_thickness();
+	}
+
+	glm::vec3 *get_plot_colour()
+	{
+		return _plot.get_plot_colour();
+	}
+
+	glm::vec3 *get_minmax_colour()
+	{
+		return _plot.get_minmax_colour();
 	}
 
   private:

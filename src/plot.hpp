@@ -19,8 +19,10 @@ class Plot
 	 */
 	void update_viewport_matrix(const glm::mat3x3& viewport_matrix);
 
-	void set_line_thickness(int line_thickness_px);
 	int *get_line_thickness();
+
+	glm::vec3 *get_plot_colour();
+	glm::vec3 *get_minmax_colour();
 
   private:
     const glm::mat3x3 &_view_matrix;
@@ -31,4 +33,6 @@ class Plot
 	Program _lines_shader;
 	const int SAMPLE_COUNT = 4096;
 	int _line_thickness_px;
+	glm::vec3 _plot_colour;
+	glm::vec3 _minmax_colour;
 };
