@@ -24,12 +24,11 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    spdlog::info("Initialization GLot");
+    spdlog::info("Initializing...");
 
     try
     {
         Window win;
-
         spdlog::info("Initialization OK: Spinning forever");
         win.spin();
     }
