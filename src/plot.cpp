@@ -70,14 +70,10 @@ Plot::draw() const
 	glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
 
     uniform_id = _lines_shader.get_uniform_location("line_thickness_px");
-    // glm::ivec2 sz(1.0);
-    // glfwGetWindowSize(win, &sz.x, &sz.y);
 	glUniform1i(uniform_id, _line_thickness_px);
 
-    uniform_id = _lines_shader.get_uniform_location("multicoloured_line_segments");
-    // glm::ivec2 sz(1.0);
-    // glfwGetWindowSize(win, &sz.x, &sz.y);
-	glUniform1i(uniform_id, false);
+    uniform_id = _lines_shader.get_uniform_location("show_line_segments");
+	glUniform1i(uniform_id, _show_line_segments);
 
 	uniform_id = _lines_shader.get_uniform_location("plot_colour");
 	glUniform3f(uniform_id, _plot_colour.r, _plot_colour.g, _plot_colour.b);
@@ -118,4 +114,9 @@ glm::vec3 *Plot::get_plot_colour()
 glm::vec3 *Plot::get_minmax_colour()
 {
 	return &_minmax_colour;
+}
+
+bool *Plot::get_show_line_segments()
+{
+	return &_show_line_segments;
 }

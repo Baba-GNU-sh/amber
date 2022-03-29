@@ -27,7 +27,7 @@
 class Window
 {
   public:
-    Window() : _bgcolour(0.2f, 0.2f, 0.2f)
+    Window() : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT)
     {
         m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLot", NULL, NULL);
         if (!m_window)
@@ -133,45 +133,65 @@ class Window
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Info");
+        ImGui::Begin("Info", 0,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
+        ImGui::SetWindowPos(ImVec2(_win_size.x - ImGui::GetWindowWidth() - 10, 0), true);
 
-        ImGui::Text("Use the right mouse button to pan");
-        ImGui::Text("Use the scroll wheel to zoom");
-        ImGui::Text("Try scrolling in one of the gutters");
-
-        ImGui::Text("Perf: %.1f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-        auto viewmat = m_graph->get_view_matrix();
-        ImGui::Text("View Matrix:");
-        for (int i = 0; i < 3; i++)
+        if (ImGui::CollapsingHeader("Help", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::Text("%f %f %f", viewmat[0][i], viewmat[1][i], viewmat[2][i]);
+            ImGui::BulletText("Left mouse + drag to pan");
+            ImGui::BulletText("Scroll to zoom");
+            ImGui::BulletText("Scroll on gutters to zoom individual axes");
         }
 
-        auto cursor_gs = m_graph->get_cursor_graphspace();
-        ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
-
-        if (ImGui::Checkbox("Enable VSync", &_enable_vsync))
+        if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            _update_vsync();
+            ImGui::Text("%.1f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+            auto viewmat = m_graph->get_view_matrix();
+            ImGui::Text("View Matrix:");
+            for (int i = 0; i < 3; i++)
+            {
+                ImGui::Text("%f %f %f", viewmat[0][i], viewmat[1][i], viewmat[2][i]);
+            }
+
+            auto cursor_gs = m_graph->get_cursor_graphspace();
+            ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
         }
 
-        if (ImGui::Checkbox("Multisampling", &_enable_multisampling))
+        if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            _update_multisampling();
+            if (ImGui::Checkbox("Enable VSync", &_enable_vsync))
+            {
+                _update_vsync();
+            }
+
+            if (ImGui::Checkbox("Multisampling", &_enable_multisampling))
+            {
+                _update_multisampling();
+            }
+
+            if (ImGui::ColorEdit3("BG Colour", &(_bgcolour.x)))
+            {
+                _update_bgcolour();
+            }
+
+            ImGui::SliderInt("Line Width", m_graph->get_plot_thickness(), 1, 8);
+
+            auto *colour = m_graph->get_plot_colour();
+            ImGui::ColorEdit3("Line Colour", &(colour->x));
+
+            ImGui::Checkbox("Show Line Segments", m_graph->get_show_line_segments());
+
+            colour = m_graph->get_minmax_colour();
+            ImGui::ColorEdit3("MinMax Colour", &(colour->x));
         }
 
-        ImGui::SliderInt("Plot Width", m_graph->get_plot_thickness(), 1, 8);
+        ImGui::Separator();
 
-        auto *colour = m_graph->get_plot_colour();
-        ImGui::ColorEdit3("Plot Colour", &(colour->x));
-
-        colour = m_graph->get_minmax_colour();
-        ImGui::ColorEdit3("MinMax Colour", &(colour->x));
-
-        if (ImGui::ColorEdit3("BG Colour", &(_bgcolour.x)))
+        if (ImGui::Button("Close GLot"))
         {
-            _update_bgcolour();
+            glfwSetWindowShouldClose(m_window, GL_TRUE);
         }
 
         ImGui::End();
@@ -184,6 +204,8 @@ class Window
         spdlog::info("Window resized: {}x{}px", width, height);
         glViewport(0, 0, width, height);
         Window *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
+
+        win->_win_size = glm::ivec2(width, height);
 
         // Update the graph to fill the screen
         win->m_graph->set_size(width, height);
@@ -221,5 +243,6 @@ class Window
 
     bool _enable_vsync = true;
     bool _enable_multisampling = true;
+    glm::ivec2 _win_size;
     glm::vec3 _bgcolour;
 };

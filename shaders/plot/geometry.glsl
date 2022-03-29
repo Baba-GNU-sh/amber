@@ -61,7 +61,7 @@ flat out vec4 fColor;
 // Define this if you want the shader to draw the 3 triangles that make up the
 // thicc line to be rendered using different colours. Otherwise it's drawn in
 // one solid colour.
-uniform bool multicoloured_line_segments;
+uniform bool show_line_segments;
 
 // I can't beleive GLSL doesn't have a PI definition
 const float PI = 3.1415926535897932384626433832795;
@@ -143,7 +143,7 @@ void draw_line_segment(vec4 line_start, vec4 line_end, vec4 next_start)
     // rectangle
 
     // If multicoloured line segments are enabled, Always set the colour to orange to begin with
-    fColor = multicoloured_line_segments? ORANGE : vec4(plot_colour, 1.0);
+    fColor = show_line_segments? ORANGE : vec4(plot_colour, 1.0);
 
     // Emit the three verticies that make up the first triangle
     gl_Position = line_start + normal_a;
@@ -154,14 +154,14 @@ void draw_line_segment(vec4 line_start, vec4 line_end, vec4 next_start)
     EmitVertex();
 
     // Colour the upper triangle of the line segment green
-    fColor = multicoloured_line_segments? GREEN : vec4(plot_colour, 1.0);
+    fColor = show_line_segments? GREEN : vec4(plot_colour, 1.0);
 
     // This is the bottom half of the segment
     gl_Position = line_end - normal_a;
     EmitVertex();
 
     // Colour the third triangle (the bevel bit) blue
-    fColor = multicoloured_line_segments? BLUE : vec4(plot_colour, 1.0);
+    fColor = show_line_segments? BLUE : vec4(plot_colour, 1.0);
 
     float a = angle_between(line_end, line_start);
     float b = angle_between(next_start, line_end);

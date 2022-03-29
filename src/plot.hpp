@@ -20,9 +20,9 @@ class Plot
 	void update_viewport_matrix(const glm::mat3x3& viewport_matrix);
 
 	int *get_line_thickness();
-
 	glm::vec3 *get_plot_colour();
 	glm::vec3 *get_minmax_colour();
+	bool *get_show_line_segments();
 
   private:
     const glm::mat3x3 &_view_matrix;
@@ -35,4 +35,5 @@ class Plot
 	int _line_thickness_px;
 	glm::vec3 _plot_colour;
 	glm::vec3 _minmax_colour;
+	bool _show_line_segments = false;
 };

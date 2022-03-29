@@ -98,11 +98,11 @@ class GraphView
     {
         (void)mods;
 
-        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         {
             _dragging = true;
         }
-        else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+        else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
         {
             _dragging = false;
         }
@@ -205,6 +205,11 @@ class GraphView
     glm::vec3 *get_minmax_colour()
     {
         return _plot.get_minmax_colour();
+    }
+
+    bool *get_show_line_segments()
+    {
+        return _plot.get_show_line_segments();
     }
 
   private:
