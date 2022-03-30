@@ -16,6 +16,7 @@ find_package(glad REQUIRED)
 find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(audiofile REQUIRED)
 
 add_executable(glot
 	src/bindings/imgui_impl_opengl3.cpp
@@ -33,7 +34,9 @@ target_link_libraries(
 	glad::glad
 	glm::glm
 	imgui::imgui
-	spdlog::spdlog)
+	spdlog::spdlog
+	audiofile::audiofile
+)
 
 # Copy the shaders over to the build dir
 configure_file(shaders/plot/vertex.glsl plot/vertex.glsl COPYONLY)
@@ -46,5 +49,7 @@ configure_file(shaders/line/fragment.glsl line/fragment.glsl COPYONLY)
 configure_file(shaders/glyph/vertex.glsl glyph/vertex.glsl COPYONLY)
 configure_file(shaders/glyph/fragment.glsl glyph/fragment.glsl COPYONLY)
 configure_file(fonts/proggy_clean.png fonts/proggy_clean.png COPYONLY)
+
+configure_file(audio/CantinaBand60.wav audio/CantinaBand60.wav COPYONLY)
 
 add_subdirectory(src/fontgen)

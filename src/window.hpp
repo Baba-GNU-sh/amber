@@ -24,10 +24,12 @@
 
 #include "spdlog/spdlog.h"
 
+#include "database.hpp"
+
 class Window
 {
   public:
-    Window() : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT)
+    Window(const Database &db) : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db)
     {
         m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLot", NULL, NULL);
         if (!m_window)
@@ -69,6 +71,7 @@ class Window
         _update_bgcolour();
 
         m_graph = std::make_shared<GraphView>();
+        m_graph->set_database(_database);
         m_graph->set_size(SCR_WIDTH, SCR_HEIGHT);
 
         update_viewport_matrix(SCR_WIDTH, SCR_HEIGHT);
@@ -133,9 +136,24 @@ class Window
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        ImVec2 menubar_size;
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Close"))
+                {
+                    glfwSetWindowShouldClose(m_window, GL_TRUE);
+                }
+                ImGui::EndMenu();
+            }
+            menubar_size = ImGui::GetWindowSize();
+            ImGui::EndMainMenuBar();
+        }
+
         ImGui::Begin("Info", 0,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
-        ImGui::SetWindowPos(ImVec2(_win_size.x - ImGui::GetWindowWidth() - 10, 0), true);
+        ImGui::SetWindowPos(ImVec2(_win_size.x - ImGui::GetWindowWidth() - 10, menubar_size.y), true);
 
         if (ImGui::CollapsingHeader("Help", ImGuiTreeNodeFlags_DefaultOpen))
         {
@@ -176,7 +194,7 @@ class Window
                 _update_bgcolour();
             }
 
-            ImGui::SliderInt("Line Width", m_graph->get_plot_thickness(), 1, 8);
+            ImGui::SliderInt("Line Width", m_graph->get_plot_thickness(), 1, 32);
 
             auto *colour = m_graph->get_plot_colour();
             ImGui::ColorEdit3("Line Colour", &(colour->x));
@@ -188,14 +206,6 @@ class Window
         }
 
         ImGui::Separator();
-
-        if (ImGui::Button("Close GLot"))
-        {
-            glfwSetWindowShouldClose(m_window, GL_TRUE);
-        }
-
-        ImGui::End();
-
         ImGui::Render();
     }
 
@@ -245,4 +255,6 @@ class Window
     bool _enable_multisampling = true;
     glm::ivec2 _win_size;
     glm::vec3 _bgcolour;
+
+    const Database _database;
 };

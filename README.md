@@ -96,3 +96,6 @@ ln -s build/compile_commands.json .
 
 ## Fonts
 GLot uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in `font.png`.
+
+## Audio
+Sample audio downloaded from https://www2.cs.uic.edu/~i101/SoundFiles/

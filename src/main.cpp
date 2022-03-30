@@ -3,7 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
+#include "audiofile_source.hpp"
 #include "window.hpp"
+
+#include "database.hpp"
+#include "plugin_context.hpp"
 
 void error_callback(int error, const char *msg)
 {
@@ -28,7 +32,14 @@ int main()
 
     try
     {
-        Window win;
+        Database db;
+        PluginContext pluggy(db);
+        AudioFileSource audio(pluggy, "audio/CantinaBand60.wav");
+
+        spdlog::info("There are {} timeseries in the database", db.data().size());
+
+        Window win(db);
+        // win.set_data(audio.data(), audio.size(), audio.sample_rate());
         spdlog::info("Initialization OK: Spinning forever");
         win.spin();
     }

@@ -12,6 +12,7 @@
 
 // #include "font.hpp"
 #include <glm/glm.hpp>
+#include "database.hpp"
 
 struct GlyphVertex
 {
@@ -212,6 +213,12 @@ class GraphView
         return _plot.get_show_line_segments();
     }
 
+    void set_database(const Database &db)
+    {
+        auto ts = *db.data().begin();
+        _plot.set_timeseries(ts.second);
+    }
+
   private:
     /**
      * @brief Check if a coodinate is inside a bounding box defined by two corners.
@@ -281,7 +288,6 @@ class GraphView
 
     const int GUTTER_SIZE_PX = 60;
     const int TICKLEN = 8;
-    const int SAMPLE_COUNT = 4096;
 
     Plot _plot;
 };
