@@ -195,6 +195,10 @@ void GraphView::_draw_lines() const
     draw_ticks(tick_spacing_major, glm::vec2(-TICKLEN, 0), glm::vec2(0, TICKLEN));
     draw_ticks(tick_spacing_minor, glm::vec2(-TICKLEN / 2, 0), glm::vec2(0, TICKLEN / 2));
 
+    // Add one additional vertical line where the cursor is
+    ptr[offset++] = glm::vec2(_cursor.x, 0.0);
+    ptr[offset++] = glm::vec2(_cursor.x, _size.y);
+
     auto line_round = [](float value) { return roundf(value - 0.5f) + 0.5f; };
 
     for (int i = 0; i < offset; i++)
@@ -255,6 +259,26 @@ void GraphView::_draw_labels() const
         ss << std::fixed << std::setprecision(precision.x) << i;
         _draw_label(ss.str(), point, 18, 7, LabelAlignment::Center, LabelAlignmentVertical::Top);
     }
+
+    // Find the nearest sample and draw labels for it
+    auto cursor_gs = glm::inverse(_view_matrix) * _viewport_matrix_inv * glm::vec3(_cursor, 1.0f);
+    auto cursor_gs2 = glm::inverse(_view_matrix) * _viewport_matrix_inv * glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
+    auto sample = _ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
+
+    const auto draw_label = [&](double value) {
+        glm::vec2 sample_gs(cursor_gs.x, value);
+
+        glm::vec3 point3 = _viewport_matrix * _view_matrix * glm::vec3(sample_gs, 1.0f);
+        glm::vec2 point(point3.x, point3.y);
+
+        std::stringstream ss;
+        ss << value;
+        _draw_label(ss.str(), point, 18, 7, LabelAlignment::Right, LabelAlignmentVertical::Center);
+    };
+
+    draw_label(sample.average);
+    // draw_label(sample.min);
+    // draw_label(sample.max);
 }
 
 void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, float height, float width,

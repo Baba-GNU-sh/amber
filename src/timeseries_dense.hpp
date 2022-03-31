@@ -44,21 +44,26 @@ class TimeSeriesDense : public TimeSeries
                 auto index_last = static_cast<int>((last - _start) / _interval);
 
                 if (index_first == index_last)
-                    continue;
-
-                double average = 0.0;
-                double max = -1000000;
-                double min = 1000000;
-                for (int i = index_first; i < index_last; i++)
                 {
-                    average += _data[i];
-                    max = std::max(max, _data[i]);
-                    min = std::min(min, _data[i]);
+                    sample.average = _data[index_first];
+                    sample.min = sample.average;
+                    sample.max = sample.average;
                 }
-                average /= (index_last - index_first);
-                sample.average = average;
-                sample.min = min;
-                sample.max = max;
+                else {
+                    double average = 0.0;
+                    double max = -1000000;
+                    double min = 1000000;
+                    for (int i = index_first; i < index_last; i++)
+                    {
+                        average += _data[i];
+                        max = std::max(max, _data[i]);
+                        min = std::min(min, _data[i]);
+                    }
+                    average /= (index_last - index_first);
+                    sample.average = average;
+                    sample.min = min;
+                    sample.max = max;
+                }
             }
 
             index++;
@@ -69,6 +74,13 @@ class TimeSeriesDense : public TimeSeries
         }
 
         return index;
+    }
+
+    TSSample get_sample(double timestamp, double bin_width)
+    {
+        TSSample sample;
+        get_samples(&sample, timestamp, bin_width, 1);
+        return sample;
     }
 
     std::pair<double, double> get_span() const override

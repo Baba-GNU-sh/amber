@@ -218,6 +218,7 @@ class GraphView
     {
         auto ts = *db.data().begin();
         _plot.set_timeseries(ts.second);
+        _ts = ts.second;
     }
 
   private:
@@ -291,4 +292,6 @@ class GraphView
     const int TICKLEN = 8;
 
     Plot _plot;
+
+    std::shared_ptr<TimeSeries> _ts;
 };

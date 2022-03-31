@@ -25,7 +25,16 @@ class TimeSeries
      * @param bin_width The width of each bin in seconds.
      * @param num_samples The number of samples to pull out.
      */
-    virtual std::size_t get_samples(TSSample *samples, double timestamp_start, double bin_width, std::size_t num_samples) const = 0;
+    virtual std::size_t get_samples(TSSample *samples, double timestamp_start, double bin_width,
+                                    std::size_t num_samples) const = 0;
+
+    /**
+     * @brief Get a single sample.
+     *
+     * @param timestamp
+     * @return TSSample
+     */
+    virtual TSSample get_sample(double timestamp, double bin_width) = 0;
 
     /**
      * @brief Get the oldest and newest samples.

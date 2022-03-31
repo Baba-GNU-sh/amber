@@ -66,7 +66,8 @@ void Plot::draw() const
     glUniform3f(uniform_id, _minmax_colour.r, _minmax_colour.g, _minmax_colour.b);
 
     // Pull out samples binned by vertical columns of pixels
-    const int width = std::min(_size.x, COLS_MAX);
+    const int PIXELS_PER_COL = 2;
+    const int width = std::min(_size.x / PIXELS_PER_COL, COLS_MAX);
 
     // Work out where on the graph the first column of pixels lives
     glm::vec3 begin(0.0f, 0.0f, 1.0f);
@@ -75,21 +76,10 @@ void Plot::draw() const
     glm::vec3 end(width, 0.0f, 1.0f);
     auto end_gs = glm::inverse(_view_matrix) * _viewport_matrix_inv * end;
 
-    auto interval = (end_gs.x - begin_gs.x) / width;
+    auto interval = PIXELS_PER_COL * (end_gs.x - begin_gs.x) / width;
 
     TSSample samples[width];
     auto n_samples = _timeseries->get_samples(&samples[0], begin_gs.x, interval, width);
-
-    // auto time = glfwGetTime();
-    // Sample plot_data[SAMPLE_COUNT];
-    // for (int i = 0; i < SAMPLE_COUNT; i++)
-    // {
-    //     const float x = static_cast<float>(i - SAMPLE_COUNT / 2) / 400.0f;
-    //     plot_data[i].x = x;
-    //     plot_data[i].y = sinf(100.0f * x + time) * sinf(1.0f * x);
-    //     plot_data[i].min = plot_data[i].y - .1;
-    //     plot_data[i].max = plot_data[i].y + .1;
-    // }
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * n_samples, samples);
     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, n_samples);
@@ -129,15 +119,4 @@ bool *Plot::get_show_line_segments()
 void Plot::set_timeseries(std::shared_ptr<TimeSeries> ts)
 {
     _timeseries = ts;
-    // _samples.resize(size);
-    // for (std::size_t i = 0; i < size; i++)
-    // {
-    // 	_samples[i].x = static_cast<float>(i) / sample_rate;
-    // 	_samples[i].y = data[i];
-    // 	_samples[i].min = data[i];
-    // 	_samples[i].max = data[i];
-    // }
-
-    // glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
-    // glBufferSubData(GL_ARRAY_BUFFER, 0, _samples.size() * sizeof(Sample), _samples.data());
 }
