@@ -17,7 +17,7 @@ Plot::Plot(const glm::mat3x3 &view_matrix)
 
     glGenBuffers(1, &_plot_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(TSSample) * SAMPLE_COUNT, nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TSSample) * COLS_MAX, nullptr, GL_STREAM_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Sample), (void *)0);
     glEnableVertexAttribArray(0);
@@ -66,7 +66,7 @@ void Plot::draw() const
     glUniform3f(uniform_id, _minmax_colour.r, _minmax_colour.g, _minmax_colour.b);
 
     // Pull out samples binned by vertical columns of pixels
-    const int width = 1000;
+    const int width = std::min(_size.x, COLS_MAX);
 
     // Work out where on the graph the first column of pixels lives
     glm::vec3 begin(0.0f, 0.0f, 1.0f);
@@ -99,6 +99,11 @@ void Plot::update_viewport_matrix(const glm::mat3x3 &viewport_matrix)
 {
     _viewport_matrix = viewport_matrix;
     _viewport_matrix_inv = glm::inverse(viewport_matrix);
+}
+
+void Plot::set_size(int width, int height)
+{
+    _size = glm::ivec2(width, height);
 }
 
 int *Plot::get_line_thickness()

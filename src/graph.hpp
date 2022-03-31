@@ -57,6 +57,7 @@ class GraphView
     void set_size(int width, int height)
     {
         _size = glm::vec2(width, height);
+        _plot.set_size(width, height);
     }
 
     /**
