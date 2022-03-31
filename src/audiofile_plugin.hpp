@@ -8,11 +8,12 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <thread>
+#include "plugin.hpp"
 
-class AudioFileSource
+class AudioFilePlugin : public Plugin
 {
   public:
-    AudioFileSource(PluginContext &pluggy, std::string_view filename) : _cancel_flag(false), _current_sample(0)
+    AudioFilePlugin(PluginContext &pluggy, std::string_view filename) : _cancel_flag(false), _current_sample(0)
     {
         _audioFile.load(std::string(filename));
         _audioFile.printSummary();
@@ -22,13 +23,13 @@ class AudioFileSource
 
         _ts = ts;
 
-        _thread = std::thread(&AudioFileSource::thread, this);
+        _thread = std::thread(&AudioFilePlugin::thread, this);
 
-        _logger = spdlog::stdout_color_mt("AudioFileSource");
+        _logger = spdlog::stdout_color_mt("AudioFilePlugin");
         _logger->info("Hello from audio plugin!");
     }
 
-    ~AudioFileSource()
+    ~AudioFilePlugin()
     {
         _cancel_flag = true;
         _thread.join();

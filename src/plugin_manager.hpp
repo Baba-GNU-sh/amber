@@ -1,10 +1,17 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
+#include "audiofile_plugin.hpp"
+#include "plugin.hpp"
+
 class PluginManager
 {
   public:
-    PluginManager()
+    PluginManager(PluginContext &context)
     {
+        _plugins.push_back(std::make_shared<AudioFilePlugin>(context, "audio/CantinaBand60.wav"));
     }
 
   private:

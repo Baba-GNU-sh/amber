@@ -3,11 +3,12 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
-#include "audiofile_source.hpp"
+#include "audiofile_plugin.hpp"
 #include "window.hpp"
 
 #include "database.hpp"
 #include "plugin_context.hpp"
+#include "plugin_manager.hpp"
 
 void error_callback(int error, const char *msg)
 {
@@ -33,8 +34,8 @@ int main()
     try
     {
         Database db;
-        PluginContext pluggy(db);
-        AudioFileSource audio(pluggy, "audio/CantinaBand60.wav");
+        PluginContext plugin_context(db);
+        PluginManager plugin_manager(plugin_context);
 
         spdlog::info("There are {} timeseries in the database", db.data().size());
 
