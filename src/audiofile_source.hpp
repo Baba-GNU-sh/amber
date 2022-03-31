@@ -58,7 +58,6 @@ class AudioFileSource
             }
 
             auto span = _ts->get_span();
-            _logger->info("Span: {}->{}", span.first, span.second);
         }
     }
 
