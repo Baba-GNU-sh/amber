@@ -7,11 +7,22 @@
 
 #include "audiofile_plugin.hpp"
 
+struct PluginInfo
+{
+  std::string name;
+  bool show_menu;
+  std::shared_ptr<Plugin> plugin;
+};
+
 class PluginManager
 {
   public:
     PluginManager(PluginContext &context);
+    void start_all();
+    void stop_all();
+    void draw_menu();
+    void draw_dialogs() const;
 
   private:
-    std::vector<std::shared_ptr<Plugin>> _plugins;
+    std::vector<PluginInfo> _plugins;
 };

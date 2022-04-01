@@ -36,10 +36,7 @@ int main()
         Database db;
         PluginContext plugin_context(db);
         PluginManager plugin_manager(plugin_context);
-
-        spdlog::info("There are {} timeseries in the database", db.data().size());
-
-        Window win(db);
+        Window win(db, plugin_manager);
         // win.set_data(audio.data(), audio.size(), audio.sample_rate());
         spdlog::info("Initialization OK: Spinning forever");
         win.spin();

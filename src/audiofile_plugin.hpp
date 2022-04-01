@@ -20,11 +20,16 @@ class AudioFilePlugin : public Plugin
     std::size_t size();
     int sample_rate() const;
 
+    void start();
+    void stop();
+    void draw_menu();
+
   private:
     AudioFile<float> _audioFile;
     std::thread _thread;
-    std::atomic<bool> _cancel_flag;
+    std::atomic<bool> _running;
     std::shared_ptr<TimeSeriesDense> _ts;
     std::shared_ptr<spdlog::logger> _logger;
     std::size_t _current_sample;
+    std::string _filename;
 };

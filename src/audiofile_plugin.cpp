@@ -1,7 +1,8 @@
 #include "audiofile_plugin.hpp"
+#include <imgui.h>
 
 AudioFilePlugin::AudioFilePlugin(PluginContext &pluggy, std::string_view filename)
-    : _cancel_flag(false), _current_sample(0)
+    : _running(false), _current_sample(0), _filename(filename)
 {
     _audioFile.load(std::string(filename));
     _audioFile.printSummary();
@@ -11,24 +12,21 @@ AudioFilePlugin::AudioFilePlugin(PluginContext &pluggy, std::string_view filenam
 
     _ts = ts;
 
-    _thread = std::thread(&AudioFilePlugin::thread, this);
-
     _logger = spdlog::stdout_color_mt("AudioFilePlugin");
-    _logger->info("Hello from audio plugin!");
+    _logger->info("Plugin initialized");
 }
 
 AudioFilePlugin::~AudioFilePlugin()
 {
-    _cancel_flag = true;
-    _thread.join();
-    _logger->info("Goodbye from audio plugin!");
+    stop();
+    _logger->info("Goodbye!");
 }
 
 void AudioFilePlugin::thread()
 {
     using namespace std::chrono_literals;
 
-    while (!_cancel_flag)
+    while (_running)
     {
         std::this_thread::sleep_for(1ms);
 
@@ -63,4 +61,39 @@ std::size_t AudioFilePlugin::size()
 int AudioFilePlugin::sample_rate() const
 {
     return _audioFile.getSampleRate();
+}
+
+void AudioFilePlugin::start()
+{
+    if (!_running)
+    {
+        _running = true;
+        _thread = std::thread(&AudioFilePlugin::thread, this);
+        _logger->info("Started");
+    }
+    else
+    {
+        _logger->warn("Already running");
+    }
+}
+
+void AudioFilePlugin::stop()
+{
+    if (_running)
+    {
+        _running = false;
+        _thread.join();
+        _logger->info("Stopped");
+    }
+    else
+    {
+        _logger->warn("Already stopped");
+    }
+}
+
+void AudioFilePlugin::draw_menu()
+{
+    ImGui::Begin("AudioFile");
+    ImGui::Text("File: %s", _filename.c_str());
+    ImGui::Text("Sample Rate: %u", _audioFile.getSampleRate());
 }

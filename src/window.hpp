@@ -25,11 +25,12 @@
 #include "spdlog/spdlog.h"
 
 #include "database.hpp"
+#include "plugin_manager.hpp"
 
 class Window
 {
   public:
-    Window(const Database &db);
+    Window(const Database &db, PluginManager &plugins);
     ~Window();
     void spin();
 
@@ -55,5 +56,6 @@ class Window
     glm::ivec2 _win_size;
     glm::vec3 _bgcolour;
 
-    const Database _database;
+    const Database &_database;
+    PluginManager &_plugin_manager;
 };

@@ -1,7 +1,8 @@
 #include "window.hpp"
 
-Window::Window(const Database &db)
-    : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db)
+Window::Window(const Database &db, PluginManager &plugins)
+    : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db),
+      _plugin_manager(plugins)
 {
     m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLot", NULL, NULL);
     if (!m_window)
@@ -118,6 +119,13 @@ void Window::render_imgui()
             }
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("Plugins"))
+        {
+            _plugin_manager.draw_menu();
+            ImGui::EndMenu();
+        }
+
         menubar_size = ImGui::GetWindowSize();
         ImGui::EndMainMenuBar();
     }
@@ -181,6 +189,9 @@ void Window::render_imgui()
     }
 
     ImGui::Separator();
+
+    _plugin_manager.draw_dialogs();
+
     ImGui::Render();
 }
 
