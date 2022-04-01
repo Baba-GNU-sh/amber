@@ -1,14 +1,14 @@
 #pragma once
 
-#include <string>
 #include <fstream>
-#include <sstream>
-#include <vector>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 class ShaderImpl
 {
-public:
+  public:
     ShaderImpl(const std::string &filename, int shader_type);
     ~ShaderImpl();
 
@@ -17,7 +17,7 @@ public:
 
     int get_handle() const;
 
-private:
+  private:
     const std::string m_filename;
     int m_shader_handle;
 };
@@ -28,12 +28,13 @@ private:
  */
 class Shader
 {
-public:
+  public:
     /**
      * @brief Initialize the shader from a file.
-     * 
+     *
      * @param filename The filename where the shader program is stored.
-     * @param shader_type The type of the shader to create (vertex, geometry, fragment), passed straight into glCreateShader.
+     * @param shader_type The type of the shader to create (vertex, geometry, fragment), passed
+     * straight into glCreateShader.
      */
     Shader(const std::string &filename, int shader_type)
     {
@@ -48,13 +49,13 @@ public:
         return m_impl->get_handle();
     }
 
-private:
+  private:
     std::shared_ptr<ShaderImpl> m_impl;
 };
 
 class ProgramImpl
 {
-public:
+  public:
     ProgramImpl(const std::vector<Shader> &);
     ~ProgramImpl();
 
@@ -65,7 +66,7 @@ public:
     int get_handle() const;
     int get_uniform_location(const char *uniform_name) const;
 
-private:
+  private:
     int m_program_handle;
 };
 
@@ -75,11 +76,11 @@ private:
  */
 class Program
 {
-public:
+  public:
     /**
      * @brief Creates a new shader program, getting
-     * 
-     * @param shaders 
+     *
+     * @param shaders
      */
     Program(const std::vector<Shader> &shaders)
     {
@@ -106,7 +107,7 @@ public:
 
     /**
      * @brief Lookup a uniform location.
-     * 
+     *
      * @param uniform_name The name of the uniform to lookup.
      * @return int The value of the uniform's location in the program.
      */
@@ -115,7 +116,6 @@ public:
         return m_impl->get_uniform_location(uniform_name);
     }
 
-
-private:
+  private:
     std::shared_ptr<ProgramImpl> m_impl;
 };

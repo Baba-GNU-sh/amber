@@ -7,7 +7,9 @@ TimeSeriesDense::TimeSeriesDense(double start, double interval) : _interval(inte
     //
 }
 
-std::size_t TimeSeriesDense::get_samples(TSSample *samples, double timestamp_start, double bin_width,
+std::size_t TimeSeriesDense::get_samples(TSSample *samples,
+                                         double timestamp_start,
+                                         double bin_width,
                                          std::size_t num_samples) const
 {
     std::lock_guard<std::recursive_mutex> _(_mut);

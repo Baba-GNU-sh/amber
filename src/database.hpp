@@ -17,7 +17,8 @@ class Database
     void register_timeseries(std::string name, std::shared_ptr<TimeSeries> timeseries);
 
     /**
-     * @brief Get immutable access to all the entire list of time series in the database.
+     * @brief Get immutable access to all the entire list of time series in the
+     * database.
      *
      * @return const std::map<std::string, std::shared_ptr<TimeSeries>>&
      */

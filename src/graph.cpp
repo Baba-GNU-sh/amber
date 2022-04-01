@@ -60,8 +60,9 @@ void GraphView::_init_line_buffers()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void *)0);
     glEnableVertexAttribArray(0);
 
-    std::vector<Shader> shaders{Shader(Resources::find_shader("line/vertex.glsl"), GL_VERTEX_SHADER),
-                                Shader(Resources::find_shader("line/fragment.glsl"), GL_FRAGMENT_SHADER)};
+    std::vector<Shader> shaders{
+        Shader(Resources::find_shader("line/vertex.glsl"), GL_VERTEX_SHADER),
+        Shader(Resources::find_shader("line/fragment.glsl"), GL_FRAGMENT_SHADER)};
     _lines_shader = Program(shaders);
 }
 
@@ -90,7 +91,8 @@ void GraphView::_init_glyph_buffers()
 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // A glyph is rendered as a quad so we only need 4 verts and 4 texture lookups
+    // A glyph is rendered as a quad so we only need 4 verts and 4 texture
+    // lookups
     glBufferData(GL_ARRAY_BUFFER, 128 * sizeof(GlyphData), nullptr, GL_STREAM_DRAW);
 
     // Define an attribute for the glyph verticies
@@ -98,16 +100,18 @@ void GraphView::_init_glyph_buffers()
     glEnableVertexAttribArray(0);
 
     // Define an attribute for the texture lookups
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void *)offsetof(GlyphVertex, tex_coords));
+    glVertexAttribPointer(
+        1, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void *)offsetof(GlyphVertex, tex_coords));
     glEnableVertexAttribArray(1);
 
-    std::vector<Shader> shaders{Shader(Resources::find_shader("glyph/vertex.glsl"), GL_VERTEX_SHADER),
-                                Shader(Resources::find_shader("glyph/fragment.glsl"), GL_FRAGMENT_SHADER)};
+    std::vector<Shader> shaders{
+        Shader(Resources::find_shader("glyph/vertex.glsl"), GL_VERTEX_SHADER),
+        Shader(Resources::find_shader("glyph/fragment.glsl"), GL_FRAGMENT_SHADER)};
     _glyph_shader = Program(shaders);
 
     int width, height, nrChannels;
-    unsigned char *tex_data =
-        stbi_load(Resources::find_font("proggy_clean.png").c_str(), &width, &height, &nrChannels, 0);
+    unsigned char *tex_data = stbi_load(
+        Resources::find_font("proggy_clean.png").c_str(), &width, &height, &nrChannels, 0);
     if (!tex_data)
     {
         throw std::runtime_error("Unable to load font map: " + std::string(stbi_failure_reason()));
@@ -161,7 +165,9 @@ void GraphView::_draw_lines() const
     ptr[offset++] = bl;
     ptr[offset++] = br;
 
-    auto draw_ticks = [&](const glm::vec2 &tick_spacing, const glm::vec2 &tick_size_y, const glm::vec2 &tick_size_x) {
+    auto draw_ticks = [&](const glm::vec2 &tick_spacing,
+                          const glm::vec2 &tick_size_y,
+                          const glm::vec2 &tick_size_x) {
         // Draw the y-axis ticks
         // Work out where (in graph space) margin and height-margin is
         auto top_gs = screen2graph(tl);
@@ -262,7 +268,8 @@ void GraphView::_draw_labels() const
 
     // Find the nearest sample and draw labels for it
     auto cursor_gs = glm::inverse(_view_matrix) * _viewport_matrix_inv * glm::vec3(_cursor, 1.0f);
-    auto cursor_gs2 = glm::inverse(_view_matrix) * _viewport_matrix_inv * glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
+    auto cursor_gs2 = glm::inverse(_view_matrix) * _viewport_matrix_inv *
+                      glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
     auto sample = _ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
 
     const auto draw_label = [&](double value) {
@@ -281,8 +288,12 @@ void GraphView::_draw_labels() const
     // draw_label(sample.max);
 }
 
-void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, float height, float width,
-                            LabelAlignment align, LabelAlignmentVertical valign) const
+void GraphView::_draw_label(const std::string_view text,
+                            const glm::vec2 &pos,
+                            float height,
+                            float width,
+                            LabelAlignment align,
+                            LabelAlignmentVertical valign) const
 {
     glm::vec2 offset = pos;
     glm::vec2 delta = glm::vec2(width, 0);
@@ -332,7 +343,8 @@ void GraphView::_draw_label(const std::string_view text, const glm::vec2 &pos, f
     // glDrawArrays(GL_TRIANGLES, 0, 4 * (bufptr - buffer));
 }
 
-void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const
+void GraphView::_draw_glyph(
+    char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const
 {
     GlyphData *data = *buf;
     data->verts[0].vert = pos;
@@ -353,7 +365,8 @@ void GraphView::_draw_glyph(char c, const glm::vec2 &pos, float height, float wi
     data->verts[0].tex_coords = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row);
     data->verts[1].tex_coords = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row);
     data->verts[2].tex_coords = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row + GLYPH_HEIGHT);
-    data->verts[3].tex_coords = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row + GLYPH_HEIGHT);
+    data->verts[3].tex_coords =
+        glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row + GLYPH_HEIGHT);
 
     *buf = data + 1;
 }
@@ -460,11 +473,15 @@ void GraphView::mouse_scroll(double xoffset, double yoffset)
         // We are in the y gutter
         zoom_delta_vec.y = zoom_delta;
     }
-    else if (_hittest(_cursor, glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX), glm::vec2(_size.x, _size.y)))
+    else if (_hittest(_cursor,
+                      glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX),
+                      glm::vec2(_size.x, _size.y)))
     {
         zoom_delta_vec.x = zoom_delta;
     }
-    else if (_hittest(_cursor, glm::vec2(GUTTER_SIZE_PX, 0), glm::vec2(_size.x, _size.y - GUTTER_SIZE_PX)))
+    else if (_hittest(_cursor,
+                      glm::vec2(GUTTER_SIZE_PX, 0),
+                      glm::vec2(_size.x, _size.y - GUTTER_SIZE_PX)))
     {
         zoom_delta_vec = glm::vec2(zoom_delta);
     }

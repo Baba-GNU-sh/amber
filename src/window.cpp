@@ -1,6 +1,7 @@
 #include "window.hpp"
 
-Window::Window(const Database &db) : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db)
+Window::Window(const Database &db)
+    : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db)
 {
     m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLot", NULL, NULL);
     if (!m_window)
@@ -121,7 +122,10 @@ void Window::render_imgui()
         ImGui::EndMainMenuBar();
     }
 
-    ImGui::Begin("Info", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
+    ImGui::Begin("Info",
+                 0,
+                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
+                     ImGuiWindowFlags_NoMove);
     ImGui::SetWindowPos(ImVec2(_win_size.x - ImGui::GetWindowWidth() - 10, menubar_size.y), true);
 
     if (ImGui::CollapsingHeader("Help", ImGuiTreeNodeFlags_DefaultOpen))
@@ -133,7 +137,9 @@ void Window::render_imgui()
 
     if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::Text("%.1f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("%.1f ms/frame (%.1f FPS)",
+                    1000.0f / ImGui::GetIO().Framerate,
+                    ImGui::GetIO().Framerate);
 
         auto viewmat = m_graph->get_view_matrix();
         ImGui::Text("View Matrix:");

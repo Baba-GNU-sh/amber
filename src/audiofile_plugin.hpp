@@ -1,5 +1,6 @@
 #pragma once
 
+#include "plugin.hpp"
 #include "plugin_context.hpp"
 #include "timeseries.hpp"
 #include "timeseries_dense.hpp"
@@ -8,7 +9,6 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <thread>
-#include "plugin.hpp"
 
 class AudioFilePlugin : public Plugin
 {

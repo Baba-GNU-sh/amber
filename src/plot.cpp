@@ -26,9 +26,10 @@ Plot::Plot(const glm::mat3x3 &view_matrix)
     glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Sample), (void *)offsetof(Sample, max));
     glEnableVertexAttribArray(2);
 
-    std::vector<Shader> shaders{Shader(Resources::find_shader("plot/vertex.glsl"), GL_VERTEX_SHADER),
-                                Shader(Resources::find_shader("plot/fragment.glsl"), GL_FRAGMENT_SHADER),
-                                Shader(Resources::find_shader("plot/geometry.glsl"), GL_GEOMETRY_SHADER)};
+    std::vector<Shader> shaders{
+        Shader(Resources::find_shader("plot/vertex.glsl"), GL_VERTEX_SHADER),
+        Shader(Resources::find_shader("plot/fragment.glsl"), GL_FRAGMENT_SHADER),
+        Shader(Resources::find_shader("plot/geometry.glsl"), GL_GEOMETRY_SHADER)};
 
     _lines_shader = Program(shaders);
 }

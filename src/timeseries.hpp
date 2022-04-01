@@ -21,11 +21,13 @@ class TimeSeries
      * @brief Gets binned samples from the time series.
      *
      * @param samples Where to put the samples.
-     * @param timestamp_start The first timestamp from which to start reading from.
+     * @param timestamp_start Start here.
      * @param bin_width The width of each bin in seconds.
      * @param num_samples The number of samples to pull out.
      */
-    virtual std::size_t get_samples(TSSample *samples, double timestamp_start, double bin_width,
+    virtual std::size_t get_samples(TSSample *samples,
+                                    double timestamp_start,
+                                    double bin_width,
                                     std::size_t num_samples) const = 0;
 
     /**

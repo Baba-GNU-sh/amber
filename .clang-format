@@ -1,4 +1,9 @@
 ﻿BasedOnStyle: Microsoft
+ColumnLimit: '100'
+
+BinPackArguments: false
+BinPackParameters: false
+
 # AccessModifierOffset: '-2'
 # AllowShortBlocksOnASingleLine: 'false'
 # AllowShortCaseLabelsOnASingleLine: 'false'

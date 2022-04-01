@@ -1,8 +1,7 @@
 #include "shader_utils.hpp"
 #include <glad/glad.h>
 
-ShaderImpl::ShaderImpl(const std::string &filename, int shader_type)
-    : m_filename(filename)
+ShaderImpl::ShaderImpl(const std::string &filename, int shader_type) : m_filename(filename)
 {
     std::ifstream ifs(m_filename, std::ios::in);
     if (!ifs.is_open())
