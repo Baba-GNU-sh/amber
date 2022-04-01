@@ -398,3 +398,142 @@ std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() cons
 
     return std::tuple(tick_spacing, minor_tick_spacing, precision);
 }
+
+void GraphView::set_size(int width, int height)
+{
+    _size = glm::vec2(width, height);
+    _plot.set_size(width, height);
+}
+
+glm::ivec2 GraphView::size() const
+{
+    return _size;
+}
+
+void GraphView::set_position(int x, int y)
+{
+    _position = glm::vec2(x, y);
+}
+
+glm::ivec2 GraphView::position() const
+{
+    return _position;
+}
+
+void GraphView::mouse_button(int button, int action, int mods)
+{
+    (void)mods;
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        _dragging = true;
+    }
+    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        _dragging = false;
+    }
+}
+
+void GraphView::cursor_move(double xpos, double ypos)
+{
+    glm::ivec2 new_cursor(xpos, ypos);
+
+    if (_dragging)
+    {
+        auto cursor_gs_old = screen2graph(_cursor);
+        auto cursor_gs_new = screen2graph(new_cursor);
+        auto cursor_gs_delta = cursor_gs_new - cursor_gs_old;
+        _update_view_matrix(glm::translate(_view_matrix, cursor_gs_delta));
+    }
+
+    _cursor = new_cursor;
+}
+
+void GraphView::mouse_scroll(double xoffset, double yoffset)
+{
+    const float zoom_delta = 1.0f + (yoffset / 10.0f);
+    glm::vec2 zoom_delta_vec(1.0);
+
+    // Is the cursor in the gutter?
+    if (_hittest(_cursor, glm::vec2(0, 0), glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX)))
+    {
+        // We are in the y gutter
+        zoom_delta_vec.y = zoom_delta;
+    }
+    else if (_hittest(_cursor, glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX), glm::vec2(_size.x, _size.y)))
+    {
+        zoom_delta_vec.x = zoom_delta;
+    }
+    else if (_hittest(_cursor, glm::vec2(GUTTER_SIZE_PX, 0), glm::vec2(_size.x, _size.y - GUTTER_SIZE_PX)))
+    {
+        zoom_delta_vec = glm::vec2(zoom_delta);
+    }
+
+    // Work out where the pointer is in graph space
+    auto cursor_in_gs_old = screen2graph(_cursor);
+
+    _update_view_matrix(glm::scale(_view_matrix, zoom_delta_vec));
+
+    auto cursor_in_gs_new = screen2graph(_cursor);
+    auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
+
+    _update_view_matrix(glm::translate(_view_matrix, cursor_delta));
+}
+
+void GraphView::update_viewport_matrix(const glm::mat3x3 &viewport_matrix)
+{
+    _viewport_matrix = viewport_matrix;
+    _viewport_matrix_inv = glm::inverse(viewport_matrix);
+    _plot.update_viewport_matrix(viewport_matrix);
+}
+
+glm::mat3x3 GraphView::get_view_matrix() const
+{
+    return _view_matrix;
+}
+
+glm::vec2 GraphView::get_cursor_graphspace() const
+{
+    return screen2graph(_cursor);
+}
+
+int *GraphView::get_plot_thickness()
+{
+    return _plot.get_line_thickness();
+}
+
+glm::vec3 *GraphView::get_plot_colour()
+{
+    return _plot.get_plot_colour();
+}
+
+glm::vec3 *GraphView::get_minmax_colour()
+{
+    return _plot.get_minmax_colour();
+}
+
+bool *GraphView::get_show_line_segments()
+{
+    return _plot.get_show_line_segments();
+}
+
+void GraphView::set_database(const Database &db)
+{
+    auto ts = *db.data().begin();
+    _plot.set_timeseries(ts.second);
+    _ts = ts.second;
+}
+
+glm::vec2 GraphView::screen2graph(const glm::ivec2 &value) const
+{
+    glm::vec3 value3(value, 1.0f);
+    auto value_cs = _viewport_matrix_inv * value3;
+    auto value_gs = _view_matrix_inv * value_cs;
+    return value_gs;
+}
+
+void GraphView::_update_view_matrix(const glm::mat3x3 &value)
+{
+    _view_matrix = value;
+    _view_matrix_inv = glm::inverse(value);
+}

@@ -3,16 +3,14 @@
 #include <memory>
 #include <vector>
 
-#include "audiofile_plugin.hpp"
 #include "plugin.hpp"
+
+#include "audiofile_plugin.hpp"
 
 class PluginManager
 {
   public:
-    PluginManager(PluginContext &context)
-    {
-        _plugins.push_back(std::make_shared<AudioFilePlugin>(context, "audio/CantinaBand60.wav"));
-    }
+    PluginManager(PluginContext &context);
 
   private:
     std::vector<std::shared_ptr<Plugin>> _plugins;

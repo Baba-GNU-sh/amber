@@ -5,14 +5,8 @@
 class PluginContext
 {
   public:
-    PluginContext(Database &database) : _database(database)
-    {
-    }
-
-    Database &get_database()
-    {
-        return _database;
-    }
+    PluginContext(Database &database);
+    Database &get_database();
 
   private:
     Database &_database;

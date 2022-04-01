@@ -26,6 +26,12 @@ add_executable(glot
 	src/graph.cpp
 	src/plot.cpp
 	src/main.cpp
+	src/audiofile_plugin.cpp
+	src/database.cpp
+	src/plugin_context.cpp
+	src/plugin_manager.cpp
+	src/timeseries_dense.cpp
+	src/window.cpp
 )
 
 target_link_libraries(
