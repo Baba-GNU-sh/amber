@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "timeseries_dense.hpp"
 
 TimeSeriesDense::TimeSeriesDense(double start, double interval) : _interval(interval), _start(start)
