@@ -2,6 +2,7 @@
 
 #include <mutex>
 #include <vector>
+#include <algorithm>
 
 #include "timeseries.hpp"
 
