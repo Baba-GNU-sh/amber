@@ -43,7 +43,7 @@ cmake --build .
 
 Run GLot with:
 ```
-./glot
+src/glot/glot
 ```
 
 Use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.

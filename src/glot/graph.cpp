@@ -229,7 +229,7 @@ void GraphView::_draw_labels() const
     glm::vec2 br(_size.x, _size.y - GUTTER_SIZE_PX);
     auto tick_spacing = _get_tick_spacing();
     auto tick_spacing_major = std::get<0>(tick_spacing);
-    auto tick_spacing_minor = std::get<1>(tick_spacing);
+    // auto tick_spacing_minor = std::get<1>(tick_spacing);
     auto precision = std::get<2>(tick_spacing);
 
     // Draw one label per tick on the y axis
@@ -462,7 +462,7 @@ void GraphView::cursor_move(double xpos, double ypos)
     _cursor = new_cursor;
 }
 
-void GraphView::mouse_scroll(double xoffset, double yoffset)
+void GraphView::mouse_scroll(double /*xoffset*/, double yoffset)
 {
     const float zoom_delta = 1.0f + (yoffset / 10.0f);
     glm::vec2 zoom_delta_vec(1.0);

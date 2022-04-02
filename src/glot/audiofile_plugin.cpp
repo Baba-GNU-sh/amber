@@ -33,7 +33,7 @@ void AudioFilePlugin::thread()
         auto sample_count = _audioFile.getSampleRate() / 1000.0;
         for (int i = 0; i < sample_count; ++i)
         {
-            if (_current_sample >= _audioFile.getNumSamplesPerChannel())
+            if (_current_sample >= static_cast<std::size_t>(_audioFile.getNumSamplesPerChannel()))
             {
                 _current_sample = 0;
             }
@@ -43,8 +43,6 @@ void AudioFilePlugin::thread()
 
             _current_sample++;
         }
-
-        auto span = _ts->get_span();
     }
 }
 

@@ -48,14 +48,13 @@ class Window
     static constexpr unsigned int SCR_WIDTH = 800;
     static constexpr unsigned int SCR_HEIGHT = 600;
 
-    GLFWwindow *m_window;
-    std::shared_ptr<GraphView> m_graph;
-
-    bool _enable_vsync = true;
-    bool _enable_multisampling = true;
-    glm::ivec2 _win_size;
     glm::vec3 _bgcolour;
-
+    glm::ivec2 _win_size;
     const Database &_database;
     PluginManager &_plugin_manager;
+    bool _enable_vsync = true;
+    bool _enable_multisampling = true;
+
+    GLFWwindow *m_window;
+    std::shared_ptr<GraphView> m_graph;
 };
