@@ -89,6 +89,11 @@ void AudioFilePlugin::stop()
     }
 }
 
+bool AudioFilePlugin::is_running() const
+{
+    return _running;
+}
+
 void AudioFilePlugin::draw_menu()
 {
     ImGui::Begin("AudioFile");

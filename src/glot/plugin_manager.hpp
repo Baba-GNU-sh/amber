@@ -4,14 +4,13 @@
 #include <vector>
 
 #include "plugin.hpp"
-
-#include "audiofile_plugin.hpp"
+#include "plugin_context.hpp"
 
 struct PluginInfo
 {
-  std::string name;
-  bool show_menu;
-  std::shared_ptr<Plugin> plugin;
+    std::string name;
+    bool show_menu;
+    std::shared_ptr<Plugin> plugin;
 };
 
 class PluginManager

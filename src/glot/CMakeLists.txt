@@ -19,12 +19,13 @@ add_executable(glot
 	graph.cpp
 	plot.cpp
 	main.cpp
-	audiofile_plugin.cpp
 	database.cpp
 	plugin_context.cpp
 	plugin_manager.cpp
 	timeseries_dense.cpp
 	window.cpp
+	audiofile_plugin.cpp
+	wavegen_plugin.cpp
 )
 
 target_link_libraries(

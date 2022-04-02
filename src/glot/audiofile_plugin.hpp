@@ -6,8 +6,6 @@
 #include "timeseries_dense.hpp"
 #include <AudioFile.h>
 #include <spdlog/logger.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
 #include <thread>
 
 class AudioFilePlugin : public Plugin
@@ -19,10 +17,10 @@ class AudioFilePlugin : public Plugin
     float *data();
     std::size_t size();
     int sample_rate() const;
-
-    void start();
-    void stop();
-    void draw_menu();
+    void start() override;
+    void stop() override;
+    bool is_running() const override;
+    void draw_menu() override;
 
   private:
     AudioFile<float> _audioFile;
