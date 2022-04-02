@@ -216,6 +216,11 @@ void Window::cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 
 void Window::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
+    ImGuiIO &io = ImGui::GetIO();
+    bool capture = io.WantCaptureMouse;
+    if (capture)
+        return;
+
     Window *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
     win->m_graph->mouse_scroll(xoffset, yoffset);
 }
