@@ -89,32 +89,37 @@ class GraphView
      * @brief Call this to pass through cursor move events from GLFW to control
      * the graph.
      */
-    void cursor_move(double xpos, double ypos);
+    void cursor_move(const glm::mat3 &vp_matrix, double xpos, double ypos);
 
     /**
      * @brief Call this to pass through mouse scroll events from GLFW to control
      * the graph.
      */
-    void mouse_scroll(double xoffset, double yoffset);
+    void mouse_scroll(const glm::mat3 &vp_matrix, double xoffset, double yoffset);
 
     /**
-     * @brief Update the matrix describing the transform from screen space to
-     * pixels.
+     * @brief Draw the graph to the screen.
      *
-     * @param viewport_matrix The new value of the viewport matrix.
+     * @param viewport_matrix
+     * @param plot_width
+     * @param plot_colour
+     * @param minmax_colour
+     * @param show_plot_segments
      */
-    void update_viewport_matrix(const glm::mat3x3 &viewport_matrix);
+    void draw(const glm::mat3 &viewport_matrix,
+              int plot_width,
+              glm::vec3 plot_colour,
+              glm::vec3 minmax_colour,
+              bool show_plot_segments) const;
 
-    void draw(int plot_width, glm::vec3 plot_colour, glm::vec3 minmax_colour, bool show_plot_segments) const;
-
-    glm::mat3x3 get_view_matrix() const;
+    glm::mat3 view_matrix() const;
 
     /**
      * @brief Get the cursor's position in graph space.
      *
      * @return glm::vec2
      */
-    glm::vec2 get_cursor_graphspace() const;
+    glm::vec2 cursor_graphspace(const glm::mat3 &vp_matrix) const;
 
   private:
     /**
@@ -135,15 +140,16 @@ class GraphView
      * @param value The vector to convert.
      * @return glm::vec2 The resultant vector in graph space.
      */
-    glm::vec2 screen2graph(const glm::ivec2 &value) const;
+    glm::vec2 screen2graph(const glm::mat3 &vp_matrix, const glm::ivec2 &value) const;
 
-    void _update_view_matrix(const glm::mat3x3 &value);
+    void _update_view_matrix(const glm::mat3 &value);
 
     void _init_line_buffers();
     void _init_glyph_buffers();
-    void _draw_lines() const;
-    void _draw_labels() const;
-    void _draw_label(const std::string_view text,
+    void _draw_lines(const glm::mat3 &vp_matrix) const;
+    void _draw_labels(const glm::mat3 &vp_matrix) const;
+    void _draw_label(const glm::mat3 &vp_matrix,
+                     const std::string_view text,
                      const glm::vec2 &pos,
                      float height,
                      float width,
@@ -152,7 +158,7 @@ class GraphView
     void _draw_glyph(
         char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const;
 
-    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing() const;
+    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing(const glm::mat3 &vp_matrix) const;
 
     const Database &_db;
 
@@ -162,10 +168,8 @@ class GraphView
 
     bool _dragging;
 
-    glm::mat3x3 _view_matrix; // Transform from graph space to clip space
-    glm::mat3x3 _view_matrix_inv;
-    glm::mat3x3 _viewport_matrix; // Transform from clip space to screen space
-    glm::mat3x3 _viewport_matrix_inv;
+    glm::mat3 _view_matrix; // Transform from graph space to clip space
+    glm::mat3 _view_matrix_inv;
 
     // Line renderer
     GLuint _linebuf_vao;

@@ -62,4 +62,5 @@ class Window
     bool _show_line_segments = false;
     glm::vec3 _plot_colour;
     glm::vec3 _minmax_colour;
+    glm::mat3 _vp_matrix;
 };

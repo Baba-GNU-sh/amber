@@ -40,7 +40,7 @@ int ProgramImpl::get_handle() const
     return m_program_handle;
 }
 
-int ProgramImpl::get_uniform_location(const char *uniform_name) const
+int ProgramImpl::uniform_location(const char *uniform_name) const
 {
     return glGetUniformLocation(m_program_handle, uniform_name);
 }

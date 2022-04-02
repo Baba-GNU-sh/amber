@@ -64,7 +64,7 @@ void Window::spin()
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m_graph->draw(_plot_width, _plot_colour, _minmax_colour, _show_line_segments);
+        m_graph->draw(_vp_matrix, _plot_width, _plot_colour, _minmax_colour, _show_line_segments);
         render_imgui();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(m_window);
@@ -97,8 +97,7 @@ void Window::update_viewport_matrix(int width, int height)
 {
     const glm::mat3 identity(1.0f);
     auto vp_matrix = glm::scale(identity, glm::vec2(width / 2, -height / 2));
-    vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
-    m_graph->update_viewport_matrix(vp_matrix);
+    _vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
 }
 
 void Window::render_imgui()
@@ -148,14 +147,14 @@ void Window::render_imgui()
                     1000.0f / ImGui::GetIO().Framerate,
                     ImGui::GetIO().Framerate);
 
-        auto viewmat = m_graph->get_view_matrix();
+        auto viewmat = m_graph->view_matrix();
         ImGui::Text("View Matrix:");
         for (int i = 0; i < 3; i++)
         {
             ImGui::Text("%f %f %f", viewmat[0][i], viewmat[1][i], viewmat[2][i]);
         }
 
-        auto cursor_gs = m_graph->get_cursor_graphspace();
+        auto cursor_gs = m_graph->cursor_graphspace(_vp_matrix);
         ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
     }
 
@@ -205,25 +204,23 @@ void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height
 void Window::cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
     Window *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
-    win->m_graph->cursor_move(xpos, ypos);
+    win->m_graph->cursor_move(win->_vp_matrix, xpos, ypos);
 }
 
 void Window::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     ImGuiIO &io = ImGui::GetIO();
-    bool capture = io.WantCaptureMouse;
-    if (capture)
+    if (io.WantCaptureMouse)
         return;
 
     Window *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
-    win->m_graph->mouse_scroll(xoffset, yoffset);
+    win->m_graph->mouse_scroll(win->_vp_matrix, xoffset, yoffset);
 }
 
 void Window::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     ImGuiIO &io = ImGui::GetIO();
-    bool capture = io.WantCaptureMouse;
-    if (capture)
+    if (io.WantCaptureMouse)
         return;
 
     Window *win = static_cast<Window *>(glfwGetWindowUserPointer(window));

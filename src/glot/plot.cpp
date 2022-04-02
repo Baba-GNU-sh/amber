@@ -8,8 +8,7 @@
 #include "resources.hpp"
 #include "timeseries.hpp"
 
-Plot::Plot(const glm::mat3x3 &view_matrix)
-    : _view_matrix(view_matrix)
+Plot::Plot(const glm::mat3 &view_matrix) : _view_matrix(view_matrix)
 {
     glGenVertexArrays(1, &_plot_vao);
     glBindVertexArray(_plot_vao);
@@ -40,33 +39,35 @@ Plot::~Plot()
 }
 
 void Plot::draw(const TimeSeries &ts,
+                const glm::mat3 &vp_matrix,
                 int line_width,
                 glm::vec3 line_colour,
                 glm::vec3 minmax_colour,
                 bool show_line_segments) const
 {
+    const auto vp_matrix_inv = glm::inverse(vp_matrix);
     glBindVertexArray(_plot_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
 
     _lines_shader.use();
-    int uniform_id = _lines_shader.get_uniform_location("view_matrix");
+    int uniform_id = _lines_shader.uniform_location("view_matrix");
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_view_matrix[0]));
 
-    uniform_id = _lines_shader.get_uniform_location("viewport_matrix");
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix[0]));
+    uniform_id = _lines_shader.uniform_location("viewport_matrix");
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix[0]));
 
-    uniform_id = _lines_shader.get_uniform_location("viewport_matrix_inv");
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
+    uniform_id = _lines_shader.uniform_location("viewport_matrix_inv");
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
-    uniform_id = _lines_shader.get_uniform_location("line_thickness_px");
+    uniform_id = _lines_shader.uniform_location("line_thickness_px");
     glUniform1i(uniform_id, line_width);
 
-    uniform_id = _lines_shader.get_uniform_location("show_line_segments");
+    uniform_id = _lines_shader.uniform_location("show_line_segments");
     glUniform1i(uniform_id, show_line_segments);
 
-    uniform_id = _lines_shader.get_uniform_location("plot_colour");
+    uniform_id = _lines_shader.uniform_location("plot_colour");
     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
-    uniform_id = _lines_shader.get_uniform_location("minmax_colour");
+    uniform_id = _lines_shader.uniform_location("minmax_colour");
     glUniform3f(uniform_id, minmax_colour.r, minmax_colour.g, minmax_colour.b);
 
     // Pull out samples binned by vertical columns of pixels
@@ -75,10 +76,10 @@ void Plot::draw(const TimeSeries &ts,
 
     // Work out where on the graph the first column of pixels lives
     glm::vec3 begin(0.0f, 0.0f, 1.0f);
-    auto begin_gs = glm::inverse(_view_matrix) * _viewport_matrix_inv * begin;
+    auto begin_gs = glm::inverse(_view_matrix) * vp_matrix_inv * begin;
 
     glm::vec3 end(width, 0.0f, 1.0f);
-    auto end_gs = glm::inverse(_view_matrix) * _viewport_matrix_inv * end;
+    auto end_gs = glm::inverse(_view_matrix) * vp_matrix_inv * end;
 
     auto interval = PIXELS_PER_COL * (end_gs.x - begin_gs.x) / width;
 
@@ -87,12 +88,6 @@ void Plot::draw(const TimeSeries &ts,
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * n_samples, samples);
     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, n_samples);
-}
-
-void Plot::update_viewport_matrix(const glm::mat3x3 &viewport_matrix)
-{
-    _viewport_matrix = viewport_matrix;
-    _viewport_matrix_inv = glm::inverse(viewport_matrix);
 }
 
 void Plot::set_size(int width, int height)

@@ -64,7 +64,7 @@ class ProgramImpl
 
     void use() const;
     int get_handle() const;
-    int get_uniform_location(const char *uniform_name) const;
+    int uniform_location(const char *uniform_name) const;
 
   private:
     int m_program_handle;
@@ -111,9 +111,9 @@ class Program
      * @param uniform_name The name of the uniform to lookup.
      * @return int The value of the uniform's location in the program.
      */
-    int get_uniform_location(const char *uniform_name) const
+    int uniform_location(const char *uniform_name) const
     {
-        return m_impl->get_uniform_location(uniform_name);
+        return m_impl->uniform_location(uniform_name);
     }
 
   private:
