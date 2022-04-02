@@ -10,10 +10,8 @@
 
 #include "resources.hpp"
 
-GraphView::GraphView()
-    : _position(0, 0), _size(100, 100) // This is completely arbitrary
-      ,
-      _dragging(false), _plot(_view_matrix)
+GraphView::GraphView(const Database &db)
+    : _db(db), _position(0, 0), _size(100, 100), _dragging(false), _plot(_view_matrix)
 {
     update_viewport_matrix(glm::mat3x3(1.0f));
     _update_view_matrix(glm::mat3x3(1.0f));
@@ -133,7 +131,16 @@ void GraphView::_init_glyph_buffers()
 
 void GraphView::draw() const
 {
-    _plot.draw();
+    // auto ts = *db.data().begin();
+    // _plot.set_timeseries(ts.second);
+    // _ts = ts.second;
+
+    for (const auto &ts : _db.data())
+    {
+        const auto &tsraw = *(ts.second);
+        _plot.draw(tsraw);
+    }
+
     _draw_lines();
     _draw_labels();
 }
@@ -267,25 +274,25 @@ void GraphView::_draw_labels() const
     }
 
     // Find the nearest sample and draw labels for it
-    auto cursor_gs = glm::inverse(_view_matrix) * _viewport_matrix_inv * glm::vec3(_cursor, 1.0f);
-    auto cursor_gs2 = glm::inverse(_view_matrix) * _viewport_matrix_inv *
-                      glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
-    auto sample = _ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
+    // auto cursor_gs = glm::inverse(_view_matrix) * _viewport_matrix_inv * glm::vec3(_cursor, 1.0f);
+    // auto cursor_gs2 = glm::inverse(_view_matrix) * _viewport_matrix_inv *
+    //                   glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
+    // auto sample = _ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
 
-    const auto draw_label = [&](double value) {
-        glm::vec2 sample_gs(cursor_gs.x, value);
+    // const auto draw_label = [&](double value) {
+    //     glm::vec2 sample_gs(cursor_gs.x, value);
 
-        glm::vec3 point3 = _viewport_matrix * _view_matrix * glm::vec3(sample_gs, 1.0f);
-        glm::vec2 point(point3.x, point3.y);
+    //     glm::vec3 point3 = _viewport_matrix * _view_matrix * glm::vec3(sample_gs, 1.0f);
+    //     glm::vec2 point(point3.x, point3.y);
 
-        std::stringstream ss;
-        ss << value;
-        _draw_label(ss.str(), point, 18, 7, LabelAlignment::Right, LabelAlignmentVertical::Center);
-    };
+    //     std::stringstream ss;
+    //     ss << value;
+    //     _draw_label(ss.str(), point, 18, 7, LabelAlignment::Right, LabelAlignmentVertical::Center);
+    // };
 
-    draw_label(sample.average);
-    // draw_label(sample.min);
-    // draw_label(sample.max);
+    // draw_label(sample.average);
+    // // draw_label(sample.min);
+    // // draw_label(sample.max);
 }
 
 void GraphView::_draw_label(const std::string_view text,
@@ -532,13 +539,6 @@ glm::vec3 *GraphView::get_minmax_colour()
 bool *GraphView::get_show_line_segments()
 {
     return _plot.get_show_line_segments();
-}
-
-void GraphView::set_database(const Database &db)
-{
-    auto ts = *db.data().begin();
-    _plot.set_timeseries(ts.second);
-    _ts = ts.second;
 }
 
 glm::vec2 GraphView::screen2graph(const glm::ivec2 &value) const

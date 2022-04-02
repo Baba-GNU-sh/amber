@@ -45,7 +45,7 @@ enum class LabelAlignmentVertical
 class GraphView
 {
   public:
-    GraphView();
+    GraphView(const Database &db);
     ~GraphView();
 
     /**
@@ -124,8 +124,6 @@ class GraphView
 
     bool *get_show_line_segments();
 
-    void set_database(const Database &db);
-
   private:
     /**
      * @brief Check if a coodinate is inside a bounding box defined by two corners.
@@ -164,6 +162,8 @@ class GraphView
 
     std::tuple<glm::vec2, glm::vec2, glm::ivec2> _get_tick_spacing() const;
 
+    const Database &_db;
+
     glm::ivec2 _position;
     glm::ivec2 _size;
     glm::vec2 _cursor;
@@ -192,6 +192,4 @@ class GraphView
     const int TICKLEN = 8;
 
     Plot _plot;
-
-    std::shared_ptr<TimeSeries> _ts;
 };

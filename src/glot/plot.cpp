@@ -40,7 +40,7 @@ Plot::~Plot()
     glDeleteBuffers(1, &_plot_vbo);
 }
 
-void Plot::draw() const
+void Plot::draw(const TimeSeries &ts) const
 {
     glBindVertexArray(_plot_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
@@ -80,7 +80,7 @@ void Plot::draw() const
     auto interval = PIXELS_PER_COL * (end_gs.x - begin_gs.x) / width;
 
     TSSample samples[width];
-    auto n_samples = _timeseries->get_samples(&samples[0], begin_gs.x, interval, width);
+    auto n_samples = ts.get_samples(&samples[0], begin_gs.x, interval, width);
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * n_samples, samples);
     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, n_samples);
@@ -115,9 +115,4 @@ glm::vec3 *Plot::get_minmax_colour()
 bool *Plot::get_show_line_segments()
 {
     return &_show_line_segments;
-}
-
-void Plot::set_timeseries(std::shared_ptr<TimeSeries> ts)
-{
-    _timeseries = ts;
 }

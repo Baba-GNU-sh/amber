@@ -19,7 +19,7 @@ class Plot
   public:
     Plot(const glm::mat3x3 &view_matrix);
     ~Plot();
-    void draw() const;
+    void draw(const TimeSeries &ts) const;
 
     /**
      * @brief Update the matrix describing the transform from screen space to pixels.
@@ -49,6 +49,5 @@ class Plot
     glm::vec3 _minmax_colour;
     bool _show_line_segments = false;
     std::vector<Sample> _samples;
-    std::shared_ptr<TimeSeries> _timeseries;
     glm::ivec2 _size;
 };
