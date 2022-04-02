@@ -71,7 +71,7 @@ void Plot::draw(const TimeSeries &ts,
     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
 
     // Pull out samples binned by vertical columns of pixels
-    const int PIXELS_PER_COL = 2;
+    const int PIXELS_PER_COL = 1;
     const int width = std::min(_size.x / PIXELS_PER_COL, COLS_MAX);
 
     // Work out where on the graph the first column of pixels lives
