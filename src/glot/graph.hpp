@@ -12,6 +12,7 @@
 
 // #include "font.hpp"
 #include "database.hpp"
+#include "timeseries.hpp"
 #include <glm/glm.hpp>
 
 struct GlyphVertex
@@ -37,6 +38,13 @@ enum class LabelAlignmentVertical
     Top,
     Center,
     Bottom
+};
+
+struct TimeSeriesContainer
+{
+    std::shared_ptr<TimeSeries> ts;
+    glm::vec3 colour;
+    std::string name;
 };
 
 /**
@@ -108,8 +116,7 @@ class GraphView
      */
     void draw(const glm::mat3 &viewport_matrix,
               int plot_width,
-              glm::vec3 plot_colour,
-              glm::vec3 minmax_colour,
+              const std::vector<TimeSeriesContainer> &ts,
               bool show_plot_segments) const;
 
     glm::mat3 view_matrix() const;

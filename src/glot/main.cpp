@@ -36,6 +36,8 @@ int main()
         Database db;
         PluginContext plugin_context(db);
         PluginManager plugin_manager(plugin_context);
+        plugin_manager.start_all();
+        
         Window win(db, plugin_manager);
         // win.set_data(audio.data(), audio.size(), audio.sample_rate());
         spdlog::info("Initialization OK: Spinning forever");

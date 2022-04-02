@@ -23,7 +23,6 @@ class Plot
               const glm::mat3 &vp_matrix,
               int plot_width,
               glm::vec3 plot_colour,
-              glm::vec3 minmax_colour,
               bool show_line_segments) const;
     void set_size(int width, int height);
 

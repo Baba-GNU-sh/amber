@@ -1,4 +1,6 @@
 #include "window.hpp"
+#include "graph.hpp"
+#include <imgui.h>
 
 Window::Window(const Database &db, PluginManager &plugins)
     : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db),
@@ -47,6 +49,27 @@ Window::Window(const Database &db, PluginManager &plugins)
     m_graph->set_size(SCR_WIDTH, SCR_HEIGHT);
 
     update_viewport_matrix(SCR_WIDTH, SCR_HEIGHT);
+
+    std::vector<glm::vec3> plot_colours = {
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f)
+    };
+
+    const auto &data = _database.data();
+    _ts.resize(data.size());
+    auto col = plot_colours.begin();
+    std::transform(data.begin(), data.end(), _ts.begin(), [&col, &plot_colours](const auto &ts) {
+        TimeSeriesContainer cont;
+        cont.name = ts.first;
+        cont.ts = ts.second;
+        cont.colour = *col++;
+        if (col == plot_colours.end())
+        {
+            col = plot_colours.begin();
+        }
+        return cont;
+    });
 }
 
 Window::~Window()
@@ -64,7 +87,8 @@ void Window::spin()
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m_graph->draw(_vp_matrix, _plot_width, _plot_colour, _minmax_colour, _show_line_segments);
+
+        m_graph->draw(_vp_matrix, _plot_width, _ts, _show_line_segments);
         render_imgui();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(m_window);
@@ -176,12 +200,17 @@ void Window::render_imgui()
         }
 
         ImGui::SliderInt("Line Width", &_plot_width, 1, 5);
-        ImGui::ColorEdit3("Line Colour", &(_plot_colour.x));
         ImGui::Checkbox("Show Line Segments", &_show_line_segments);
         ImGui::ColorEdit3("MinMax Colour", &(_minmax_colour.x));
     }
 
-    ImGui::Separator();
+    if (ImGui::CollapsingHeader("Plots", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        for (auto &plugin : _ts)
+        {
+            ImGui::ColorEdit3(plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
+        }
+    }
 
     _plugin_manager.draw_dialogs();
 

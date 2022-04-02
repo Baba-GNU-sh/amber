@@ -11,7 +11,6 @@
 
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
-#include <imgui.h>
 
 #include "shader_utils.hpp"
 
@@ -63,4 +62,7 @@ class Window
     glm::vec3 _plot_colour;
     glm::vec3 _minmax_colour;
     glm::mat3 _vp_matrix;
+
+    std::vector<TimeSeriesContainer> _ts;
+    
 };

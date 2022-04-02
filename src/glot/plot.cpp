@@ -42,7 +42,6 @@ void Plot::draw(const TimeSeries &ts,
                 const glm::mat3 &vp_matrix,
                 int line_width,
                 glm::vec3 line_colour,
-                glm::vec3 minmax_colour,
                 bool show_line_segments) const
 {
     const auto vp_matrix_inv = glm::inverse(vp_matrix);
@@ -67,8 +66,9 @@ void Plot::draw(const TimeSeries &ts,
 
     uniform_id = _lines_shader.uniform_location("plot_colour");
     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
+    
     uniform_id = _lines_shader.uniform_location("minmax_colour");
-    glUniform3f(uniform_id, minmax_colour.r, minmax_colour.g, minmax_colour.b);
+    glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
 
     // Pull out samples binned by vertical columns of pixels
     const int PIXELS_PER_COL = 2;
