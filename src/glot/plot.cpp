@@ -9,8 +9,7 @@
 #include "timeseries.hpp"
 
 Plot::Plot(const glm::mat3x3 &view_matrix)
-    : _view_matrix(view_matrix), _line_thickness_px(2.0), _plot_colour(1.0f, 0.5f, 0.2f),
-      _minmax_colour(0.5f, 0.5f, 0.5f)
+    : _view_matrix(view_matrix)
 {
     glGenVertexArrays(1, &_plot_vao);
     glBindVertexArray(_plot_vao);
@@ -40,7 +39,11 @@ Plot::~Plot()
     glDeleteBuffers(1, &_plot_vbo);
 }
 
-void Plot::draw(const TimeSeries &ts) const
+void Plot::draw(const TimeSeries &ts,
+                int line_width,
+                glm::vec3 line_colour,
+                glm::vec3 minmax_colour,
+                bool show_line_segments) const
 {
     glBindVertexArray(_plot_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
@@ -56,15 +59,15 @@ void Plot::draw(const TimeSeries &ts) const
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_viewport_matrix_inv[0]));
 
     uniform_id = _lines_shader.get_uniform_location("line_thickness_px");
-    glUniform1i(uniform_id, _line_thickness_px);
+    glUniform1i(uniform_id, line_width);
 
     uniform_id = _lines_shader.get_uniform_location("show_line_segments");
-    glUniform1i(uniform_id, _show_line_segments);
+    glUniform1i(uniform_id, show_line_segments);
 
     uniform_id = _lines_shader.get_uniform_location("plot_colour");
-    glUniform3f(uniform_id, _plot_colour.r, _plot_colour.g, _plot_colour.b);
+    glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
     uniform_id = _lines_shader.get_uniform_location("minmax_colour");
-    glUniform3f(uniform_id, _minmax_colour.r, _minmax_colour.g, _minmax_colour.b);
+    glUniform3f(uniform_id, minmax_colour.r, minmax_colour.g, minmax_colour.b);
 
     // Pull out samples binned by vertical columns of pixels
     const int PIXELS_PER_COL = 2;
@@ -95,24 +98,4 @@ void Plot::update_viewport_matrix(const glm::mat3x3 &viewport_matrix)
 void Plot::set_size(int width, int height)
 {
     _size = glm::ivec2(width, height);
-}
-
-int *Plot::get_line_thickness()
-{
-    return &_line_thickness_px;
-}
-
-glm::vec3 *Plot::get_plot_colour()
-{
-    return &_plot_colour;
-}
-
-glm::vec3 *Plot::get_minmax_colour()
-{
-    return &_minmax_colour;
-}
-
-bool *Plot::get_show_line_segments()
-{
-    return &_show_line_segments;
 }

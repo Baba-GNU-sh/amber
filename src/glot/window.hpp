@@ -57,4 +57,9 @@ class Window
 
     GLFWwindow *m_window;
     std::shared_ptr<GraphView> m_graph;
+
+    int _plot_width = 2;
+    bool _show_line_segments = false;
+    glm::vec3 _plot_colour;
+    glm::vec3 _minmax_colour;
 };

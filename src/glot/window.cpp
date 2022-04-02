@@ -2,7 +2,7 @@
 
 Window::Window(const Database &db, PluginManager &plugins)
     : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db),
-      _plugin_manager(plugins)
+      _plugin_manager(plugins), _plot_colour(1.0f, 0.5f, 0.2f), _minmax_colour(0.5f, 0.5f, 0.5f)
 {
     m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLot", NULL, NULL);
     if (!m_window)
@@ -64,7 +64,7 @@ void Window::spin()
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m_graph->draw();
+        m_graph->draw(_plot_width, _plot_colour, _minmax_colour, _show_line_segments);
         render_imgui();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(m_window);
@@ -176,15 +176,10 @@ void Window::render_imgui()
             _update_bgcolour();
         }
 
-        ImGui::SliderInt("Line Width", m_graph->get_plot_thickness(), 1, 32);
-
-        auto *colour = m_graph->get_plot_colour();
-        ImGui::ColorEdit3("Line Colour", &(colour->x));
-
-        ImGui::Checkbox("Show Line Segments", m_graph->get_show_line_segments());
-
-        colour = m_graph->get_minmax_colour();
-        ImGui::ColorEdit3("MinMax Colour", &(colour->x));
+        ImGui::SliderInt("Line Width", &_plot_width, 1, 5);
+        ImGui::ColorEdit3("Line Colour", &(_plot_colour.x));
+        ImGui::Checkbox("Show Line Segments", &_show_line_segments);
+        ImGui::ColorEdit3("MinMax Colour", &(_minmax_colour.x));
     }
 
     ImGui::Separator();

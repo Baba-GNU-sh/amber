@@ -105,7 +105,7 @@ class GraphView
      */
     void update_viewport_matrix(const glm::mat3x3 &viewport_matrix);
 
-    void draw() const;
+    void draw(int plot_width, glm::vec3 plot_colour, glm::vec3 minmax_colour, bool show_plot_segments) const;
 
     glm::mat3x3 get_view_matrix() const;
 
@@ -115,14 +115,6 @@ class GraphView
      * @return glm::vec2
      */
     glm::vec2 get_cursor_graphspace() const;
-
-    int *get_plot_thickness();
-
-    glm::vec3 *get_plot_colour();
-
-    glm::vec3 *get_minmax_colour();
-
-    bool *get_show_line_segments();
 
   private:
     /**
@@ -160,7 +152,7 @@ class GraphView
     void _draw_glyph(
         char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const;
 
-    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _get_tick_spacing() const;
+    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing() const;
 
     const Database &_db;
 

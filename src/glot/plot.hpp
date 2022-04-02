@@ -19,22 +19,13 @@ class Plot
   public:
     Plot(const glm::mat3x3 &view_matrix);
     ~Plot();
-    void draw(const TimeSeries &ts) const;
-
-    /**
-     * @brief Update the matrix describing the transform from screen space to pixels.
-     *
-     * @param viewport_matrix The new value of the viewport matrix.
-     */
+    void draw(const TimeSeries &ts,
+              int plot_width,
+              glm::vec3 plot_colour,
+              glm::vec3 minmax_colour,
+              bool show_line_segments) const;
     void update_viewport_matrix(const glm::mat3x3 &viewport_matrix);
-
     void set_size(int width, int height);
-
-    int *get_line_thickness();
-    glm::vec3 *get_plot_colour();
-    glm::vec3 *get_minmax_colour();
-    bool *get_show_line_segments();
-    void set_timeseries(std::shared_ptr<TimeSeries> ts);
 
   private:
     const glm::mat3x3 &_view_matrix;
@@ -44,10 +35,6 @@ class Plot
     GLuint _plot_vbo;
     Program _lines_shader;
     static constexpr int COLS_MAX = 8000; // This could come back to bit me!
-    int _line_thickness_px;
-    glm::vec3 _plot_colour;
-    glm::vec3 _minmax_colour;
-    bool _show_line_segments = false;
     std::vector<Sample> _samples;
     glm::ivec2 _size;
 };

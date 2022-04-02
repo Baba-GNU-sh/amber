@@ -129,16 +129,11 @@ void GraphView::_init_glyph_buffers()
     stbi_image_free(tex_data);
 }
 
-void GraphView::draw() const
+void GraphView::draw(int plot_width, glm::vec3 plot_colour, glm::vec3 minmax_colour, bool show_line_segments) const
 {
-    // auto ts = *db.data().begin();
-    // _plot.set_timeseries(ts.second);
-    // _ts = ts.second;
-
     for (const auto &ts : _db.data())
     {
-        const auto &tsraw = *(ts.second);
-        _plot.draw(tsraw);
+        _plot.draw(*(ts.second), plot_width, plot_colour, minmax_colour, show_line_segments);
     }
 
     _draw_lines();
@@ -149,9 +144,9 @@ void GraphView::_draw_lines() const
 {
     int offset = 0;
 
-    auto tick_spacing = _get_tick_spacing();
-    auto tick_spacing_major = std::get<0>(tick_spacing);
-    auto tick_spacing_minor = std::get<1>(tick_spacing);
+    const auto tick_spacing = _tick_spacing();
+    const auto tick_spacing_major = std::get<0>(tick_spacing);
+    const auto tick_spacing_minor = std::get<1>(tick_spacing);
 
     glBindVertexArray(_linebuf_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
@@ -234,7 +229,7 @@ void GraphView::_draw_labels() const
     glm::vec2 tl(GUTTER_SIZE_PX, 0);
     glm::vec2 bl(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX);
     glm::vec2 br(_size.x, _size.y - GUTTER_SIZE_PX);
-    auto tick_spacing = _get_tick_spacing();
+    auto tick_spacing = _tick_spacing();
     auto tick_spacing_major = std::get<0>(tick_spacing);
     // auto tick_spacing_minor = std::get<1>(tick_spacing);
     auto precision = std::get<2>(tick_spacing);
@@ -378,7 +373,7 @@ void GraphView::_draw_glyph(
     *buf = data + 1;
 }
 
-std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_get_tick_spacing() const
+std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_tick_spacing() const
 {
     const glm::vec2 MIN_TICK_SPACING_PX(80, 50);
 
@@ -519,26 +514,6 @@ glm::mat3x3 GraphView::get_view_matrix() const
 glm::vec2 GraphView::get_cursor_graphspace() const
 {
     return screen2graph(_cursor);
-}
-
-int *GraphView::get_plot_thickness()
-{
-    return _plot.get_line_thickness();
-}
-
-glm::vec3 *GraphView::get_plot_colour()
-{
-    return _plot.get_plot_colour();
-}
-
-glm::vec3 *GraphView::get_minmax_colour()
-{
-    return _plot.get_minmax_colour();
-}
-
-bool *GraphView::get_show_line_segments()
-{
-    return _plot.get_show_line_segments();
 }
 
 glm::vec2 GraphView::screen2graph(const glm::ivec2 &value) const
