@@ -34,14 +34,19 @@ void PluginManager::draw_menu()
     {
         if (ImGui::BeginMenu(plugin.name.c_str()))
         {
-            if (ImGui::MenuItem("Start"))
+            if (plugin.plugin->is_running())
             {
-                plugin.plugin->start();
+                if (ImGui::MenuItem("Stop"))
+                {
+                    plugin.plugin->stop();
+                }
             }
-
-            if (ImGui::MenuItem("Stop"))
+            else
             {
-                plugin.plugin->stop();
+                if (ImGui::MenuItem("Start"))
+                {
+                    plugin.plugin->start();
+                }
             }
 
             if (ImGui::MenuItem("Show Display"))
