@@ -1,19 +1,19 @@
 #include "audiofile_plugin.hpp"
+
 #include <imgui.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 AudioFilePlugin::AudioFilePlugin(PluginContext &pluggy, std::string_view filename)
     : _running(false), _current_sample(0), _filename(filename)
 {
     _audioFile.load(std::string(filename));
-    _audioFile.printSummary();
 
     auto ts = std::make_shared<TimeSeriesDense>(0.0, 1.0 / _audioFile.getSampleRate());
     pluggy.get_database().register_timeseries(std::string(filename), ts);
-
     _ts = ts;
 
     _logger = spdlog::stdout_color_mt("AudioFilePlugin");
-    _logger->info("Plugin initialized");
+    _logger->info("Initialized");
 }
 
 AudioFilePlugin::~AudioFilePlugin()
