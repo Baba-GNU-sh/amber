@@ -7,9 +7,12 @@
 #include "plugin_context.hpp"
 #include "timeseries_dense.hpp"
 
-enum class WaveType
+enum WaveType
 {
-    Sine
+    Sine = 0,
+    Square = 1,
+    Triangle = 2,
+    SawTooth = 3
 };
 
 class WaveGenPlugin : public Plugin
@@ -27,7 +30,7 @@ class WaveGenPlugin : public Plugin
     PluginContext &_ctx;
     float _frequency = 1.0f;
     const unsigned int _sample_rate = 1000;
-    WaveType _wave_type = WaveType::Sine;
+    int _wave_type = Sine;
     std::shared_ptr<spdlog::logger> _logger;
     std::atomic<bool> _running = false;
     std::thread _thread;

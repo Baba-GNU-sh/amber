@@ -46,20 +46,11 @@ bool WaveGenPlugin::is_running() const
 
 void WaveGenPlugin::draw_menu()
 {
-    const auto get_signal_name = [](WaveType type) -> const char * {
-        switch (type)
-        {
-        case WaveType::Sine:
-            return "Sine";
-        default:
-            return "Unkown";
-        }
-    };
-
     ImGui::Begin("Wave Gen");
     ImGui::Text("Sample Rate: %u", _sample_rate);
     ImGui::SliderFloat("Frequency", &_frequency, 0.1, 10);
-    ImGui::Text("Signal: %s", get_signal_name(_wave_type));
+    const char *items[] = {"Sine", "Square", "Triangle", "SawTooth"};
+    ImGui::Combo("Signal Type", &_wave_type, items, IM_ARRAYSIZE(items));
     ImGui::Text("Running: %s", _running ? "yes" : "no");
 }
 
@@ -81,7 +72,21 @@ void WaveGenPlugin::thread_handler()
         for (int i = 0; i < duration.count(); i++)
         {
             const double time = static_cast<double>(_ticks++) * _frequency / _sample_rate;
-            _ts->push_samples(std::sin(time));
+            switch (_wave_type)
+            {
+            case Sine:
+                _ts->push_samples(std::sin(time));
+                break;
+            case Square:
+                _ts->push_samples(std::sin(time) > 0.0 ? 1.0 : -1.0);
+                break;
+            case Triangle:
+                _ts->push_samples(2 * std::asin(std::sin(time)) / M_PI);
+                break;
+            case SawTooth:
+                _ts->push_samples(2 * std::atan(std::tan(M_PI_2 - time)) / M_PI);
+                break;
+            }
         }
     }
 }
