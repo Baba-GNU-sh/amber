@@ -75,16 +75,16 @@ void WaveGenPlugin::thread_handler()
             switch (_wave_type)
             {
             case Sine:
-                _ts->push_samples(std::sin(time));
+                _ts->push_sample(std::sin(time));
                 break;
             case Square:
-                _ts->push_samples(std::sin(time) > 0.0 ? 1.0 : -1.0);
+                _ts->push_sample(std::sin(time) > 0.0 ? 1.0 : -1.0);
                 break;
             case Triangle:
-                _ts->push_samples(2 * std::asin(std::sin(time)) / M_PI);
+                _ts->push_sample(2 * std::asin(std::sin(time)) / M_PI);
                 break;
             case SawTooth:
-                _ts->push_samples(2 * std::atan(std::tan(M_PI_2 - time)) / M_PI);
+                _ts->push_sample(2 * std::atan(std::tan(M_PI_2 - time)) / M_PI);
                 break;
             }
         }

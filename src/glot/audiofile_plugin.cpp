@@ -39,7 +39,7 @@ void AudioFilePlugin::thread()
             }
 
             auto sample = _audioFile.samples[0][_current_sample];
-            _ts->push_samples(sample);
+            _ts->push_sample(sample);
 
             _current_sample++;
         }

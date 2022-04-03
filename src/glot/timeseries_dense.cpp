@@ -61,10 +61,6 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
         }
 
         index++;
-
-        // // For now, just find the nearest sample to first timestamp
-        // auto start = timestamp_start - _start;
-        // if (start < )
     }
 
     return index;
@@ -84,12 +80,14 @@ std::pair<double, double> TimeSeriesDense::get_span() const
     return std::pair(_start, last);
 }
 
-/**
- * @brief Adds a new sample to the timeseries.
- * @param value The value of the sample to add.
- */
-void TimeSeriesDense::push_samples(double value)
+void TimeSeriesDense::push_sample(double value)
 {
     std::lock_guard<std::recursive_mutex> _(_mut);
-    _data.push_back(value);
+    _data.insert(_data.end(), value);
+}
+
+void TimeSeriesDense::push_samples(const std::vector<double> &value)
+{
+    std::lock_guard<std::recursive_mutex> _(_mut);
+    _data.insert(_data.end(), value.begin(), value.end());
 }
