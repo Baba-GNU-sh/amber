@@ -69,10 +69,6 @@ void AudioFilePlugin::start()
         _thread = std::thread(&AudioFilePlugin::thread, this);
         _logger->info("Started");
     }
-    else
-    {
-        _logger->warn("Already running");
-    }
 }
 
 void AudioFilePlugin::stop()
@@ -82,10 +78,6 @@ void AudioFilePlugin::stop()
         _running = false;
         _thread.join();
         _logger->info("Stopped");
-    }
-    else
-    {
-        _logger->warn("Already stopped");
     }
 }
 
