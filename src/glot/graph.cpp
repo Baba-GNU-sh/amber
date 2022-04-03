@@ -130,16 +130,15 @@ void GraphView::_init_glyph_buffers()
 
 void GraphView::draw(const glm::mat3 &viewport_matrix,
                      int plot_width,
-                     const std::vector<TimeSeriesContainer> &ts,
+                     const std::vector<TimeSeriesContainer> &time_series,
                      bool show_line_segments) const
 {
-    for (const auto &ts : ts)
+    for (const auto &ts : time_series)
     {
-        _plot.draw(*(ts.ts),
-                   viewport_matrix,
-                   plot_width,
-                   ts.colour,
-                   show_line_segments);
+        if (ts.visible)
+        {
+            _plot.draw(*(ts.ts), viewport_matrix, plot_width, ts.colour, show_line_segments);
+        }
     }
 
     _draw_lines(viewport_matrix);

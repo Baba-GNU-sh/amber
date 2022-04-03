@@ -45,6 +45,7 @@ struct TimeSeriesContainer
     std::shared_ptr<TimeSeries> ts;
     glm::vec3 colour;
     std::string name;
+    bool visible;
 };
 
 /**

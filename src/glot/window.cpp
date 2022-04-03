@@ -51,10 +51,7 @@ Window::Window(const Database &db, PluginManager &plugins)
     update_viewport_matrix(SCR_WIDTH, SCR_HEIGHT);
 
     std::vector<glm::vec3> plot_colours = {
-        glm::vec3(1.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
-    };
+        glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)};
 
     const auto &data = _database.data();
     _ts.resize(data.size());
@@ -64,6 +61,7 @@ Window::Window(const Database &db, PluginManager &plugins)
         cont.name = ts.first;
         cont.ts = ts.second;
         cont.colour = *col++;
+        cont.visible = true;
         if (col == plot_colours.end())
         {
             col = plot_colours.begin();
@@ -208,7 +206,13 @@ void Window::render_imgui()
     {
         for (auto &plugin : _ts)
         {
-            ImGui::ColorEdit3(plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
+            // Im ImGui, widgets need unique label names
+            // Anything after the "##" is not displayed
+            const auto label_name = "##" + plugin.name;
+            ImGui::Checkbox(label_name.c_str(), &(plugin.visible));
+            ImGui::SameLine();
+            ImGui::ColorEdit3(
+                plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
         }
     }
 
