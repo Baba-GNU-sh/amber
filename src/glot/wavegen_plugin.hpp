@@ -1,7 +1,7 @@
 #pragma once
 
-#include <thread>
 #include <spdlog/spdlog.h>
+#include <thread>
 
 #include "plugin.hpp"
 #include "plugin_context.hpp"
@@ -13,6 +13,13 @@ enum WaveType
     Square = 1,
     Triangle = 2,
     SawTooth = 3
+};
+
+struct WaveSettings
+{
+    WaveType type;
+    float frequency;
+    float amplitude;
 };
 
 class WaveGenPlugin : public Plugin
@@ -29,12 +36,12 @@ class WaveGenPlugin : public Plugin
   private:
     void thread_handler();
     PluginContext &_ctx;
-    float _frequency = 1.0f;
     const unsigned int _sample_rate = 1000;
-    int _wave_type = Sine;
     std::shared_ptr<spdlog::logger> _logger;
     std::atomic<bool> _running = false;
     std::thread _thread;
     std::shared_ptr<TimeSeriesDense> _ts;
     std::size_t _ticks = 0;
+    mutable std::mutex _mutex;
+    WaveSettings _settings;
 };

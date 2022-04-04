@@ -11,6 +11,10 @@ WaveGenPlugin::WaveGenPlugin(PluginContext &ctx) : _ctx(ctx)
 
     _ts = std::make_shared<TimeSeriesDense>(0.0, 1.0 / _sample_rate);
     _ctx.get_database().register_timeseries("ChannelA", _ts);
+
+    _settings.amplitude = 1.0;
+    _settings.frequency = 1.0;
+    _settings.type = Sine;
 }
 
 WaveGenPlugin::~WaveGenPlugin()
@@ -46,12 +50,17 @@ bool WaveGenPlugin::is_running() const
 
 void WaveGenPlugin::draw_menu()
 {
-    ImGui::Begin("Wave Gen");
-    ImGui::Text("Sample Rate: %u", _sample_rate);
-    ImGui::SliderFloat("Frequency", &_frequency, 0.1, 10);
     const char *items[] = {"Sine", "Square", "Triangle", "SawTooth"};
-    ImGui::Combo("Signal Type", &_wave_type, items, IM_ARRAYSIZE(items));
+
+    ImGui::Begin("Wave Gen");
     ImGui::Text("Running: %s", _running ? "yes" : "no");
+    ImGui::Text("Sample Rate: %u", _sample_rate);
+
+    std::lock_guard<std::mutex> _(_mutex);
+    ImGui::Combo(
+        "Signal Type", reinterpret_cast<int *>(&_settings.type), items, IM_ARRAYSIZE(items));
+    ImGui::SliderFloat("Frequency", &_settings.frequency, 0.1, 10);
+    ImGui::SliderFloat("Amplitude", &_settings.amplitude, 0.1, 10);
 }
 
 void WaveGenPlugin::thread_handler()
@@ -65,26 +74,32 @@ void WaveGenPlugin::thread_handler()
     {
         std::this_thread::sleep_for(10ms);
 
+        WaveSettings settings = [this]() {
+            std::lock_guard<std::mutex> _(_mutex);
+            return _settings;
+        }();
+
         const auto timenow = steady_clock::now();
         const auto duration = duration_cast<milliseconds>(timenow - prevtime);
         prevtime = timenow;
 
         for (int i = 0; i < duration.count(); i++)
         {
-            const double time = static_cast<double>(_ticks++) * _frequency / _sample_rate;
-            switch (_wave_type)
+            const double time = static_cast<double>(_ticks++) * settings.frequency / _sample_rate;
+            switch (settings.type)
             {
             case Sine:
-                _ts->push_samples(std::sin(time));
+                _ts->push_samples(settings.amplitude * std::sin(time));
                 break;
             case Square:
-                _ts->push_samples(std::sin(time) > 0.0 ? 1.0 : -1.0);
+                _ts->push_samples(settings.amplitude * std::sin(time) > 0.0 ? 1.0 : -1.0);
                 break;
             case Triangle:
-                _ts->push_samples(2 * std::asin(std::sin(time)) / M_PI);
+                _ts->push_samples(settings.amplitude * 2 * std::asin(std::sin(time)) / M_PI);
                 break;
             case SawTooth:
-                _ts->push_samples(2 * std::atan(std::tan(M_PI_2 - time)) / M_PI);
+                _ts->push_samples(settings.amplitude * 2 * std::atan(std::tan(M_PI_2 - time)) /
+                                  M_PI);
                 break;
             }
         }
