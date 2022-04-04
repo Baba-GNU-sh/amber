@@ -12,7 +12,8 @@ class AudioFilePlugin : public Plugin
 {
   public:
     AudioFilePlugin(PluginContext &pluggy, std::string_view filename);
-    ~AudioFilePlugin();
+    virtual ~AudioFilePlugin();
+
     void thread();
     float *data();
     std::size_t size();

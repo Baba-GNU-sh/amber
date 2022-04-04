@@ -12,13 +12,14 @@ class TimeSeriesDense : public TimeSeries
 {
   public:
     TimeSeriesDense(double start, double interval);
+    virtual ~TimeSeriesDense() = default;
 
     std::size_t get_samples(TSSample *samples,
                             double timestamp_start,
                             double bin_width,
                             std::size_t num_samples) const override;
 
-    TSSample get_sample(double timestamp, double bin_width);
+    TSSample get_sample(double timestamp, double bin_width) override;
     std::pair<double, double> get_span() const override;
 
     /**

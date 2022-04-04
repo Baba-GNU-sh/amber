@@ -19,7 +19,8 @@ class WaveGenPlugin : public Plugin
 {
   public:
     WaveGenPlugin(PluginContext &ctx);
-    ~WaveGenPlugin();
+    virtual ~WaveGenPlugin();
+
     void start() override;
     void stop() override;
     bool is_running() const override;
