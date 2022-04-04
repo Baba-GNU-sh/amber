@@ -54,7 +54,7 @@ struct TimeSeriesContainer
 class GraphView
 {
   public:
-    GraphView(const Database &db);
+    GraphView();
     ~GraphView();
 
     /**
@@ -168,8 +168,6 @@ class GraphView
 
     std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing(const glm::mat3 &vp_matrix) const;
 
-    const Database &_db;
-
     glm::ivec2 _position;
     glm::ivec2 _size;
     glm::vec2 _cursor;
@@ -190,7 +188,6 @@ class GraphView
     GLuint _glyphbuf_ebo;
     Program _glyph_shader;
     GLuint _glyph_texture;
-    int _glyph_offset = 0;
 
     const int GUTTER_SIZE_PX = 60;
     const int TICKLEN = 8;

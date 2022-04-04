@@ -14,6 +14,7 @@ class TimeSeriesDense : public TimeSeries
 {
   public:
     TimeSeriesDense(double start, double interval);
+    virtual ~TimeSeriesDense() = default;
 
     std::size_t get_samples(TSSample *samples,
                             double timestamp_start,

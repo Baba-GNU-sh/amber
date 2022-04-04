@@ -37,7 +37,7 @@ Clone this repo then cd into the root:
 ```bash
 mkdir build && cd build
 CONAN_SYSREQUIRES_MODE=enabled conan install ..
-cmake -DCMAKE_MODULE_PATH=${PWD} ..
+cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ```
 
@@ -78,6 +78,34 @@ Or of you built it in release mode:
 ```
 
 As in the linux version, use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
+
+### Running Tests
+GLot comes with a suite of tests and performance benchmarks. For some reason, these don't work on Windows, so make sure to run this under Linux. I am also going to show how to build with coverage enabled because coverage is pretty useful information!
+
+Adding the coverage flag will cause the compiler to spit out `.gcno` files for every object file. 
+
+> Note: this only works with `gcc`.
+```
+mkdir build && cd build
+CONAN_SYSREQUIRES_MODE=enabled conan install ..
+cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_COVERAGE=ON ..
+cmake --build .
+```
+
+Now let's run the tests, which have been instrumented to spit out `.gcda` files for every `.gcno` file which contains the coverage information.
+```
+ctest --verbose
+```
+
+Generate a report using gcovr:
+```
+gcovr --root .. --html-details -o coverage.html
+```
+
+You can no view the reults by opening `coverage.html` in a browser. E.g.
+```
+firefox coverage.html
+```
 
 ## Alternatives
 - [PlotJuggler](https://www.plotjuggler.io/)

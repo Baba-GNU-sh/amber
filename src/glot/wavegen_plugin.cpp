@@ -10,7 +10,7 @@ WaveGenPlugin::WaveGenPlugin(PluginContext &ctx) : _ctx(ctx)
     _logger->info("Initialized");
 
     _ts = std::make_shared<TimeSeriesDense>(0.0, 1.0 / _sample_rate);
-    ctx.get_database().register_timeseries("ChannelA", _ts);
+    _ctx.get_database().register_timeseries("ChannelA", _ts);
 }
 
 WaveGenPlugin::~WaveGenPlugin()

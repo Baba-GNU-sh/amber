@@ -45,7 +45,7 @@ Window::Window(const Database &db, PluginManager &plugins)
     _update_vsync();
     _update_bgcolour();
 
-    m_graph = std::make_shared<GraphView>(db);
+    m_graph = std::make_shared<GraphView>();
     m_graph->set_size(SCR_WIDTH, SCR_HEIGHT);
 
     update_viewport_matrix(SCR_WIDTH, SCR_HEIGHT);
