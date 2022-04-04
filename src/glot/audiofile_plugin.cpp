@@ -39,7 +39,7 @@ void AudioFilePlugin::thread()
             }
 
             auto sample = _audioFile.samples[0][_current_sample];
-            _ts->push_samples(sample);
+            _ts->push_sample(sample);
 
             _current_sample++;
         }
@@ -69,10 +69,6 @@ void AudioFilePlugin::start()
         _thread = std::thread(&AudioFilePlugin::thread, this);
         _logger->info("Started");
     }
-    else
-    {
-        _logger->warn("Already running");
-    }
 }
 
 void AudioFilePlugin::stop()
@@ -82,10 +78,6 @@ void AudioFilePlugin::stop()
         _running = false;
         _thread.join();
         _logger->info("Stopped");
-    }
-    else
-    {
-        _logger->warn("Already stopped");
     }
 }
 
