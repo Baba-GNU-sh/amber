@@ -92,7 +92,7 @@ void WaveGenPlugin::thread_handler()
                 _ts->push_sample(settings.amplitude * std::sin(time));
                 break;
             case Square:
-                _ts->push_sample(settings.amplitude * std::sin(time) > 0.0 ? 1.0 : -1.0);
+                _ts->push_sample(std::sin(time) > 0.0 ? settings.amplitude : -settings.amplitude);
                 break;
             case Triangle:
                 _ts->push_sample(settings.amplitude * 2 * std::asin(std::sin(time)) / M_PI);
