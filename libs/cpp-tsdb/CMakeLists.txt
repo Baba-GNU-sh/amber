@@ -3,7 +3,7 @@ project(tsdb)
 
 option(BUILD_TESTS "Build test programs" OFF)
 option(BUILD_COVERAGE "Build with coverage info" OFF)
-option(TSDB_BUILD_EXAMPLES "Buld example binaries" OFF)
+option(TSDB_BUILD_EXAMPLES "Build example binaries" OFF)
 
 add_library(tsdb INTERFACE)
 target_include_directories(
