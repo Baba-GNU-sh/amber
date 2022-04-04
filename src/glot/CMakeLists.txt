@@ -55,5 +55,5 @@ if (BUILD_TESTS)
 			glot
 			benchmark::benchmark
 	)
-	add_test(NAME AllTests COMMAND bench)
+	add_test(NAME Benchmarks COMMAND bench)
 endif()
