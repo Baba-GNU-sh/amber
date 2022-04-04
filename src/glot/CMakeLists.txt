@@ -46,7 +46,7 @@ add_executable(glotapp main.cpp)
 target_link_libraries(glotapp PRIVATE glot)
 target_compile_options(glotapp PRIVATE -Werror -Wall -Wextra)
 
-if (BUILD_TESTS)
+if (BUILD_BENCHMARKS)
 	find_package(benchmark REQUIRED)
 	add_executable(bench benchmark/ts.cpp)
 	target_link_libraries(
