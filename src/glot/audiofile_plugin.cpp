@@ -24,13 +24,20 @@ AudioFilePlugin::~AudioFilePlugin()
 
 void AudioFilePlugin::thread()
 {
+    using namespace std::chrono;
     using namespace std::chrono_literals;
+
+    auto prevtime = std::chrono::steady_clock::now();
 
     while (_running)
     {
-        std::this_thread::sleep_for(1ms);
+        std::this_thread::sleep_for(10ms);
 
-        auto sample_count = _audioFile.getSampleRate() / 1000.0;
+        const auto timenow = steady_clock::now();
+        const auto duration = duration_cast<milliseconds>(timenow - prevtime);
+        prevtime = timenow;
+
+        const auto sample_count = duration.count() * _audioFile.getSampleRate() / 1000;
         for (int i = 0; i < sample_count; ++i)
         {
             if (_current_sample >= static_cast<std::size_t>(_audioFile.getNumSamplesPerChannel()))
