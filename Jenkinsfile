@@ -2,10 +2,6 @@ pipeline {
     agent {
         docker { image "grouchytoaster/cppbuild:focal" }
     }
-    options {
-        gitLabConnection("gitlab.com")
-        gitlabBuilds builds: ["Build"]
-    }
     stages {
         stage("Build 'n' Test") {
             stages {
@@ -38,15 +34,6 @@ pipeline {
     }
     
     post {
-        failure {
-            updateGitlabCommitStatus name: 'Build', state: 'failed'
-        }
-        unstable {
-            updateGitlabCommitStatus name: 'Build', state: 'success'
-        }
-        success {
-            updateGitlabCommitStatus name: 'Build', state: 'success'
-        }
         always {
             deleteDir()
         }
