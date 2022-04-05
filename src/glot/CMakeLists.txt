@@ -41,6 +41,14 @@ target_link_libraries(
 		audiofile::audiofile
 )
 target_compile_options(glot PRIVATE -Werror -Wall -Wextra)
+if (BUILD_COVERAGE)
+	target_compile_options(glot PRIVATE -fprofile-arcs -ftest-coverage)
+	target_link_libraries(
+		glot
+		PUBLIC
+			gcov
+)
+endif()
 
 add_executable(glotapp main.cpp)
 target_link_libraries(glotapp PRIVATE glot)
@@ -48,7 +56,7 @@ target_compile_options(glotapp PRIVATE -Werror -Wall -Wextra)
 
 if (BUILD_BENCHMARKS)
 	find_package(benchmark REQUIRED)
-	add_executable(bench benchmark/ts.cpp)
+	add_executable(bench benchmark/bench_timeseries_dense.cpp)
 	target_link_libraries(
 		bench
 		PRIVATE
@@ -56,4 +64,17 @@ if (BUILD_BENCHMARKS)
 			benchmark::benchmark
 	)
 	add_test(NAME Benchmarks COMMAND bench)
+endif()
+
+if (BUILD_TESTS)
+	find_package(GTest REQUIRED)
+	enable_testing()
+	add_executable(test_timeseries_dense test/test_timeseries_dense.cpp)
+	target_link_libraries(
+		test_timeseries_dense
+		PRIVATE
+			glot
+			GTest::GTest
+	)
+	add_test(NAME TestTimeseriesDense COMMAND test_timeseries_dense)
 endif()

@@ -23,19 +23,19 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
         TSSample &sample = samples[index];
 
         auto span = get_span();
-        if (first < span.first || first >= span.second || last < span.first || last >= span.second)
+        if (_data.empty() || (first < span.first && last < span.first) || (first > span.second && last > span.second))
         {
             sample.timestamp = first;
-            sample.average = std::numeric_limits<double>::quiet_NaN();
-            sample.min = sample.average;
-            sample.max = sample.average;
+            sample.average = sample.min = sample.max = std::numeric_limits<double>::quiet_NaN();
         }
         else
         {
             sample.timestamp = first;
 
-            auto index_first = static_cast<int>((first - _start) / _interval);
-            auto index_last = static_cast<int>((last - _start) / _interval);
+            auto index_first = static_cast<std::size_t>((first - _start) / _interval);
+            index_first = std::max(index_first, 0UL);
+            auto index_last = static_cast<std::size_t>((last - _start) / _interval);
+            index_last = std::min(index_last, _data.size());
 
             auto iter_first = _data.begin() + index_first;
             auto iter_last = _data.begin() + index_last;

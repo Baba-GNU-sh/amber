@@ -17,6 +17,7 @@ struct TSSample
 class TimeSeries
 {
   public:
+    virtual ~TimeSeries() = default;
     /**
      * @brief Gets binned samples from the time series.
      *

@@ -4,12 +4,9 @@ project(glot)
 set(CMAKE_CXX_STANDARD 17)
 
 option(BUILD_TESTS "Build test programs" OFF)
+option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
+option(BUILD_COVERAGE "Build with coverage instrumentation" OFF)
 
-if (BUILD_TESTS)
-	enable_testing()
-endif()
-
-add_subdirectory(libs/cpp-tsdb)
 add_subdirectory(src/glot)
 
 # Copy the shaders over to the build dir
