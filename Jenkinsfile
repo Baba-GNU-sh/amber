@@ -13,6 +13,7 @@ pipeline {
                     steps {
                         dir("build") {
                             sh """
+                                pwd
                                 CONAN_SYSREQUIRES_SUDO=0 CONAN_SYSREQUIRES_MODE=enabled conan install ..
                                 cmake -GNinja -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=yes -DBUILD_COVERAGE=yes ..
                                 cmake --build .
