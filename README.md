@@ -1,5 +1,6 @@
 # GLot
 [![Actions Status](https://github.com/stevegolton/glot/workflows/ci/badge.svg?branch=master)](https://github.com/stevegolton/glot/actions)
+[![codecov](https://codecov.io/gh/stevegolton/glot/branch/main/graph/badge.svg?token=1UFSHJ5BEP)](https://codecov.io/gh/stevegolton/glot)
 
 > :warning: **This project is still in its feasibility phase, and thus is not much more than an experiment right now!**
 
