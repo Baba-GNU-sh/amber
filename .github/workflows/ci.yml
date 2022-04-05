@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Install Conan
       id: conan
       uses: turtlebrowser/get-conan@main
@@ -20,6 +20,7 @@ jobs:
       run: |
         conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
         CONAN_SYSREQUIRES_MODE=enabled conan install -if ${{github.workspace}}/build .
+        sudo apt-get install -y gcovr
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -39,4 +40,3 @@ jobs:
     - name: Coverage
       working-directory: ${{github.workspace}}/build
       run: gcovr --root ..
-      
