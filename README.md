@@ -1,20 +1,28 @@
-[![pipeline status](https://gitlab.com/tinker3/glot/badges/master/pipeline.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
-[![coverage report](https://gitlab.com/tinker3/glot/badges/master/coverage.svg)](https://gitlab.com/tinker3/glot/-/commits/master)
+# GLot
+[![Actions Status](https://github.com/stevegolton/glot/workflows/ci/badge.svg?branch=master)](https://github.com/stevegolton/glot/actions)
+[![codecov](https://codecov.io/gh/stevegolton/glot/branch/main/graph/badge.svg?token=1UFSHJ5BEP)](https://codecov.io/gh/stevegolton/glot)
 
+> :warning: **This project is still in its feasibility phase, and thus is not much more than an experiment right now!**
 
-Below is a sample image from the latest branch of the build artifacts.
-![sample image from the](https://gitlab.com/tinker3/glot/-/jobs/artifacts/master/raw/public/html/bdwn.png?job=pages)
+## Intro
+GLot is (going to be) an OpenGL oscilloscope-like desktop application for Windows, Linux and Mac, used for displaying, logging, and exploring high-frequency signals from arbitrary sources such as robots, servers, data loggers, sound cards, USB oscillioscopes, USB logic analyzers, and custom microcontrollers.
 
-Documentation can be found under [pages](https://tinker3.gitlab.io/glot/).
+Much like an oscilloscope, GLot will display these signals as a 2D graph view with time along the X axis, and signal value up the Y axis. GLot will provide intuitive controls for navigating the graph (e.g. scrolling around, zooming in and out on combined & individual axes, zooming in on specific events with a selection tool), and will be fast and responsive even when displaying very high frequency data. The graph display will be designed to give you as much information about the signal as possible at every zoom level without making any assumptions, for example, by showing average value + error bars when there is more than data point per pixel.
 
-Glot is an example project showing how high frequency time series data can be plotted using a line of arbitrary thickness with error bars, rendered on the GPU.
+Ultimately, data sources shall be provided via plugins, allowing users to easily get data from custom sources into GLot.
 
-Glot uses [conan](http://conan.io/) to manage its dependencies, which makes it easier / possible to build it on Windows (and hopefully MacOS).
+GLot is designed to fill a hole that I have personally encountered so many times while working as an embedded software engineer: I can get data off my embedded device but have no decent way to view and explore it! There are alternatives (see the [Alternatives](#alternatives) section for a list), and while there are plenty of quality tools out there, I've found all of them to be missing at least one important factor.
 
-# Building
-Glot can be built on Debian/Ubuntu linux as well as Windows 10.
+So far, GLot is far from complete. It's just an example project which I am using to test the graph renderer using OpenGL, and the best way to draw other UI elements such as menus and buttons, for which I am currently using imgui.
 
-## Debian/Ubuntu
+## Screenshots
+![screenshot1](screenshot1.png)
+![screenshot2](screenshot2.png)
+
+## Building
+Glot uses [Conan](http://conan.io/) to manage its dependencies, which makes it easier to build on Windows (and hopefully MacOS). So far, GLot has been tested on Ubuntu 20.04 and Windows 10, but it may well work on other distros and Windowses thanks to Conan.
+
+### Ubuntu 20.04
 Install python, then install conan:
 ```bash
 sudo apt install python3-pip build-essential cmake git
@@ -30,22 +38,18 @@ Clone this repo then cd into the root:
 ```bash
 mkdir build && cd build
 CONAN_SYSREQUIRES_MODE=enabled conan install ..
-cmake -DCMAKE_MODULE_PATH=${PWD} ..
+cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ```
 
-Run it with:
+Run GLot with:
 ```
-bin/glot
+src/glot/glot
 ```
-
-You should see something like this:
-![screenshot](screenshot.png)
 
 Use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
 
-## Windows
-
+## Windows 10
 First make sure to install `git` and `cmake` and make sure they are in your `PATH`.
 
 Make sure to install Visual Studio (Community Edition will do) - glot has been tested with the 2019 version. Cmake should pick this up automatically.
@@ -76,7 +80,39 @@ Or of you built it in release mode:
 
 As in the linux version, use the scroll wheel to zoom in and out, and use the left mouse button to drag the canvas around.
 
-# Using with clangd
+### Running Tests
+GLot comes with a suite of tests and performance benchmarks. For some reason, these don't work on Windows, so make sure to run this under Linux. I am also going to show how to build with coverage enabled because coverage is pretty useful information!
+
+Adding the coverage flag will cause the compiler to spit out `.gcno` files for every object file. 
+
+> Note: this only works with `gcc`.
+```
+mkdir build && cd build
+CONAN_SYSREQUIRES_MODE=enabled conan install ..
+cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_COVERAGE=ON ..
+cmake --build .
+```
+
+Now let's run the tests, which have been instrumented to spit out `.gcda` files for every `.gcno` file which contains the coverage information.
+```
+ctest --verbose
+```
+
+Generate a report using gcovr:
+```
+gcovr --root .. --html-details -o coverage.html
+```
+
+You can no view the reults by opening `coverage.html` in a browser. E.g.
+```
+firefox coverage.html
+```
+
+## Alternatives
+- [PlotJuggler](https://www.plotjuggler.io/)
+
+## Additional Notes
+### Using with clangd
 ```
 cd build
 cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
@@ -87,3 +123,8 @@ From the root dir, make a symlink to `compile_commands.json` in the build dir.
 ln -s build/compile_commands.json .
 ```
 
+## Fonts
+GLot uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in `font.png`.
+
+## Audio
+Sample audio downloaded from https://www2.cs.uic.edu/~i101/SoundFiles/

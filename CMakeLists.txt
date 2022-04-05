@@ -2,25 +2,27 @@ cmake_minimum_required(VERSION 3.16)
 project(glot)
 
 option(BUILD_TESTS "Build test programs" OFF)
+option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
+option(BUILD_COVERAGE "Build with coverage instrumentation" OFF)
+option(USE_SANITIZERS "Build with address and undefined behaviour sanitizer instrumentation" OFF)
 
+# Note: We need to enable testing at the top level to generate the test file at the root of the build dir
 if (BUILD_TESTS)
 	enable_testing()
 endif()
 
-add_subdirectory(libs/cpp-tsdb)
-
-find_package(glfw3 REQUIRED)
-find_package(glad REQUIRED)
-find_package(glm REQUIRED)
-
-add_executable(glot
-	src/glot.cpp
-	src/shader.cpp
-	src/shader_program.cpp)
-
-target_link_libraries(glot glfw::glfw glad::glad glm::glm)
+add_subdirectory(src/glot)
 
 # Copy the shaders over to the build dir
-configure_file(shaders/vertex.glsl . COPYONLY)
-configure_file(shaders/geometry.glsl . COPYONLY)
-configure_file(shaders/fragment.glsl . COPYONLY)
+configure_file(shaders/plot/vertex.glsl plot/vertex.glsl COPYONLY)
+configure_file(shaders/plot/geometry.glsl plot/geometry.glsl COPYONLY)
+configure_file(shaders/plot/fragment.glsl plot/fragment.glsl COPYONLY)
+
+configure_file(shaders/line/vertex.glsl line/vertex.glsl COPYONLY)
+configure_file(shaders/line/fragment.glsl line/fragment.glsl COPYONLY)
+
+configure_file(shaders/glyph/vertex.glsl glyph/vertex.glsl COPYONLY)
+configure_file(shaders/glyph/fragment.glsl glyph/fragment.glsl COPYONLY)
+configure_file(fonts/proggy_clean.png fonts/proggy_clean.png COPYONLY)
+
+configure_file(audio/CantinaBand60.wav audio/CantinaBand60.wav COPYONLY)
