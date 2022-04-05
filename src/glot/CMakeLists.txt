@@ -1,9 +1,5 @@
 option(BUILD_TESTS "Build test programs" OFF)
 
-if (BUILD_TESTS)
-	enable_testing()
-endif()
-
 add_subdirectory(bindings)
 
 find_package(glfw3 REQUIRED)
@@ -68,7 +64,6 @@ endif()
 
 if (BUILD_TESTS)
 	find_package(GTest REQUIRED)
-	enable_testing()
 	add_executable(test_timeseries_dense test/test_timeseries_dense.cpp)
 	target_link_libraries(
 		test_timeseries_dense
