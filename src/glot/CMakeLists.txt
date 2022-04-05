@@ -1,13 +1,13 @@
-option(BUILD_TESTS "Build test programs" OFF)
-
-add_subdirectory(bindings)
-
 find_package(glfw3 REQUIRED)
 find_package(glad REQUIRED)
 find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(audiofile REQUIRED)
+
+add_subdirectory(bindings)
+
+set(CMAKE_CXX_STANDARD 17)
 
 add_library(
 	glot
@@ -37,13 +37,15 @@ target_link_libraries(
 		audiofile::audiofile
 )
 target_compile_options(glot PRIVATE -Werror -Wall -Wextra)
+
+if (USE_SANITIZERS)
+	target_compile_options(glot PRIVATE -fsanitize=address -fsanitize=undefined)
+	target_link_options(glot PUBLIC -fsanitize=address -fsanitize=undefined)
+endif()
+
 if (BUILD_COVERAGE)
 	target_compile_options(glot PRIVATE -fprofile-arcs -ftest-coverage)
-	target_link_libraries(
-		glot
-		PUBLIC
-			gcov
-)
+	target_link_options(glot PUBLIC -fprofile-arcs -ftest-coverage)
 endif()
 
 add_executable(glotapp main.cpp)

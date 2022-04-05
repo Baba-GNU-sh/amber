@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 project(glot)
 
-set(CMAKE_CXX_STANDARD 17)
+option(BUILD_TESTS "Build test programs" OFF)
+option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
+option(BUILD_COVERAGE "Build with coverage instrumentation" OFF)
+option(USE_SANITIZERS "Build with address and undefined behaviour sanitizer instrumentation" OFF)
 
 # Note: We need to enable testing at the top level to generate the test file at the root of the build dir
 if (BUILD_TESTS)
 	enable_testing()
 endif()
-
-option(BUILD_TESTS "Build test programs" OFF)
-option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
-option(BUILD_COVERAGE "Build with coverage instrumentation" OFF)
 
 add_subdirectory(src/glot)
 
