@@ -39,7 +39,15 @@ jobs:
 
     - name: Coverage
       working-directory: ${{github.workspace}}/build
-      run: gcovr --root ..
+      run: gcovr --root .. --xml --output coverage.xml
+
+    - uses: codecov/codecov-action@v2
+      with:
+        files: ${{github.workspace}}/build/coverage.xml
+        flags: unittests # optional
+        name: codecov-umbrella # optional
+        fail_ci_if_error: true # optional (default = false)
+        verbose: true # optional (default = false)
 
   Prod:
     runs-on: ubuntu-latest
