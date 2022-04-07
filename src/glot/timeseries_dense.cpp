@@ -108,26 +108,15 @@ void TimeSeriesDense::push_samples(const std::vector<double> &)
 std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
                                                             std::size_t end) const
 {
-    std::size_t distance = end - begin;
-    int row = 0;
-    while (distance /= 2)
-        ++row;
+    TimeSeriesDenseSampler sampler;
+    const auto samples = sampler.sample(_data.size(), begin, end);
 
-    auto index = begin >> row;
-    auto sum = _data[row][index];
-    auto nsamples = (2 << row);
-    const auto average = sum / nsamples;
-
-    // double min = std::numeric_limits<double>::max();
-    // double max = std::numeric_limits<double>::lowest();
-    // double sum = 0.0;
-    // for (auto iter = begin; iter != end; iter++)
-    // {
-    //     min = std::min(min, *iter);
-    //     max = std::max(max, *iter);
-    //     sum += *iter;
-    // }
-    // const auto average = sum / (end - begin);
+    double sum = 0;
+    for (const auto &sample : samples)
+    {
+        sum += _data[sample.first][sample.second];
+    }
+    auto average = sum / (end - begin);
     return std::make_tuple(average, average, average);
 }
 
@@ -139,3 +128,35 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
 //     auto minmax = std::minmax_element(std::execution::seq, begin, end);
 //     return std::make_tuple(average, *minmax.first, *minmax.second);
 // }
+
+std::vector<std::pair<int, int>> TimeSeriesDenseSampler::sample(unsigned int rows,
+                                                                unsigned int start,
+                                                                unsigned int end)
+{
+    auto findrow = [&](unsigned int index, unsigned int stay_under) {
+        unsigned int row = rows - 1;
+        while (row)
+        {
+            auto compare = 0xFFFFFFFFU << row;
+            if ((index & compare) == index)
+            {
+                if (index + (1U << row) <= stay_under)
+                {
+                    break;
+                }
+            }
+            --row;
+        }
+        return std::make_pair(row, index >> row);
+    };
+
+    std::vector<std::pair<int, int>> output;
+    while (start < end)
+    {
+        auto current = findrow(start, end);
+        output.push_back(current);
+        start += (1U << current.first);
+    }
+
+    return output;
+}

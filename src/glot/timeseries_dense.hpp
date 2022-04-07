@@ -2,10 +2,17 @@
 
 #include <mutex>
 #include <tuple>
+#include <utility>
 #include <vector>
 
-#include "timeseries.hpp"
 #include "chunked_vector.hpp"
+#include "timeseries.hpp"
+
+class TimeSeriesDenseSampler
+{
+  public:
+    std::vector<std::pair<int, int>> sample(unsigned int rows, unsigned int start, unsigned int end);
+};
 
 /**
  * @brief A densely packed time series with a fixed data rate.
@@ -29,7 +36,7 @@ class TimeSeriesDense : public TimeSeries
   private:
     std::tuple<double, double, double> _reduce(std::size_t, std::size_t) const;
     mutable std::recursive_mutex _mut;
-    std::vector<ChunkedVector<double, 1024*1024>> _data;
+    std::vector<ChunkedVector<double, 1024 * 1024>> _data;
     double _interval;
     double _start;
 };
