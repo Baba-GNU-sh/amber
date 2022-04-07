@@ -107,19 +107,30 @@ void TimeSeriesDense::push_sample(double value)
 std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
                                                             std::size_t end) const
 {
-    const auto samples = sample(_data.size(), begin, end);
-
+    const auto distance = end - begin;
     double sum = 0;
     double min = std::numeric_limits<double>::max();
     double max = std::numeric_limits<double>::lowest();
-    for (const auto &sample : samples)
+
+    const auto findrow = [this](unsigned long long begin, unsigned long long end) {
+        auto row = std::min(__builtin_ctzll(begin), static_cast<int>(_data.size() - 1));
+        const auto log_dist = 63 - __builtin_clzll(end - begin);
+        row = std::min(log_dist, row);
+        return std::make_pair<>(row, begin >> row);
+    };
+
+    while (begin < end)
     {
-        const auto &s = _data[sample.first][sample.second];
+        auto current = findrow(begin, end);
+        begin += (1U << current.first);
+
+        const auto &s = _data[current.first][current.second];
         sum += s.sum;
         min = std::min(s.min, min);
         max = std::max(s.max, max);
     }
-    auto average = sum / (end - begin);
+
+    auto average = sum / distance;
     return std::make_tuple(average, min, max);
 }
 
