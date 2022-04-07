@@ -1,19 +1,11 @@
 #pragma once
 
-#include <glad/glad.h> // Keep this one before glfw to avoid errors
-
-#include <GLFW/glfw3.h>
-
-#include <glm/fwd.hpp>
-#include <glm/gtx/matrix_transform_2d.hpp>
-
+#include <glad/glad.h>
+#include <glm/glm.hpp>
 #include "plot.hpp"
 #include "shader_utils.hpp"
-
-// #include "font.hpp"
 #include "database.hpp"
 #include "timeseries.hpp"
-#include <glm/glm.hpp>
 
 struct GlyphVertex
 {
@@ -46,6 +38,7 @@ struct TimeSeriesContainer
     glm::vec3 colour;
     std::string name;
     bool visible;
+    float y_offset;
 };
 
 /**

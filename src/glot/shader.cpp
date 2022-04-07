@@ -1,5 +1,6 @@
-#include "shader_utils.hpp"
 #include <glad/glad.h>
+#include <sstream>
+#include "shader_utils.hpp"
 
 ShaderImpl::ShaderImpl(const std::string &filename, int shader_type) : m_filename(filename)
 {

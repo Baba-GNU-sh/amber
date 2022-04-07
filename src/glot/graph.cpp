@@ -1,13 +1,15 @@
-#include "graph.hpp"
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
+#include <sstream>
+#include <iomanip>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-
+#include "graph.hpp"
 #include "resources.hpp"
 
 GraphView::GraphView() : _position(0, 0), _size(100, 100), _dragging(false), _plot(_view_matrix)
@@ -136,7 +138,8 @@ void GraphView::draw(const glm::mat3 &viewport_matrix,
     {
         if (ts.visible)
         {
-            _plot.draw(*(ts.ts), viewport_matrix, plot_width, ts.colour, show_line_segments);
+            _plot.draw(
+                *(ts.ts), viewport_matrix, plot_width, ts.colour, ts.y_offset, show_line_segments);
         }
     }
 

@@ -1,8 +1,7 @@
 #pragma once
 
-#include <glad/glad.h> // Keep this one before glfw to avoid errors
+#include <glad/glad.h>
 #include <glm/glm.hpp>
-
 #include "shader_utils.hpp"
 #include "timeseries.hpp"
 
@@ -23,6 +22,7 @@ class Plot
               const glm::mat3 &vp_matrix,
               int plot_width,
               glm::vec3 plot_colour,
+              float y_offset,
               bool show_line_segments) const;
     void set_size(int width, int height);
 

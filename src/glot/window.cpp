@@ -1,6 +1,10 @@
+#include <spdlog/spdlog.h>
+#include <glm/gtx/matrix_transform_2d.hpp>
+#include <imgui.h>
+#include "bindings/imgui_impl_glfw.h"
+#include "bindings/imgui_impl_opengl3.h"
 #include "window.hpp"
 #include "graph.hpp"
-#include <imgui.h>
 
 Window::Window(const Database &db, PluginManager &plugins)
     : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db),
@@ -62,6 +66,7 @@ Window::Window(const Database &db, PluginManager &plugins)
         cont.ts = ts.second;
         cont.colour = *col++;
         cont.visible = true;
+        cont.y_offset = 0.0f;
         if (col == plot_colours.end())
         {
             col = plot_colours.begin();
@@ -213,6 +218,8 @@ void Window::render_imgui()
             ImGui::SameLine();
             ImGui::ColorEdit3(
                 plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
+            ImGui::SameLine();
+            ImGui::SliderFloat("Offset", &(plugin.y_offset), -10.0f, 10.0f);
         }
     }
 

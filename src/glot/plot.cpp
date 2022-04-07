@@ -1,12 +1,12 @@
-#include "plot.hpp"
+#include <glad/glad.h>
 
-#include <GLFW/glfw3.h>
-#include <glm/fwd.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "plot.hpp"
 
 #include "resources.hpp"
 #include "timeseries.hpp"
+#include <glm/fwd.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
 
 Plot::Plot(const glm::mat3 &view_matrix) : _view_matrix(view_matrix)
 {
@@ -42,15 +42,18 @@ void Plot::draw(const TimeSeries &ts,
                 const glm::mat3 &vp_matrix,
                 int line_width,
                 glm::vec3 line_colour,
+                float y_offset,
                 bool show_line_segments) const
 {
     const auto vp_matrix_inv = glm::inverse(vp_matrix);
     glBindVertexArray(_plot_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
 
+    glm::mat3 view_matrix = glm::translate(_view_matrix, glm::vec2(0.0f, y_offset));
+
     _lines_shader.use();
     int uniform_id = _lines_shader.uniform_location("view_matrix");
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(_view_matrix[0]));
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(view_matrix[0]));
 
     uniform_id = _lines_shader.uniform_location("viewport_matrix");
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix[0]));

@@ -1,28 +1,10 @@
 #pragma once
 
 #include <glad/glad.h>
-
 #include <GLFW/glfw3.h>
-#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/matrix.hpp>
-#include <random>
-
-#include "bindings/imgui_impl_glfw.h"
-#include "bindings/imgui_impl_opengl3.h"
-
 #include "shader_utils.hpp"
-
-#include <cmath>
-#include <iostream>
-#include <random>
-#include <stdexcept>
-
 #include "graph.hpp"
-
-#include "spdlog/spdlog.h"
-
 #include "database.hpp"
 #include "plugin_manager.hpp"
 
