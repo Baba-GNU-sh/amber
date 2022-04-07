@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include <chunked_vector.hpp>
+#include <gtest/gtest.h>
 
 TEST(ChunkedVector, nullTest)
 {
@@ -24,5 +24,26 @@ TEST(ChunkedVector, pushLots)
     }
     ASSERT_EQ(data.size(), 10000);
     ASSERT_EQ(data.at(0), 0);
-    ASSERT_EQ(data.at(10000-1), 10000-1);
+    ASSERT_EQ(data.at(10000 - 1), 10000 - 1);
+}
+
+TEST(ChunkedVector, isEmpty)
+{
+    ChunkedVector<int, 1024> data;
+    ASSERT_TRUE(data.empty());
+    data.push(0);
+    ASSERT_FALSE(data.empty());
+}
+
+TEST(ChunkedVector, squareBracketsOperator)
+{
+    ChunkedVector<int, 1024> data;
+    data.push(1234);
+    ASSERT_EQ(data[0], 1234);
+}
+
+TEST(ChunkedVector, outOfBoundsAccess)
+{
+    ChunkedVector<int, 1024> data;
+    ASSERT_THROW(data.at(100), std::out_of_range);
 }
