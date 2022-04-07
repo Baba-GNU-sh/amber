@@ -4,7 +4,8 @@
 #include <limits>
 #include <numeric>
 
-TimeSeriesDense::TimeSeriesDense(double start, double interval) : _interval(interval), _start(start)
+TimeSeriesDense::TimeSeriesDense(double start, double interval)
+    : _data(1), _interval(interval), _start(start)
 {
 }
 
@@ -23,7 +24,8 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
         TSSample &sample = samples[index];
 
         auto span = get_span();
-        if (_data.empty() || (first < span.first && last < span.first) || (first > span.second && last > span.second))
+        if (_data[0].empty() || (first < span.first && last < span.first) ||
+            (first > span.second && last > span.second))
         {
             sample.timestamp = first;
             sample.average = sample.min = sample.max = std::numeric_limits<double>::quiet_NaN();
@@ -32,23 +34,20 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
         {
             sample.timestamp = first;
 
-            auto index_first = static_cast<std::size_t>((first - _start) / _interval);
-            index_first = std::max(index_first, 0UL);
-            auto index_last = static_cast<std::size_t>((last - _start) / _interval);
-            index_last = std::min(index_last, _data.size());
-
-            auto iter_first = _data.begin() + index_first;
-            auto iter_last = _data.begin() + index_last;
+            auto index_first = static_cast<ssize_t>((first - _start) / _interval);
+            index_first = std::max(index_first, static_cast<ssize_t>(0));
+            auto index_last = static_cast<ssize_t>((last - _start) / _interval);
+            index_last = std::min(index_last, static_cast<ssize_t>(_data[0].size()));
 
             if (index_first == index_last)
             {
-                sample.average = _data[index_first];
+                sample.average = _data[0][index_first];
                 sample.min = sample.average;
                 sample.max = sample.average;
             }
             else
             {
-                const auto results = _reduce(iter_first, iter_last);
+                const auto results = _reduce(index_first, index_last);
                 sample.average = std::get<0>(results);
                 sample.min = std::get<1>(results);
                 sample.max = std::get<2>(results);
@@ -71,36 +70,65 @@ TSSample TimeSeriesDense::get_sample(double timestamp, double bin_width)
 std::pair<double, double> TimeSeriesDense::get_span() const
 {
     std::lock_guard<std::recursive_mutex> _(_mut);
-    double last = _start + _data.size() * _interval;
-    return std::pair(_start, last);
+    const double last = _start + (_data[0].size() * _interval);
+    return std::make_pair(_start, last);
 }
 
 void TimeSeriesDense::push_sample(double value)
 {
     std::lock_guard<std::recursive_mutex> _(_mut);
-    _data.push_back(value);
+    _data[0].push_back(value);
+    std::size_t sz = _data[0].size();
+    std::size_t index = 0;
+    while (sz /= 2)
+    {
+        ++index;
+        if (index >= _data.size())
+        {
+            _data.resize(index + 1);
+        }
+
+        const auto &prev = _data[index - 1];
+        auto &buf = _data[index];
+        if (sz > buf.size())
+        {
+            const auto last = prev[prev.size() - 1];
+            const auto second_last = prev[prev.size() - 2];
+            buf.push_back(last + second_last);
+        }
+    }
 }
 
-void TimeSeriesDense::push_samples(const std::vector<double> &data)
+void TimeSeriesDense::push_samples(const std::vector<double> &)
 {
     std::lock_guard<std::recursive_mutex> _(_mut);
-    _data.insert(_data.end(), data.begin(), data.end());
+    // _data[0].insert(_data[0].end(), input.begin(), input.end());
 }
 
-std::tuple<double, double, double> TimeSeriesDense::_reduce(
-    std::vector<double>::const_iterator begin, std::vector<double>::const_iterator end) const
+std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
+                                                            std::size_t end) const
 {
-    double min = std::numeric_limits<double>::max();
-    double max = std::numeric_limits<double>::lowest();
-    double sum = 0.0;
-    for (auto iter = begin; iter != end; iter++)
-    {
-        min = std::min(min, *iter);
-        max = std::max(max, *iter);
-        sum += *iter;
-    }
-    const auto average = sum / (end - begin);
-    return std::make_tuple(average, min, max);
+    std::size_t distance = end - begin;
+    int row = 0;
+    while (distance /= 2)
+        ++row;
+
+    auto index = begin >> row;
+    auto sum = _data[row][index];
+    auto nsamples = (2 << row);
+    const auto average = sum / nsamples;
+
+    // double min = std::numeric_limits<double>::max();
+    // double max = std::numeric_limits<double>::lowest();
+    // double sum = 0.0;
+    // for (auto iter = begin; iter != end; iter++)
+    // {
+    //     min = std::min(min, *iter);
+    //     max = std::max(max, *iter);
+    //     sum += *iter;
+    // }
+    // const auto average = sum / (end - begin);
+    return std::make_tuple(average, average, average);
 }
 
 // std::tuple<double, double, double> TimeSeriesDense::_reduce(

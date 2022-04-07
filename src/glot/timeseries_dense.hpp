@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "timeseries.hpp"
+#include "chunked_vector.hpp"
 
 /**
  * @brief A densely packed time series with a fixed data rate.
@@ -26,10 +27,9 @@ class TimeSeriesDense : public TimeSeries
     void push_samples(const std::vector<double> &value);
 
   private:
-    std::tuple<double, double, double> _reduce(std::vector<double>::const_iterator,
-                                               std::vector<double>::const_iterator) const;
+    std::tuple<double, double, double> _reduce(std::size_t, std::size_t) const;
     mutable std::recursive_mutex _mut;
-    std::vector<double> _data;
+    std::vector<ChunkedVector<double, 1024*1024>> _data;
     double _interval;
     double _start;
 };
