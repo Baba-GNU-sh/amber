@@ -125,20 +125,10 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
 
 std::vector<std::pair<int, int>> sample(unsigned int rows, unsigned int start, unsigned int end)
 {
-    auto findrow = [&](unsigned int index, unsigned int stay_under) {
-        unsigned int row = rows - 1;
-        while (row)
-        {
-            auto compare = 0xFFFFFFFFU << row;
-            if ((index & compare) == index)
-            {
-                if (index + (1U << row) <= stay_under)
-                {
-                    break;
-                }
-            }
-            --row;
-        }
+    const auto findrow = [&rows](unsigned int index, unsigned int stay_under) {
+        auto row = std::min(__builtin_ctz(index), static_cast<int>(rows - 1));
+        const auto log_dist = 31 - __builtin_clz(stay_under - index);
+        row = std::min(log_dist, row);
         return std::make_pair(row, index >> row);
     };
 

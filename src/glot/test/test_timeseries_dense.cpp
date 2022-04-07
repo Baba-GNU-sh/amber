@@ -56,9 +56,14 @@ TEST(TimeSeriesDense, push_loads)
 TEST(TimeSeriesDenseSampler, sample)
 {
     const auto samples = sample(4, 3, 9);
-
     for (const auto &sample : samples)
     {
         std::cout << sample.first << ", " << sample.second << "\n";
     }
+    ASSERT_EQ(samples[0].first, 0);
+    ASSERT_EQ(samples[0].second, 3);
+    ASSERT_EQ(samples[1].first, 2);
+    ASSERT_EQ(samples[1].second, 1);
+    ASSERT_EQ(samples[2].first, 0);
+    ASSERT_EQ(samples[2].second, 8);
 }
