@@ -218,8 +218,8 @@ void Window::render_imgui()
             ImGui::SameLine();
             ImGui::ColorEdit3(
                 plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
-            ImGui::SameLine();
-            ImGui::SliderFloat("Offset", &(plugin.y_offset), -10.0f, 10.0f);
+            const auto slider_name = "Y Offset##" + plugin.name;
+            ImGui::DragFloat(slider_name.c_str(), &(plugin.y_offset), 0.01);
         }
     }
 
