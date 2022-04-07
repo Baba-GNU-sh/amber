@@ -14,7 +14,7 @@ static void TimeseriesDense_Push(benchmark::State &state)
         }
     }
     auto items = int64_t(state.iterations()) * int64_t(state.range(0));
-    state.counters["samplerate"] =
+    state.counters["samples/sec"] =
         benchmark::Counter(static_cast<double>(items), benchmark::Counter::kIsRate);
 }
 BENCHMARK(TimeseriesDense_Push)
@@ -42,8 +42,8 @@ static void TimeseriesDense_Reduce(benchmark::State &state)
         benchmark::DoNotOptimize(
             ts.get_samples(&sample[0], 0.0, TOTAL_SAMPLES / TOTAL_BINS, TOTAL_BINS));
     }
-    auto items = int64_t(state.iterations()) * int64_t(TOTAL_SAMPLES);
-    state.counters["effective_samplerate"] =
+    auto items = int64_t(state.iterations()) * int64_t(TOTAL_BINS);
+    state.counters["bins/sec"] =
         benchmark::Counter(static_cast<double>(items), benchmark::Counter::kIsRate);
 }
 BENCHMARK(TimeseriesDense_Reduce)
