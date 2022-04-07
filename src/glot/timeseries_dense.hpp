@@ -8,7 +8,7 @@
 #include "chunked_vector.hpp"
 #include "timeseries.hpp"
 
-std::vector<std::pair<int, int>> sample(unsigned int rows, unsigned int start, unsigned int end);
+std::vector<std::pair<int, int>> sample(int rows, unsigned long long start, unsigned long long end);
 
 struct DataStore
 {

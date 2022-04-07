@@ -123,11 +123,11 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
     return std::make_tuple(average, min, max);
 }
 
-std::vector<std::pair<int, int>> sample(unsigned int rows, unsigned int start, unsigned int end)
+std::vector<std::pair<int, int>> sample(int rows, unsigned long long start, unsigned long long end)
 {
-    const auto findrow = [&rows](unsigned int index, unsigned int stay_under) {
-        auto row = std::min(__builtin_ctz(index), static_cast<int>(rows - 1));
-        const auto log_dist = 31 - __builtin_clz(stay_under - index);
+    const auto findrow = [&rows](unsigned long long index, unsigned long long stay_under) {
+        auto row = std::min(__builtin_ctzll(index), static_cast<int>(rows - 1));
+        const auto log_dist = 63 - __builtin_clzll(stay_under - index);
         row = std::min(log_dist, row);
         return std::make_pair(row, index >> row);
     };
