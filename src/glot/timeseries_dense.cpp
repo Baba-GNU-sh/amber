@@ -108,48 +108,29 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
                                                             std::size_t end) const
 {
     const auto distance = end - begin;
+    const auto row_max = static_cast<int>(_data.size() - 1);
     double sum = 0;
     double min = std::numeric_limits<double>::max();
     double max = std::numeric_limits<double>::lowest();
 
-    const auto findrow = [this](unsigned long long begin, unsigned long long end) {
-        auto row = std::min(__builtin_ctzll(begin), static_cast<int>(_data.size() - 1));
-        const auto log_dist = 63 - __builtin_clzll(end - begin);
-        row = std::min(log_dist, row);
-        return std::make_pair<>(row, begin >> row);
-    };
-
     while (begin < end)
     {
-        auto current = findrow(begin, end);
-        begin += (1U << current.first);
+        auto row = __builtin_ctzll(begin);
+        row = std::min(row, row_max);
 
-        const auto &s = _data[current.first][current.second];
+        const auto distance_remaining = end - begin;
+        const auto log2_dist = 63 - __builtin_clzll(distance_remaining);
+        row = std::min(log2_dist, row);
+
+        const auto index = begin >> row;
+        const auto &s = _data[row][index];
         sum += s.sum;
         min = std::min(s.min, min);
         max = std::max(s.max, max);
+
+        begin += (1U << row);
     }
 
     auto average = sum / distance;
     return std::make_tuple(average, min, max);
-}
-
-std::vector<std::pair<int, int>> sample(int rows, unsigned long long start, unsigned long long end)
-{
-    const auto findrow = [&rows](unsigned long long index, unsigned long long stay_under) {
-        auto row = std::min(__builtin_ctzll(index), static_cast<int>(rows - 1));
-        const auto log_dist = 63 - __builtin_clzll(stay_under - index);
-        row = std::min(log_dist, row);
-        return std::make_pair(row, index >> row);
-    };
-
-    std::vector<std::pair<int, int>> output;
-    while (start < end)
-    {
-        auto current = findrow(start, end);
-        output.push_back(current);
-        start += (1U << current.first);
-    }
-
-    return output;
 }

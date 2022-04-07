@@ -8,8 +8,6 @@
 #include "chunked_vector.hpp"
 #include "timeseries.hpp"
 
-std::vector<std::pair<int, int>> sample(int rows, unsigned long long start, unsigned long long end);
-
 struct DataStore
 {
     double sum;
@@ -18,8 +16,7 @@ struct DataStore
 };
 
 /**
- * @brief A densely packed time series with a fixed data rate.
- * This time series is useful if you
+ * @brief A time series with a fixed data rate.
  */
 class TimeSeriesDense : public TimeSeries
 {
