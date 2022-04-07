@@ -69,7 +69,6 @@ if (BUILD_TESTS)
 	find_package(GTest REQUIRED)
 	add_executable(tests
 		test/test_timeseries_dense.cpp
-		test/test_db.cpp
 		test/test_chunked_vector.cpp
 	)
 	target_link_libraries(
