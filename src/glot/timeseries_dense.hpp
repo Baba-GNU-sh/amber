@@ -14,6 +14,13 @@ class TimeSeriesDenseSampler
     std::vector<std::pair<int, int>> sample(unsigned int rows, unsigned int start, unsigned int end);
 };
 
+struct DataStore
+{
+  double sum;
+  double min;
+  double max;
+};
+
 /**
  * @brief A densely packed time series with a fixed data rate.
  * This time series is useful if you
@@ -36,7 +43,7 @@ class TimeSeriesDense : public TimeSeries
   private:
     std::tuple<double, double, double> _reduce(std::size_t, std::size_t) const;
     mutable std::recursive_mutex _mut;
-    std::vector<ChunkedVector<double, 1024 * 1024>> _data;
+    std::vector<ChunkedVector<DataStore, 1024>> _data;
     double _interval;
     double _start;
 };

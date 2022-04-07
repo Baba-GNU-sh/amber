@@ -41,9 +41,10 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
 
             if (index_first == index_last)
             {
-                sample.average = _data[0][index_first];
-                sample.min = sample.average;
-                sample.max = sample.average;
+                const auto &s = _data[0][index_first];
+                sample.average = s.sum;
+                sample.min = s.min;
+                sample.max = s.max;
             }
             else
             {
@@ -77,7 +78,7 @@ std::pair<double, double> TimeSeriesDense::get_span() const
 void TimeSeriesDense::push_sample(double value)
 {
     std::lock_guard<std::recursive_mutex> _(_mut);
-    _data[0].push_back(value);
+    _data[0].push_back(DataStore{value, value, value});
     std::size_t sz = _data[0].size();
     std::size_t index = 0;
     while (sz /= 2)
@@ -94,7 +95,11 @@ void TimeSeriesDense::push_sample(double value)
         {
             const auto last = prev[prev.size() - 1];
             const auto second_last = prev[prev.size() - 2];
-            buf.push_back(last + second_last);
+
+            const auto sum = last.sum + second_last.sum;
+            const auto min = std::min(last.min, second_last.min);
+            const auto max = std::max(last.max, second_last.max);
+            buf.push_back(DataStore{sum, min, max});
         }
     }
 }
@@ -112,12 +117,17 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
     const auto samples = sampler.sample(_data.size(), begin, end);
 
     double sum = 0;
+    double min = std::numeric_limits<double>::max();
+    double max = std::numeric_limits<double>::lowest();
     for (const auto &sample : samples)
     {
-        sum += _data[sample.first][sample.second];
+        const auto &s = _data[sample.first][sample.second];
+        sum += s.sum;
+        min = std::min(s.min, min);
+        max = std::max(s.max, max);
     }
     auto average = sum / (end - begin);
-    return std::make_tuple(average, average, average);
+    return std::make_tuple(average, min, max);
 }
 
 // std::tuple<double, double, double> TimeSeriesDense::_reduce(
