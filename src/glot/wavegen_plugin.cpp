@@ -19,7 +19,11 @@ WaveGenPlugin::WaveGenPlugin(PluginContext &ctx) : _ctx(ctx)
 
 WaveGenPlugin::~WaveGenPlugin()
 {
-    stop();
+    if (_running)
+    {
+        _running = false;
+        _thread.join();
+    }
     _logger->info("Bye");
 }
 
