@@ -51,6 +51,7 @@ endif()
 add_executable(glotapp main.cpp)
 target_link_libraries(glotapp PRIVATE glot)
 target_compile_options(glotapp PRIVATE -Werror -Wall -Wextra)
+set_target_properties(glotapp PROPERTIES OUTPUT_NAME glot)
 
 if (BUILD_BENCHMARKS)
 	find_package(benchmark REQUIRED)
@@ -66,12 +67,16 @@ endif()
 
 if (BUILD_TESTS)
 	find_package(GTest REQUIRED)
-	add_executable(test_timeseries_dense test/test_timeseries_dense.cpp)
+	add_executable(tests
+		test/test_timeseries_dense.cpp
+		test/test_db.cpp
+		test/test_chunked_vector.cpp
+	)
 	target_link_libraries(
-		test_timeseries_dense
+		tests
 		PRIVATE
 			glot
 			GTest::GTest
 	)
-	add_test(NAME TestTimeseriesDense COMMAND test_timeseries_dense)
+	add_test(NAME Tests COMMAND tests)
 endif()
