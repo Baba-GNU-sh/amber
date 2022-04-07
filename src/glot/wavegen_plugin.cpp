@@ -1,8 +1,10 @@
 #include "wavegen_plugin.hpp"
 
 #include <chrono>
+#include <cmath>
 #include <imgui.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <stdexcept>
 
 WaveGenPlugin::WaveGenPlugin(PluginContext &ctx) : _ctx(ctx)
 {
@@ -73,6 +75,7 @@ void WaveGenPlugin::thread_handler()
     using namespace std::chrono_literals;
 
     auto prevtime = std::chrono::steady_clock::now();
+    double time = 0.0;
 
     while (_running)
     {
@@ -89,23 +92,29 @@ void WaveGenPlugin::thread_handler()
 
         for (int i = 0; i < duration.count(); i++)
         {
-            const double time = static_cast<double>(_ticks++) * settings.frequency / _sample_rate;
-            switch (settings.type)
-            {
-            case Sine:
-                _ts->push_sample(settings.amplitude * std::sin(time));
-                break;
-            case Square:
-                _ts->push_sample(std::sin(time) > 0.0 ? settings.amplitude : -settings.amplitude);
-                break;
-            case Triangle:
-                _ts->push_sample(settings.amplitude * 2 * std::asin(std::sin(time)) / M_PI);
-                break;
-            case SawTooth:
-                _ts->push_sample(settings.amplitude * 2 * std::atan(std::tan(M_PI_2 - time)) /
-                                 M_PI);
-                break;
-            }
+            time += settings.frequency / _sample_rate;
+            // const auto time = static_cast<double>(_ticks++) * settings.frequency / _sample_rate;
+            const auto value = settings.amplitude * sample_value(settings.type, time);
+            _ts->push_sample(value);
         }
+    }
+}
+
+double WaveGenPlugin::sample_value(WaveType type, double time) const
+{
+    const double M_2PI = 2 * M_PI;
+    const double radians = M_2PI * time;
+    switch (type)
+    {
+    case Sine:
+        return std::sin(radians);
+    case Square:
+        return std::sin(radians) > 0.0 ? 1.0 : -1.0;
+    case Triangle:
+        return 2 * std::asin(std::sin(radians)) / M_PI;
+    case SawTooth:
+        return 2 * std::atan(std::tan(radians / 2)) / M_PI;
+    default:
+        throw std::invalid_argument("Bad wave type");
     }
 }

@@ -55,8 +55,7 @@ TEST(TimeSeriesDense, push_loads)
 
 TEST(TimeSeriesDenseSampler, sample)
 {
-    TimeSeriesDenseSampler sampler;
-    const auto samples = sampler.sample(4, 3, 9);
+    const auto samples = sample(4, 3, 9);
 
     for (const auto &sample : samples)
     {

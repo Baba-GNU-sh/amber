@@ -64,5 +64,4 @@ class Window
     glm::mat3 _vp_matrix;
 
     std::vector<TimeSeriesContainer> _ts;
-    
 };

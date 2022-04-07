@@ -8,17 +8,13 @@
 #include "chunked_vector.hpp"
 #include "timeseries.hpp"
 
-class TimeSeriesDenseSampler
-{
-  public:
-    std::vector<std::pair<int, int>> sample(unsigned int rows, unsigned int start, unsigned int end);
-};
+std::vector<std::pair<int, int>> sample(unsigned int rows, unsigned int start, unsigned int end);
 
 struct DataStore
 {
-  double sum;
-  double min;
-  double max;
+    double sum;
+    double min;
+    double max;
 };
 
 /**
@@ -38,7 +34,6 @@ class TimeSeriesDense : public TimeSeries
     TSSample get_sample(double timestamp, double bin_width) override;
     std::pair<double, double> get_span() const override;
     void push_sample(double value);
-    void push_samples(const std::vector<double> &value);
 
   private:
     std::tuple<double, double, double> _reduce(std::size_t, std::size_t) const;

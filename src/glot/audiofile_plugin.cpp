@@ -18,7 +18,7 @@ AudioFilePlugin::AudioFilePlugin(PluginContext &pluggy, std::string_view filenam
 
 AudioFilePlugin::~AudioFilePlugin()
 {
-	if (_running)
+    if (_running)
     {
         _running = false;
         _thread.join();
@@ -103,4 +103,3 @@ void AudioFilePlugin::draw_menu()
     ImGui::Text("File: %s", _filename.c_str());
     ImGui::Text("Sample Rate: %u", _audioFile.getSampleRate());
 }
-

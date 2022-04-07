@@ -10,8 +10,7 @@
 
 #include "resources.hpp"
 
-GraphView::GraphView()
-    : _position(0, 0), _size(100, 100), _dragging(false), _plot(_view_matrix)
+GraphView::GraphView() : _position(0, 0), _size(100, 100), _dragging(false), _plot(_view_matrix)
 {
     _update_view_matrix(glm::mat3(1.0f));
 

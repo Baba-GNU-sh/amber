@@ -66,7 +66,7 @@ void Plot::draw(const TimeSeries &ts,
 
     uniform_id = _lines_shader.uniform_location("plot_colour");
     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
-    
+
     uniform_id = _lines_shader.uniform_location("minmax_colour");
     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
 

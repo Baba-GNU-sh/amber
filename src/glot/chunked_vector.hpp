@@ -2,10 +2,9 @@
 
 #include <array>
 #include <cstddef>
-#include <vector>
 #include <deque>
 #include <memory>
-#include <spdlog/spdlog.h>
+#include <vector>
 
 template <typename T, unsigned int ChunkSize> class ChunkedVector
 {
@@ -14,6 +13,7 @@ template <typename T, unsigned int ChunkSize> class ChunkedVector
   public:
     ChunkedVector() : _size(0), _chunks(0)
     {
+        //
     }
 
     void push_back(const T &value)
@@ -27,12 +27,9 @@ template <typename T, unsigned int ChunkSize> class ChunkedVector
         if (_size > ChunkSize * _chunks)
         {
             ++_chunks;
-            auto chunk = std::make_shared<Chunk>();
-            // spdlog::info("Allocation {}", _chunks);
-            _map.push_back(chunk);
+            _map.push_back(std::make_unique<Chunk>());
         }
 
-        // const auto chunk_index = (_size - 1) / ChunkSize;
         const auto offset = (_size - 1) % ChunkSize;
         auto &chunk = *(_map.back());
         chunk[offset] = value;
@@ -77,7 +74,7 @@ template <typename T, unsigned int ChunkSize> class ChunkedVector
     }
 
   private:
-    std::vector<std::shared_ptr<Chunk>> _map;
+    std::vector<std::unique_ptr<Chunk>> _map;
     std::size_t _size;
     std::size_t _chunks;
 };

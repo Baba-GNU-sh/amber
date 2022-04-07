@@ -104,17 +104,10 @@ void TimeSeriesDense::push_sample(double value)
     }
 }
 
-void TimeSeriesDense::push_samples(const std::vector<double> &)
-{
-    std::lock_guard<std::recursive_mutex> _(_mut);
-    // _data[0].insert(_data[0].end(), input.begin(), input.end());
-}
-
 std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
                                                             std::size_t end) const
 {
-    TimeSeriesDenseSampler sampler;
-    const auto samples = sampler.sample(_data.size(), begin, end);
+    const auto samples = sample(_data.size(), begin, end);
 
     double sum = 0;
     double min = std::numeric_limits<double>::max();
@@ -130,18 +123,7 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
     return std::make_tuple(average, min, max);
 }
 
-// std::tuple<double, double, double> TimeSeriesDense::_reduce(
-//     std::vector<double>::const_iterator begin, std::vector<double>::const_iterator end) const
-// {
-//     const auto len = (end - begin);
-//     auto average = std::reduce(std::execution::seq, begin, end, 0.0) / len;
-//     auto minmax = std::minmax_element(std::execution::seq, begin, end);
-//     return std::make_tuple(average, *minmax.first, *minmax.second);
-// }
-
-std::vector<std::pair<int, int>> TimeSeriesDenseSampler::sample(unsigned int rows,
-                                                                unsigned int start,
-                                                                unsigned int end)
+std::vector<std::pair<int, int>> sample(unsigned int rows, unsigned int start, unsigned int end)
 {
     auto findrow = [&](unsigned int index, unsigned int stay_under) {
         unsigned int row = rows - 1;
