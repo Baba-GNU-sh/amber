@@ -127,4 +127,18 @@ ln -s build/compile_commands.json .
 GLot uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in `font.png`.
 
 ## Audio
-Sample audio downloaded from https://www2.cs.uic.edu/~i101/SoundFiles/
+Sample audio (for the audiofile plugin) is from https://www2.cs.uic.edu/~i101/SoundFiles/
+
+## TODO
+- [ ] Fix x-axis precision issues at high and low zoom levels.
+- [ ] Support for variable-rate time series.
+- [ ] Single and dual markers with frequency readout.
+- [ ] Vertical cursor and value readout.
+- [ ] Zoom to selection - for both double and single-axis modes.
+- [ ] Time series synchronization.
+- [ ] Multiple vertically stacked plots syncrhonized in time.
+- [ ] True plugin interface - e.g. loadable shared objects.
+- [ ] Keep view in line with newest data.
+- [ ] Autoscale Y-axis button.
+- [ ] Better renderer for when individual samples are visible.
+- [ ] ROS plugin.
