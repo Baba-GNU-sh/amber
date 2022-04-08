@@ -59,4 +59,4 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ctest --verbose
+      run: ctest -C Debug --verbose
