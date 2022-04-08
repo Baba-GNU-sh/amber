@@ -1,11 +1,14 @@
 #include "wavegen_plugin.hpp"
 
 #include <chrono>
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <imgui.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <stdexcept>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 WaveGenPlugin::WaveGenPlugin(PluginContext &ctx) : _ctx(ctx)
 {
