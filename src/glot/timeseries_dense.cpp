@@ -168,7 +168,7 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
     };
     auto count_leading_zeros = [](unsigned long long value) {
         unsigned long leading;
-        _BitScanBackward64(&leading, value | 1ULL);
+        _BitScanReverse64(&leading, value | 1ULL);
         return leading;
     };
 #endif
