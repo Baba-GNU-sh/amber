@@ -36,7 +36,10 @@ target_link_libraries(
 		spdlog::spdlog
 		audiofile::audiofile
 )
-target_compile_options(glot PRIVATE -Werror -Wall -Wextra)
+
+if (NOT MSVC)
+	target_compile_options(glot PRIVATE -Werror -Wall -Wextra)
+endif()
 
 if (USE_SANITIZERS)
 	target_compile_options(glot PRIVATE -fsanitize=address -fsanitize=undefined)
@@ -50,7 +53,9 @@ endif()
 
 add_executable(glotapp main.cpp)
 target_link_libraries(glotapp PRIVATE glot)
-target_compile_options(glotapp PRIVATE -Werror -Wall -Wextra)
+if (NOT MSVC)
+	target_compile_options(glotapp PRIVATE -Werror -Wall -Wextra)
+endif()
 set_target_properties(glotapp PROPERTIES OUTPUT_NAME glot)
 
 if (BUILD_BENCHMARKS)
