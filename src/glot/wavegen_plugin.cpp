@@ -1,6 +1,7 @@
 #include "wavegen_plugin.hpp"
 
 #include <chrono>
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <imgui.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
