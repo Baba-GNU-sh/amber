@@ -163,10 +163,13 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
 #elif defined _MSC_VER
     auto count_trailing_zeros = [](unsigned long long value) {
         unsigned long leading;
-        return _BitScanForward64(leading, value | (1ULL << 63));
+        _BitScanForward64(&leading, value | (1ULL << 63));
+        return leading;
     };
     auto count_leading_zeros = [](unsigned long long value) {
-        return _BitScanBackward64(value | 1ULL);
+        unsigned long leading;
+        _BitScanBackward64(&leading, value | 1ULL);
+        return leading;
     };
 #endif
 
