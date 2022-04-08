@@ -51,13 +51,6 @@ if (BUILD_COVERAGE)
 	target_link_options(glot PUBLIC -fprofile-arcs -ftest-coverage)
 endif()
 
-add_executable(glotapp main.cpp)
-target_link_libraries(glotapp PRIVATE glot)
-if (NOT MSVC)
-	target_compile_options(glotapp PRIVATE -Werror -Wall -Wextra)
-endif()
-set_target_properties(glotapp PROPERTIES OUTPUT_NAME glot)
-
 if (BUILD_BENCHMARKS)
 	find_package(benchmark REQUIRED)
 	add_executable(bench benchmark/bench_timeseries_dense.cpp)

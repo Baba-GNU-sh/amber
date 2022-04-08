@@ -44,6 +44,11 @@ class Resources
     {
         // TODO change this to use some invironment variable or something for
         // locating resource files
+        auto *env = std::getenv("GLOT_ROOT");
+        if (env)
+        {
+            return std::filesystem::path(env);
+        }
         return std::filesystem::current_path();
     }
 };

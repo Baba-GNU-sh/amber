@@ -6,12 +6,21 @@ option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
 option(BUILD_COVERAGE "Build with coverage instrumentation" OFF)
 option(USE_SANITIZERS "Build with address and undefined behaviour sanitizer instrumentation" OFF)
 
+set(CMAKE_CXX_STANDARD 17)
+
 # Note: We need to enable testing at the top level to generate the test file at the root of the build dir
 if (BUILD_TESTS)
 	enable_testing()
 endif()
 
 add_subdirectory(src/glot)
+
+add_executable(glotapp src/glot/main.cpp)
+target_link_libraries(glotapp PRIVATE glot)
+if (NOT MSVC)
+	target_compile_options(glotapp PRIVATE -Werror -Wall -Wextra)
+endif()
+set_target_properties(glotapp PROPERTIES OUTPUT_NAME glot)
 
 # Copy the shaders over to the build dir
 configure_file(shaders/plot/vertex.glsl plot/vertex.glsl COPYONLY)
