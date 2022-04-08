@@ -31,6 +31,6 @@ class Plot
     GLuint _plot_vbo;
     Program _lines_shader;
     static constexpr int COLS_MAX = 8000; // This could come back to bit me!
-    std::vector<Sample> _samples;
     glm::ivec2 _size;
+    mutable TSSample _samples[COLS_MAX];
 };
