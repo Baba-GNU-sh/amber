@@ -33,7 +33,7 @@ GraphView::~GraphView()
 {
 }
 
-bool GraphView::_hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br)
+bool GraphView::_hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br) const
 {
     if (value.x < tl.x)
         return false;
@@ -144,7 +144,7 @@ void GraphView::draw(const glm::mat3 &viewport_matrix,
     }
 
     _draw_lines(viewport_matrix);
-    _draw_labels(viewport_matrix);
+    _draw_labels(viewport_matrix, time_series);
 }
 
 void GraphView::_draw_lines(const glm::mat3 &vp_matrix) const
@@ -211,11 +211,21 @@ void GraphView::_draw_lines(const glm::mat3 &vp_matrix) const
     draw_ticks(tick_spacing_minor, glm::vec2(-TICKLEN / 2, 0), glm::vec2(0, TICKLEN / 2));
 
     // Add one additional vertical line where the cursor is
-    ptr[offset++] = glm::vec2(_cursor.x, 0.0);
-    ptr[offset++] = glm::vec2(_cursor.x, _size.y);
+    if (_hittest(_cursor,
+                 glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX),
+                 glm::vec2(_size.x, _size.y)))
+    {
+        ptr[offset++] = glm::vec2(_cursor.x, 0.0);
+        ptr[offset++] = glm::vec2(_cursor.x, _size.y);
+    }
+    else if (_hittest(
+                 _cursor, glm::vec2(0, 0), glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX)))
+    {
+        ptr[offset++] = glm::vec2(0.0, _cursor.y);
+        ptr[offset++] = glm::vec2(_size.x, _cursor.y);
+    }
 
     auto line_round = [](float value) { return roundf(value - 0.5f) + 0.5f; };
-
     for (int i = 0; i < offset; i++)
     {
         ptr[i].x = line_round(ptr[i].x);
@@ -232,7 +242,8 @@ void GraphView::_draw_lines(const glm::mat3 &vp_matrix) const
     glDrawArrays(GL_LINES, 0, offset);
 }
 
-void GraphView::_draw_labels(const glm::mat3 &vp_matrix) const
+void GraphView::_draw_labels(const glm::mat3 &vp_matrix,
+                             const std::vector<TimeSeriesContainer> &time_series) const
 {
     glm::vec2 tl(GUTTER_SIZE_PX, 0);
     glm::vec2 bl(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX);
@@ -283,28 +294,45 @@ void GraphView::_draw_labels(const glm::mat3 &vp_matrix) const
             vp_matrix, ss.str(), point, 18, 7, LabelAlignment::Center, LabelAlignmentVertical::Top);
     }
 
-    // Find the nearest sample and draw labels for it
-    // auto cursor_gs = glm::inverse(_view_matrix) * _viewport_matrix_inv *
-    // glm::vec3(_cursor, 1.0f); auto cursor_gs2 = glm::inverse(_view_matrix) * _viewport_matrix_inv
-    // *
-    //                   glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
-    // auto sample = _ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
+    if (_hittest(_cursor,
+                 glm::vec2(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX),
+                 glm::vec2(_size.x, _size.y)))
+    {
+        // Find the nearest sample and draw labels for it
+        auto cursor_gs =
+            glm::inverse(_view_matrix) * glm::inverse(vp_matrix) * glm::vec3(_cursor, 1.0f);
+        auto cursor_gs2 = glm::inverse(_view_matrix) * glm::inverse(vp_matrix) *
+                          glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
 
-    // const auto draw_label = [&](double value) {
-    //     glm::vec2 sample_gs(cursor_gs.x, value);
+        for (const auto &ts : time_series)
+        {
+            if (ts.visible)
+            {
+                auto sample = ts.ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
 
-    //     glm::vec3 point3 = _viewport_matrix * _view_matrix * glm::vec3(sample_gs, 1.0f);
-    //     glm::vec2 point(point3.x, point3.y);
+                const auto draw_label = [&](double value) {
+                    glm::vec2 sample_gs(cursor_gs.x, value);
 
-    //     std::stringstream ss;
-    //     ss << value;
-    //     _draw_label(ss.str(), point, 18, 7, LabelAlignment::Right,
-    //     LabelAlignmentVertical::Center);
-    // };
+                    glm::vec3 point3 = vp_matrix * _view_matrix * glm::vec3(sample_gs, 1.0f);
+                    glm::vec2 point(point3.x, point3.y);
 
-    // draw_label(sample.average);
-    // // draw_label(sample.min);
-    // // draw_label(sample.max);
+                    std::stringstream ss;
+                    ss << value;
+                    _draw_label(vp_matrix,
+                                ss.str(),
+                                point,
+                                18,
+                                7,
+                                LabelAlignment::Right,
+                                LabelAlignmentVertical::Center);
+                };
+
+                draw_label(sample.average);
+                // draw_label(sample.min);
+                // draw_label(sample.max);
+            }
+        }
+    }
 }
 
 void GraphView::_draw_label(const glm::mat3 &vp_matrix,

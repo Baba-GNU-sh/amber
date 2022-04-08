@@ -131,7 +131,7 @@ class GraphView
      * @return true The coordinate is within the bounding box.
      * @return false The coordinate is outside the bounding box.
      */
-    bool _hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br);
+    bool _hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br) const;
 
     /**
      * @brief Converts a vector from viewport space (pixels w/ origin at TL) to
@@ -147,7 +147,7 @@ class GraphView
     void _init_line_buffers();
     void _init_glyph_buffers();
     void _draw_lines(const glm::mat3 &vp_matrix) const;
-    void _draw_labels(const glm::mat3 &vp_matrix) const;
+    void _draw_labels(const glm::mat3 &vp_matrix, const std::vector<TimeSeriesContainer> &time_series) const;
     void _draw_label(const glm::mat3 &vp_matrix,
                      const std::string_view text,
                      const glm::vec2 &pos,
