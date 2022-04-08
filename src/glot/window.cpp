@@ -228,6 +228,7 @@ void Window::render_imgui()
 
     _plugin_manager.draw_dialogs();
 
+    ImGui::End();
     ImGui::Render();
 }
 
