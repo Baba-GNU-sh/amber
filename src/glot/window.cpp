@@ -1,6 +1,8 @@
+#include <glad/glad.h>
 #include <spdlog/spdlog.h>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <imgui.h>
+#include <algorithm>
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 #include "window.hpp"
@@ -23,6 +25,7 @@ Window::Window(const Database &db, PluginManager &plugins)
     glfwSetCursorPosCallback(m_window, Window::cursor_pos_callback);
     glfwSetScrollCallback(m_window, Window::scroll_callback);
     glfwSetMouseButtonCallback(m_window, Window::mouse_button_callback);
+    glfwSetKeyCallback(m_window, Window::key_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -259,10 +262,17 @@ void Window::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 void Window::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
-    ImGuiIO &io = ImGui::GetIO();
-    if (io.WantCaptureMouse)
+    if (ImGui::GetIO().WantCaptureMouse)
         return;
 
     Window *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
     win->m_graph->mouse_button(button, action, mods);
+}
+
+void Window::key_callback(GLFWwindow *window, int key, int, int action, int)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
 }

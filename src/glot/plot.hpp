@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
 #include "timeseries.hpp"
