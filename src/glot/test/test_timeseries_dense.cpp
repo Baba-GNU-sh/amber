@@ -22,6 +22,7 @@ TEST(TimeSeriesDense, oor)
     db.push_sample(2.0);
 
     auto a = db.get_sample(-0.5, 1.0);
+    EXPECT_FLOAT_EQ(a.timestamp, -0.5);
     EXPECT_FLOAT_EQ(a.average, 1.0);
     EXPECT_FLOAT_EQ(a.min, 1.0);
     EXPECT_FLOAT_EQ(a.max, 1.0);

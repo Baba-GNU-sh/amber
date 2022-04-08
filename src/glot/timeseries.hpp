@@ -5,6 +5,7 @@
 
 struct TSSample
 {
+    float timestamp;
     float average;
     float min;
     float max;

@@ -9,12 +9,12 @@
 #endif
 
 TimeSeriesDense::TimeSeriesDense(double start, double interval)
-    : _data(64), _interval(interval), _start(start)
+    : _data(1), _interval(interval), _start(start)
 {
 }
 
 TimeSeriesDense::TimeSeriesDense(double start, double interval, std::vector<double> init)
-    : _data(64), _interval(interval), _start(start)
+    : _data(1), _interval(interval), _start(start)
 {
     for (double d : init)
     {
@@ -25,6 +25,7 @@ TimeSeriesDense::TimeSeriesDense(double start, double interval, std::vector<doub
     auto size = init.size() >> 1;
     while (size)
     {
+        _data.resize(row + 1);
         for (std::size_t i = 0; i < size; ++i)
         {
             _data[row].push_back(
@@ -55,10 +56,12 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
         if (_data[0].empty() || (first < span.first && last < span.first) ||
             (first > span.second && last > span.second))
         {
+            sample.timestamp = first;
             sample.average = sample.min = sample.max = std::numeric_limits<double>::quiet_NaN();
         }
         else
         {
+            sample.timestamp = first;
             auto index_first = static_cast<long long>((first - _start) / _interval);
             index_first = std::max(index_first, static_cast<long long>(0));
             auto index_last = static_cast<long long>((last - _start) / _interval);
@@ -109,6 +112,10 @@ void TimeSeriesDense::push_sample(double value)
     while (sz /= 2)
     {
         ++index;
+        if (index >= _data.size())
+        {
+            _data.resize(index + 1);
+        }
         const auto &prev = _data[index - 1];
         auto &buf = _data[index];
         if (sz > buf.size())
@@ -169,7 +176,7 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
     auto count_leading_zeros = [](unsigned long long value) {
         unsigned long leading;
         _BitScanReverse64(&leading, value | 1ULL);
-        return leading;
+        return 63 ^ leading;
     };
 #endif
 
@@ -187,7 +194,7 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
         // we are aligned to Note: Passing 0 to __builtin_ctzll() is UB, so set the MSB which will
         // never affect our results
         auto row = count_trailing_zeros(iter);
-        row = std::min(row, row_max);
+        row = std::min<unsigned long>(row, row_max);
 
         // If the remaining number of samples is smaller than one chunk on this row then we would
         // have consumed too much Work out the largest chunk that that will fit in this chunk (by
