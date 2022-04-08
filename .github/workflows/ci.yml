@@ -70,7 +70,7 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}\build -config Debug
+      run: cmake --build ${{github.workspace}}\build --config Debug
 
     - name: Test
       working-directory: ${{github.workspace}}/build
