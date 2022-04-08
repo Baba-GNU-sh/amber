@@ -1,14 +1,9 @@
 name: ci
-
 on: push
-
 jobs:
-  Ubuntu:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
 
+  Ubuntu:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
 
@@ -23,18 +18,13 @@ jobs:
         sudo apt-get install -y gcovr
 
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MODULE_PATH=${{github.workspace}}/build -DBUILD_TESTS=ON -DBUILD_COVERAGE=ON -DUSE_SANITIZERS=ON
 
     - name: Build
-      # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest --verbose
 
     - name: Coverage
@@ -44,12 +34,11 @@ jobs:
     - uses: codecov/codecov-action@v2
       with:
         files: ${{github.workspace}}/build/coverage.xml
-        flags: unittests # optional
-        name: codecov-umbrella # optional
-        fail_ci_if_error: true # optional (default = false)
-        verbose: true # optional (default = false)
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true
 
-  
   Windows:
     runs-on: windows-latest
     steps:
@@ -60,27 +49,14 @@ jobs:
       uses: turtlebrowser/get-conan@main
     
     - name: Install Deps
-      run: |
-        conan install -if ${{github.workspace}}/build --build=missing .
+      run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug . 
 
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -B ${{github.workspace}}\build "-DCMAKE_MODULE_PATH=$('${{github.workspace}}\build' -replace '\\', '/')" -DBUILD_TESTS=ON
 
     - name: Build
-      # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}\build --config Debug
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest --verbose
-
-    # - name: Archive production artifacts
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: app
-    #     path: |
-    #       ${{github.workspace}}/build/src/glot/glotapp
