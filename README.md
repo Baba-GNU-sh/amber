@@ -24,6 +24,7 @@ GLot will feature the following features:
 - Keep recording data 'til your memory is full (no fixed size ring buffer).
 - Target 60FPS even on modest integrated laptop graphics.
 - Builds and runs on Windows and Linux - see [actions](/actions).
+- Always show the most useful information possible, regardless of the zoom level.
 
 ## Screenshots
 
