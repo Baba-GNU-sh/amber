@@ -8,11 +8,11 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <boost/signals2.hpp>
 
-class WindowContainer
+class Window
 {
   public:
-    WindowContainer(int width, int height, const std::string &title);
-    virtual ~WindowContainer();
+    Window(int width, int height, const std::string &title);
+    virtual ~Window();
 
     void use() const;
     void finish() const;

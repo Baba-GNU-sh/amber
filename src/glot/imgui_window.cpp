@@ -1,7 +1,7 @@
 #include "imgui_window.hpp"
 
 ImGuiContextWindow::ImGuiContextWindow(int width, int height, const std::string &title)
-    : WindowContainer(width, height, title)
+    : Window(width, height, title)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

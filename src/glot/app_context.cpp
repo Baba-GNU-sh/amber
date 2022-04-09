@@ -5,7 +5,7 @@
 #include "database.hpp"
 #include "plugin_context.hpp"
 #include "plugin_manager.hpp"
-#include "window_container.hpp"
+#include "window.hpp"
 #include <imgui.h>
 #include <unistd.h>
 #include "bindings/imgui_impl_glfw.h"
@@ -16,7 +16,7 @@
 
 AppContext::AppContext(Database &database,
                        Graph &graph,
-                       WindowContainer &window,
+                       Window &window,
                        PluginManager &plugin_manager)
     : m_database(database), m_graph(graph), m_window(window), m_plugin_manager(plugin_manager)
 {

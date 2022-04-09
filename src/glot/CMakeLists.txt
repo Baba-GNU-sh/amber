@@ -20,7 +20,7 @@ add_library(
 		plugin_context.cpp
 		plugin_manager.cpp
 		timeseries_dense.cpp
-		window_container.cpp
+		window.cpp
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
 		imgui_window.cpp

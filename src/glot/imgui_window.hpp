@@ -2,11 +2,11 @@
 
 #include <string>
 #include <imgui.h>
-#include "window_container.hpp"
+#include "window.hpp"
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 
-class ImGuiContextWindow : public WindowContainer
+class ImGuiContextWindow : public Window
 {
   public:
     ImGuiContextWindow(int width, int height, const std::string &title);

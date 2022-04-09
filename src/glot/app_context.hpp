@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include "database.hpp"
 #include "graph.hpp"
-#include "window_container.hpp"
+#include "window.hpp"
 #include "plugin_manager.hpp"
 #include "timeseries.hpp"
 
@@ -22,7 +22,7 @@ class AppContext
   public:
     AppContext(Database &database,
                Graph &graph,
-               WindowContainer &window,
+               Window &window,
                PluginManager &plugin_manager);
 
     void draw();
@@ -36,7 +36,7 @@ class AppContext
 
     Database &m_database;
     Graph &m_graph;
-    WindowContainer &m_window;
+    Window &m_window;
     PluginManager &m_plugin_manager;
     std::vector<TimeSeriesContainer> m_ts;
     int m_plot_width = 1;

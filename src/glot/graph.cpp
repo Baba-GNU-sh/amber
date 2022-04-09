@@ -12,7 +12,7 @@
 #include "graph.hpp"
 #include "resources.hpp"
 
-Graph::Graph(WindowContainer &window)
+Graph::Graph(Window &window)
     : m_window(window), _position(0, 0), _size(500, 500), _dragging(false), _plot(_view_matrix)
 {
     _update_view_matrix(glm::mat3(1.0f));

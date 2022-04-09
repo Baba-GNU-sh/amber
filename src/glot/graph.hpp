@@ -5,7 +5,7 @@
 #include "shader_utils.hpp"
 #include "database.hpp"
 #include "timeseries.hpp"
-#include "window_container.hpp"
+#include "window.hpp"
 
 struct GlyphVertex
 {
@@ -47,7 +47,7 @@ struct TimeSeriesContainer
 class Graph
 {
   public:
-    Graph(WindowContainer &window);
+    Graph(Window &window);
     ~Graph();
 
     /**
@@ -158,7 +158,7 @@ class Graph
 
     std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing() const;
 
-    WindowContainer &m_window;
+    Window &m_window;
     glm::ivec2 _position;
     glm::ivec2 _size;
     glm::vec2 _cursor;

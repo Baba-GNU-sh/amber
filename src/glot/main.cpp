@@ -5,7 +5,7 @@
 #include "database.hpp"
 #include "plugin_context.hpp"
 #include "plugin_manager.hpp"
-#include "window_container.hpp"
+#include "window.hpp"
 #include <imgui.h>
 #include <unistd.h>
 #include "bindings/imgui_impl_glfw.h"
