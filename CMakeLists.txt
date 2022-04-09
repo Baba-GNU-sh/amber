@@ -15,12 +15,12 @@ endif()
 
 add_subdirectory(src/glot)
 
-add_executable(glotapp src/glot/main.cpp)
-target_link_libraries(glotapp PRIVATE glot)
+add_executable(main src/glot/main.cpp)
+target_link_libraries(main PRIVATE glot)
 if (NOT MSVC)
-	target_compile_options(glotapp PRIVATE -Werror -Wall -Wextra)
+	target_compile_options(main PRIVATE -Werror -Wall -Wextra)
 endif()
-set_target_properties(glotapp PROPERTIES OUTPUT_NAME glot)
+set_target_properties(main PROPERTIES OUTPUT_NAME glot)
 
 # Copy the shaders over to the build dir
 configure_file(shaders/plot/vertex.glsl plot/vertex.glsl COPYONLY)
