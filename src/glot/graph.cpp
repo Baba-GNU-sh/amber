@@ -31,6 +31,11 @@ GraphView::GraphView() : _position(0, 0), _size(100, 100), _dragging(false), _pl
 
 GraphView::~GraphView()
 {
+    glDeleteVertexArrays(1, &_linebuf_vao);
+    glDeleteBuffers(1, &_linebuf_vbo);
+    glDeleteVertexArrays(1, &_glyphbuf_vao);
+    glDeleteBuffers(1, &_glyphbuf_vbo);
+    glDeleteBuffers(1, &_glyphbuf_ebo);
 }
 
 bool GraphView::_hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br) const
