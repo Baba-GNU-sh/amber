@@ -7,6 +7,32 @@
 #include "database.hpp"
 #include "plugin_manager.hpp"
 
+class WindowContainer
+{
+  public:
+    WindowContainer(int width, int height, const char *title)
+    {
+      m_window = glfwCreateWindow(width, height, title, NULL, NULL);
+      if (!m_window)
+      {
+          throw std::runtime_error("Failed to create GLFW window");
+      }
+      // glfwSetWindowUserPointer(m_window, this);
+      // glfwMakeContextCurrent(m_window);
+    }
+    ~WindowContainer()
+    {
+      glfwDestroyWindow(m_window);
+    }
+    GLFWwindow *handle()
+    {
+      return m_window;
+    }
+  private:
+    GLFWwindow *m_window;
+};
+
+
 class Window
 {
   public:
@@ -29,6 +55,7 @@ class Window
     static constexpr unsigned int SCR_WIDTH = 800;
     static constexpr unsigned int SCR_HEIGHT = 600;
 
+    WindowContainer m_window;
     glm::vec3 _bgcolour;
     glm::ivec2 _win_size;
     const Database &_database;
@@ -36,7 +63,6 @@ class Window
     bool _enable_vsync = true;
     bool _enable_multisampling = true;
 
-    GLFWwindow *m_window;
     std::shared_ptr<GraphView> m_graph;
 
     int _plot_width = 2;

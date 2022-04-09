@@ -9,27 +9,22 @@
 #include "graph.hpp"
 
 Window::Window(const Database &db, PluginManager &plugins)
-    : _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db),
+    : m_window(SCR_WIDTH, SCR_HEIGHT, "GLot"), _bgcolour(0.2f, 0.2f, 0.2f), _win_size(SCR_WIDTH, SCR_HEIGHT), _database(db),
       _plugin_manager(plugins), _plot_colour(1.0f, 0.5f, 0.2f), _minmax_colour(0.5f, 0.5f, 0.5f)
 {
-    m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GLot", NULL, NULL);
-    if (!m_window)
-    {
-        throw std::runtime_error("Failed to create GLFW window");
-    }
-
     // Register callbacks
-    glfwSetWindowUserPointer(m_window, this);
-    glfwMakeContextCurrent(m_window);
-    glfwSetFramebufferSizeCallback(m_window, Window::framebuffer_size_callback);
-    glfwSetCursorPosCallback(m_window, Window::cursor_pos_callback);
-    glfwSetScrollCallback(m_window, Window::scroll_callback);
-    glfwSetMouseButtonCallback(m_window, Window::mouse_button_callback);
-    glfwSetKeyCallback(m_window, Window::key_callback);
+    auto handle = m_window.handle();
+    glfwSetWindowUserPointer(handle, this);
+    glfwMakeContextCurrent(handle);
+    glfwSetFramebufferSizeCallback(handle, Window::framebuffer_size_callback);
+    glfwSetCursorPosCallback(handle, Window::cursor_pos_callback);
+    glfwSetScrollCallback(handle, Window::scroll_callback);
+    glfwSetMouseButtonCallback(handle, Window::mouse_button_callback);
+    glfwSetKeyCallback(handle, Window::key_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        glfwDestroyWindow(m_window);
+        glfwDestroyWindow(handle);
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
@@ -44,7 +39,7 @@ Window::Window(const Database &db, PluginManager &plugins)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+    ImGui_ImplGlfw_InitForOpenGL(handle, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
     // Update settings
@@ -83,13 +78,11 @@ Window::~Window()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-
-    glfwDestroyWindow(m_window);
 }
 
 void Window::spin()
 {
-    while (!glfwWindowShouldClose(m_window))
+    while (!glfwWindowShouldClose(m_window.handle()))
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -97,7 +90,7 @@ void Window::spin()
         m_graph->draw(_vp_matrix, _plot_width, _ts, _show_line_segments);
         render_imgui();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(m_window);
+        glfwSwapBuffers(m_window.handle());
     }
 }
 
@@ -143,7 +136,7 @@ void Window::render_imgui()
         {
             if (ImGui::MenuItem("Close"))
             {
-                glfwSetWindowShouldClose(m_window, GL_TRUE);
+                glfwSetWindowShouldClose(m_window.handle(), GL_TRUE);
             }
             ImGui::EndMenu();
         }
@@ -166,7 +159,7 @@ void Window::render_imgui()
 
     if (ImGui::CollapsingHeader("Help", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::BulletText("Left mouse + drag to pan");
+        ImGui::BulletText("Left mouse + drag to pan and other shit");
         ImGui::BulletText("Scroll to zoom");
         ImGui::BulletText("Scroll on gutters to zoom individual axes");
     }
