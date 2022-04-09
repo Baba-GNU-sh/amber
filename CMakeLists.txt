@@ -21,6 +21,7 @@ if (NOT MSVC)
 	target_compile_options(main PRIVATE -Werror -Wall -Wextra)
 endif()
 set_target_properties(main PROPERTIES OUTPUT_NAME glot)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
 
 # Copy the shaders over to the build dir
 configure_file(shaders/plot/vertex.glsl plot/vertex.glsl COPYONLY)
