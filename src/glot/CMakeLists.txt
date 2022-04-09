@@ -20,9 +20,11 @@ add_library(
 		plugin_context.cpp
 		plugin_manager.cpp
 		timeseries_dense.cpp
-		window.cpp
+		window_container.cpp
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
+		imgui_window.cpp
+		app_context.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

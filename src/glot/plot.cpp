@@ -87,7 +87,7 @@ void Plot::draw(const TimeSeries &ts,
     auto interval = PIXELS_PER_COL * (end_gs.x - begin_gs.x) / width;
 
     auto n_samples = ts.get_samples(&_samples[0], begin_gs.x, interval, width);
-    
+
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * n_samples, _samples);
     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, n_samples);
 }

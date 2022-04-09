@@ -5,6 +5,7 @@
 #include "shader_utils.hpp"
 #include "database.hpp"
 #include "timeseries.hpp"
+#include "window_container.hpp"
 
 struct GlyphVertex
 {
@@ -43,11 +44,11 @@ struct TimeSeriesContainer
 /**
  * @brief Stores and renders a graph with axes and zoom and pan mouse controls.
  */
-class GraphView
+class Graph
 {
   public:
-    GraphView();
-    ~GraphView();
+    Graph(WindowContainer &window);
+    ~Graph();
 
     /**
      * @brief Update the size of the graph in the viewport.
@@ -90,27 +91,25 @@ class GraphView
      * @brief Call this to pass through cursor move events from GLFW to control
      * the graph.
      */
-    void cursor_move(const glm::mat3 &vp_matrix, double xpos, double ypos);
+    void cursor_move(double xpos, double ypos);
 
     /**
      * @brief Call this to pass through mouse scroll events from GLFW to control
      * the graph.
      */
-    void mouse_scroll(const glm::mat3 &vp_matrix, double xoffset, double yoffset);
+    void mouse_scroll(double xoffset, double yoffset);
 
     /**
      * @brief Draw the graph to the screen.
      *
-     * @param viewport_matrix
      * @param plot_width
      * @param plot_colour
      * @param minmax_colour
      * @param show_plot_segments
      */
-    void draw(const glm::mat3 &viewport_matrix,
-              int plot_width,
-              const std::vector<TimeSeriesContainer> &ts,
-              bool show_plot_segments) const;
+    void draw_decorations() const;
+
+    void draw_plot(int plot_width, const glm::vec3 &colour, float y_offset, const TimeSeries &ts);
 
     glm::mat3 view_matrix() const;
 
@@ -119,7 +118,7 @@ class GraphView
      *
      * @return glm::vec2
      */
-    glm::vec2 cursor_graphspace(const glm::mat3 &vp_matrix) const;
+    glm::vec2 cursor_graphspace() const;
 
   private:
     /**
@@ -140,16 +139,15 @@ class GraphView
      * @param value The vector to convert.
      * @return glm::vec2 The resultant vector in graph space.
      */
-    glm::vec2 screen2graph(const glm::mat3 &vp_matrix, const glm::ivec2 &value) const;
+    glm::vec2 screen2graph(const glm::ivec2 &value) const;
 
     void _update_view_matrix(const glm::mat3 &value);
 
     void _init_line_buffers();
     void _init_glyph_buffers();
-    void _draw_lines(const glm::mat3 &vp_matrix) const;
-    void _draw_labels(const glm::mat3 &vp_matrix, const std::vector<TimeSeriesContainer> &time_series) const;
-    void _draw_label(const glm::mat3 &vp_matrix,
-                     const std::string_view text,
+    void _draw_lines() const;
+    void _draw_labels() const;
+    void _draw_label(const std::string_view text,
                      const glm::vec2 &pos,
                      float height,
                      float width,
@@ -158,8 +156,9 @@ class GraphView
     void _draw_glyph(
         char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const;
 
-    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing(const glm::mat3 &vp_matrix) const;
+    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing() const;
 
+    WindowContainer &m_window;
     glm::ivec2 _position;
     glm::ivec2 _size;
     glm::vec2 _cursor;

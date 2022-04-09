@@ -12,7 +12,8 @@
 #include "graph.hpp"
 #include "resources.hpp"
 
-GraphView::GraphView() : _position(0, 0), _size(100, 100), _dragging(false), _plot(_view_matrix)
+Graph::Graph(WindowContainer &window)
+    : m_window(window), _position(0, 0), _size(500, 500), _dragging(false), _plot(_view_matrix)
 {
     _update_view_matrix(glm::mat3(1.0f));
 
@@ -27,9 +28,22 @@ GraphView::GraphView() : _position(0, 0), _size(100, 100), _dragging(false), _pl
 
     _init_line_buffers();
     _init_glyph_buffers();
+
+    namespace ph = std::placeholders;
+
+    _size = m_window.size();
+    _plot.set_size(m_window.size().x, m_window.size().y);
+    m_window.framebuffer_size.connect([this](int width, int height) {
+        _size = glm::ivec2(width, height);
+        _plot.set_size(width, height);
+    });
+
+    m_window.scroll.connect(std::bind(&Graph::mouse_scroll, this, ph::_1, ph::_2));
+    m_window.cursor_pos.connect(std::bind(&Graph::cursor_move, this, ph::_1, ph::_2));
+    m_window.mouse_button.connect(std::bind(&Graph::mouse_button, this, ph::_1, ph::_2, ph::_3));
 }
 
-GraphView::~GraphView()
+Graph::~Graph()
 {
     glDeleteVertexArrays(1, &_linebuf_vao);
     glDeleteBuffers(1, &_linebuf_vbo);
@@ -38,7 +52,7 @@ GraphView::~GraphView()
     glDeleteBuffers(1, &_glyphbuf_ebo);
 }
 
-bool GraphView::_hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br) const
+bool Graph::_hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br) const
 {
     if (value.x < tl.x)
         return false;
@@ -51,7 +65,7 @@ bool GraphView::_hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br) const
     return true;
 }
 
-void GraphView::_init_line_buffers()
+void Graph::_init_line_buffers()
 {
     glGenVertexArrays(1, &_linebuf_vao);
     glBindVertexArray(_linebuf_vao);
@@ -69,7 +83,7 @@ void GraphView::_init_line_buffers()
     _lines_shader = Program(shaders);
 }
 
-void GraphView::_init_glyph_buffers()
+void Graph::_init_glyph_buffers()
 {
     glGenVertexArrays(1, &_glyphbuf_vao);
     glBindVertexArray(_glyphbuf_vao);
@@ -134,29 +148,22 @@ void GraphView::_init_glyph_buffers()
     stbi_image_free(tex_data);
 }
 
-void GraphView::draw(const glm::mat3 &viewport_matrix,
-                     int plot_width,
-                     const std::vector<TimeSeriesContainer> &time_series,
-                     bool show_line_segments) const
+void Graph::draw_plot(int plot_width, const glm::vec3 &colour, float y_offset, const TimeSeries &ts)
 {
-    for (const auto &ts : time_series)
-    {
-        if (ts.visible)
-        {
-            _plot.draw(
-                *(ts.ts), viewport_matrix, plot_width, ts.colour, ts.y_offset, show_line_segments);
-        }
-    }
-
-    _draw_lines(viewport_matrix);
-    _draw_labels(viewport_matrix, time_series);
+    _plot.draw(ts, m_window.vp_matrix(), plot_width, colour, y_offset, false);
 }
 
-void GraphView::_draw_lines(const glm::mat3 &vp_matrix) const
+void Graph::draw_decorations() const
+{
+    _draw_lines();
+    _draw_labels();
+}
+
+void Graph::_draw_lines() const
 {
     int offset = 0;
 
-    const auto tick_spacing = _tick_spacing(vp_matrix);
+    const auto tick_spacing = _tick_spacing();
     const auto tick_spacing_major = std::get<0>(tick_spacing);
     const auto tick_spacing_minor = std::get<1>(tick_spacing);
 
@@ -184,29 +191,29 @@ void GraphView::_draw_lines(const glm::mat3 &vp_matrix) const
                           const glm::vec2 &tick_size_x) {
         // Draw the y-axis ticks
         // Work out where (in graph space) margin and height-margin is
-        auto top_gs = screen2graph(vp_matrix, tl);
-        auto bottom_gs = screen2graph(vp_matrix, bl);
+        auto top_gs = screen2graph(tl);
+        auto bottom_gs = screen2graph(bl);
         float start = ceilf(bottom_gs.y / tick_spacing.y) * tick_spacing.y;
         float end = ceilf(top_gs.y / tick_spacing.y) * tick_spacing.y;
 
         // Place a tick at every unit up the y axis
         for (float i = start; i < end; i += tick_spacing.y)
         {
-            auto tick_y_vpspace = vp_matrix * (_view_matrix * glm::vec3(0.0f, i, 1.0f));
+            auto tick_y_vpspace = m_window.vp_matrix() * (_view_matrix * glm::vec3(0.0f, i, 1.0f));
             ptr[offset++] = glm::vec2(GUTTER_SIZE_PX, tick_y_vpspace.y) + tick_size_y;
             ptr[offset++] = glm::vec2(GUTTER_SIZE_PX, tick_y_vpspace.y);
         }
 
         // Draw the y axis ticks
-        auto left_gs = screen2graph(vp_matrix, bl);
-        auto right_gs = screen2graph(vp_matrix, br);
+        auto left_gs = screen2graph(bl);
+        auto right_gs = screen2graph(br);
         start = ceilf(left_gs.x / tick_spacing.x) * tick_spacing.x;
         end = ceilf(right_gs.x / tick_spacing.x) * tick_spacing.x;
 
         // Place a tick at every unit along the x axis
         for (float i = start; i < end; i += tick_spacing.x)
         {
-            auto tick_x_vpspace = vp_matrix * (_view_matrix * glm::vec3(i, 0.0f, 1.0f));
+            auto tick_x_vpspace = m_window.vp_matrix() * (_view_matrix * glm::vec3(i, 0.0f, 1.0f));
             ptr[offset++] = glm::vec2(tick_x_vpspace.x, _size.y - GUTTER_SIZE_PX) + tick_size_x;
             ptr[offset++] = glm::vec2(tick_x_vpspace.x, _size.y - GUTTER_SIZE_PX);
         }
@@ -242,61 +249,53 @@ void GraphView::_draw_lines(const glm::mat3 &vp_matrix) const
 
     _lines_shader.use();
     int uniform_id = _lines_shader.uniform_location("view_matrix");
-    const auto viewport_matrix_inv = glm::inverse(vp_matrix); // TODO this is expensive
+    const auto viewport_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
     glDrawArrays(GL_LINES, 0, offset);
 }
 
-void GraphView::_draw_labels(const glm::mat3 &vp_matrix,
-                             const std::vector<TimeSeriesContainer> &time_series) const
+void Graph::_draw_labels() const
 {
     glm::vec2 tl(GUTTER_SIZE_PX, 0);
     glm::vec2 bl(GUTTER_SIZE_PX, _size.y - GUTTER_SIZE_PX);
     glm::vec2 br(_size.x, _size.y - GUTTER_SIZE_PX);
-    auto tick_spacing = _tick_spacing(vp_matrix);
+    auto tick_spacing = _tick_spacing();
     auto tick_spacing_major = std::get<0>(tick_spacing);
     // auto tick_spacing_minor = std::get<1>(tick_spacing);
     auto precision = std::get<2>(tick_spacing);
 
     // Draw one label per tick on the y axis
-    auto top_gs = screen2graph(vp_matrix, tl);
-    auto bottom_gs = screen2graph(vp_matrix, bl);
+    auto top_gs = screen2graph(tl);
+    auto bottom_gs = screen2graph(bl);
     float start = ceilf(bottom_gs.y / tick_spacing_major.y) * tick_spacing_major.y;
     float end = ceilf(top_gs.y / tick_spacing_major.y) * tick_spacing_major.y;
 
     // Place a tick at every unit up the y axis
     for (float i = start; i < end; i += tick_spacing_major.y)
     {
-        auto tick_y_vpspace = vp_matrix * (_view_matrix * glm::vec3(0.0f, i, 1.0f));
+        auto tick_y_vpspace = m_window.vp_matrix() * (_view_matrix * glm::vec3(0.0f, i, 1.0f));
         glm::vec2 point(GUTTER_SIZE_PX - TICKLEN, tick_y_vpspace.y);
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision.y) << i;
-        _draw_label(vp_matrix,
-                    ss.str(),
-                    point,
-                    18,
-                    7,
-                    LabelAlignment::Right,
-                    LabelAlignmentVertical::Center);
+        _draw_label(ss.str(), point, 18, 7, LabelAlignment::Right, LabelAlignmentVertical::Center);
     }
 
     // Draw the y axis ticks
-    auto left_gs = screen2graph(vp_matrix, bl);
-    auto right_gs = screen2graph(vp_matrix, br);
+    auto left_gs = screen2graph(bl);
+    auto right_gs = screen2graph(br);
     start = ceilf(left_gs.x / tick_spacing_major.x) * tick_spacing_major.x;
     end = ceilf(right_gs.x / tick_spacing_major.x) * tick_spacing_major.x;
 
     // Place a tick at every unit along the x axis
     for (float i = start; i < end; i += tick_spacing_major.x)
     {
-        auto tick_x_vpspace = vp_matrix * (_view_matrix * glm::vec3(i, 0.0f, 1.0f));
+        auto tick_x_vpspace = m_window.vp_matrix() * (_view_matrix * glm::vec3(i, 0.0f, 1.0f));
         glm::vec2 point(tick_x_vpspace.x, _size.y - GUTTER_SIZE_PX + TICKLEN);
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision.x) << i;
-        _draw_label(
-            vp_matrix, ss.str(), point, 18, 7, LabelAlignment::Center, LabelAlignmentVertical::Top);
+        _draw_label(ss.str(), point, 18, 7, LabelAlignment::Center, LabelAlignmentVertical::Top);
     }
 
     if (_hittest(_cursor,
@@ -304,49 +303,48 @@ void GraphView::_draw_labels(const glm::mat3 &vp_matrix,
                  glm::vec2(_size.x, _size.y)))
     {
         // Find the nearest sample and draw labels for it
-        auto cursor_gs =
-            glm::inverse(_view_matrix) * glm::inverse(vp_matrix) * glm::vec3(_cursor, 1.0f);
-        auto cursor_gs2 = glm::inverse(_view_matrix) * glm::inverse(vp_matrix) *
-                          glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
+        // auto cursor_gs =
+        //     glm::inverse(_view_matrix) * m_window.vp_matrix_inv() * glm::vec3(_cursor, 1.0f);
+        // auto cursor_gs2 = glm::inverse(_view_matrix) * m_window.vp_matrix_inv() *
+        //                   glm::vec3(_cursor.x + 1.0f, _cursor.y, 1.0f);
 
-        for (const auto &ts : time_series)
-        {
-            if (ts.visible)
-            {
-                auto sample = ts.ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
+        // for (const auto &ts : time_series)
+        // {
+        //     if (ts.visible)
+        //     {
+        //         auto sample = ts.ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
 
-                const auto draw_label = [&](double value) {
-                    glm::vec2 sample_gs(cursor_gs.x, value);
+        //         const auto draw_label = [&](double value) {
+        //             glm::vec2 sample_gs(cursor_gs.x, value);
 
-                    glm::vec3 point3 = vp_matrix * _view_matrix * glm::vec3(sample_gs, 1.0f);
-                    glm::vec2 point(point3.x, point3.y);
+        //             glm::vec3 point3 =
+        //                 m_window.vp_matrix() * _view_matrix * glm::vec3(sample_gs, 1.0f);
+        //             glm::vec2 point(point3.x, point3.y);
 
-                    std::stringstream ss;
-                    ss << value;
-                    _draw_label(vp_matrix,
-                                ss.str(),
-                                point,
-                                18,
-                                7,
-                                LabelAlignment::Right,
-                                LabelAlignmentVertical::Center);
-                };
+        //             std::stringstream ss;
+        //             ss << value;
+        //             _draw_label(ss.str(),
+        //                         point,
+        //                         18,
+        //                         7,
+        //                         LabelAlignment::Right,
+        //                         LabelAlignmentVertical::Center);
+        //         };
 
-                draw_label(sample.average);
-                // draw_label(sample.min);
-                // draw_label(sample.max);
-            }
-        }
+        //         draw_label(sample.average);
+        //         // draw_label(sample.min);
+        //         // draw_label(sample.max);
+        //     }
+        // }
     }
 }
 
-void GraphView::_draw_label(const glm::mat3 &vp_matrix,
-                            const std::string_view text,
-                            const glm::vec2 &pos,
-                            float height,
-                            float width,
-                            LabelAlignment align,
-                            LabelAlignmentVertical valign) const
+void Graph::_draw_label(const std::string_view text,
+                        const glm::vec2 &pos,
+                        float height,
+                        float width,
+                        LabelAlignment align,
+                        LabelAlignmentVertical valign) const
 {
     glm::vec2 offset = pos;
     glm::vec2 delta = glm::vec2(width, 0);
@@ -389,7 +387,7 @@ void GraphView::_draw_label(const glm::mat3 &vp_matrix,
 
     _glyph_shader.use();
     int uniform_id = _glyph_shader.uniform_location("view_matrix");
-    const auto vp_matrix_inv = glm::inverse(vp_matrix);
+    const auto vp_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glyphbuf_ebo);
@@ -397,7 +395,7 @@ void GraphView::_draw_label(const glm::mat3 &vp_matrix,
     // glDrawArrays(GL_TRIANGLES, 0, 4 * (bufptr - buffer));
 }
 
-void GraphView::_draw_glyph(
+void Graph::_draw_glyph(
     char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const
 {
     GlyphData *data = *buf;
@@ -425,14 +423,13 @@ void GraphView::_draw_glyph(
     *buf = data + 1;
 }
 
-std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_tick_spacing(
-    const glm::mat3 &vp_matrix) const
+std::tuple<glm::vec2, glm::vec2, glm::ivec2> Graph::_tick_spacing() const
 {
     const glm::vec2 MIN_TICK_SPACING_PX(80, 50);
 
     // Calc the size of this vector in graph space (ignoring translation & sign)
-    const glm::vec2 min_tick_spacing_gs = glm::abs(screen2graph(vp_matrix, glm::vec2(0.0f, 0.0f)) -
-                                                   screen2graph(vp_matrix, MIN_TICK_SPACING_PX));
+    const glm::vec2 min_tick_spacing_gs =
+        glm::abs(screen2graph(glm::vec2(0.0f, 0.0f)) - screen2graph(MIN_TICK_SPACING_PX));
 
     // Round this size up to the nearest power of 10
     glm::vec2 tick_spacing;
@@ -467,28 +464,28 @@ std::tuple<glm::vec2, glm::vec2, glm::ivec2> GraphView::_tick_spacing(
     return std::tuple(tick_spacing, minor_tick_spacing, precision);
 }
 
-void GraphView::set_size(int width, int height)
+void Graph::set_size(int width, int height)
 {
     _size = glm::vec2(width, height);
     _plot.set_size(width, height);
 }
 
-glm::ivec2 GraphView::size() const
+glm::ivec2 Graph::size() const
 {
     return _size;
 }
 
-void GraphView::set_position(int x, int y)
+void Graph::set_position(int x, int y)
 {
     _position = glm::vec2(x, y);
 }
 
-glm::ivec2 GraphView::position() const
+glm::ivec2 Graph::position() const
 {
     return _position;
 }
 
-void GraphView::mouse_button(int button, int action, int mods)
+void Graph::mouse_button(int button, int action, int mods)
 {
     (void)mods;
 
@@ -502,14 +499,14 @@ void GraphView::mouse_button(int button, int action, int mods)
     }
 }
 
-void GraphView::cursor_move(const glm::mat3 &vp_matrix, double xpos, double ypos)
+void Graph::cursor_move(double xpos, double ypos)
 {
     glm::ivec2 new_cursor(xpos, ypos);
 
     if (_dragging)
     {
-        auto cursor_gs_old = screen2graph(vp_matrix, _cursor);
-        auto cursor_gs_new = screen2graph(vp_matrix, new_cursor);
+        auto cursor_gs_old = screen2graph(_cursor);
+        auto cursor_gs_new = screen2graph(new_cursor);
         auto cursor_gs_delta = cursor_gs_new - cursor_gs_old;
         _update_view_matrix(glm::translate(_view_matrix, cursor_gs_delta));
     }
@@ -517,7 +514,7 @@ void GraphView::cursor_move(const glm::mat3 &vp_matrix, double xpos, double ypos
     _cursor = new_cursor;
 }
 
-void GraphView::mouse_scroll(const glm::mat3 &vp_matrix, double /*xoffset*/, double yoffset)
+void Graph::mouse_scroll(double /*xoffset*/, double yoffset)
 {
     const float zoom_delta = 1.0f + (yoffset / 10.0f);
     glm::vec2 zoom_delta_vec(1.0);
@@ -542,36 +539,35 @@ void GraphView::mouse_scroll(const glm::mat3 &vp_matrix, double /*xoffset*/, dou
     }
 
     // Work out where the pointer is in graph space
-    auto cursor_in_gs_old = screen2graph(vp_matrix, _cursor);
+    auto cursor_in_gs_old = screen2graph(_cursor);
 
     _update_view_matrix(glm::scale(_view_matrix, zoom_delta_vec));
 
-    auto cursor_in_gs_new = screen2graph(vp_matrix, _cursor);
+    auto cursor_in_gs_new = screen2graph(_cursor);
     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
 
     _update_view_matrix(glm::translate(_view_matrix, cursor_delta));
 }
 
-glm::mat3 GraphView::view_matrix() const
+glm::mat3 Graph::view_matrix() const
 {
     return _view_matrix;
 }
 
-glm::vec2 GraphView::cursor_graphspace(const glm::mat3 &vp_matrix) const
+glm::vec2 Graph::cursor_graphspace() const
 {
-    return screen2graph(vp_matrix, _cursor);
+    return screen2graph(_cursor);
 }
 
-glm::vec2 GraphView::screen2graph(const glm::mat3 &viewport_matrix, const glm::ivec2 &value) const
+glm::vec2 Graph::screen2graph(const glm::ivec2 &value) const
 {
     const glm::vec3 value3(value, 1.0f);
-    const auto viewport_matrix_inv = glm::inverse(viewport_matrix);
-    auto value_cs = viewport_matrix_inv * value3;
+    auto value_cs = m_window.vp_matrix_inv() * value3;
     auto value_gs = _view_matrix_inv * value_cs;
     return value_gs;
 }
 
-void GraphView::_update_view_matrix(const glm::mat3 &value)
+void Graph::_update_view_matrix(const glm::mat3 &value)
 {
     _view_matrix = value;
     _view_matrix_inv = glm::inverse(value);

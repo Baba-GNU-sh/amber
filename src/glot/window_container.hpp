@@ -1,0 +1,52 @@
+#pragma once
+
+#include <functional>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
+#include <spdlog/logger.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <boost/signals2.hpp>
+
+class WindowContainer
+{
+  public:
+    WindowContainer(int width, int height, const std::string &title);
+    virtual ~WindowContainer();
+
+    void use() const;
+    void finish() const;
+    const glm::mat3 &vp_matrix() const;
+    const glm::mat3 &vp_matrix_inv() const;
+    const glm::ivec2 &size() const;
+    GLFWwindow *handle();
+    bool should_close() const;
+    void request_close();
+
+    boost::signals2::signal<void(int, int)> framebuffer_size;
+    boost::signals2::signal<void(double, double)> cursor_pos;
+    boost::signals2::signal<void(double, double)> scroll;
+    boost::signals2::signal<void(int, int, int)> mouse_button;
+    boost::signals2::signal<void(int, int, int, int)> key;
+
+  protected:
+    GLFWwindow *m_window;
+    virtual void handle_framebuffer_size_callback(int width, int height);
+    virtual void handle_cursor_pos_callback(double xpos, double ypos);
+    virtual void handle_scroll_callback(double xoffset, double yoffset);
+    virtual void handle_mouse_button_callback(int button, int action, int mods);
+    virtual void handle_key_callback(int key, int scancode, int action, int mods);
+
+  private:
+    static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+    static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
+    static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+    static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
+    static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    void update_vp_matrix(int width, int height);
+
+    glm::mat3 m_vp_matrix;
+    glm::mat3 m_vp_matrix_inv;
+    std::shared_ptr<spdlog::logger> m_logger;
+    glm::ivec2 m_size;
+};

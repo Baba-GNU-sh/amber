@@ -27,8 +27,8 @@ class Plot
 
   private:
     const glm::mat3 &_view_matrix;
-    GLuint _plot_vao;
-    GLuint _plot_vbo;
+    unsigned int _plot_vao;
+    unsigned int _plot_vbo;
     Program _lines_shader;
     static constexpr int COLS_MAX = 8000; // This could come back to bit me!
     glm::ivec2 _size;
