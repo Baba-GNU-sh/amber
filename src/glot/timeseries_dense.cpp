@@ -69,10 +69,7 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
 
             if (index_first == index_last)
             {
-                const auto &s = _data[0][index_first];
-                sample.average = s.sum;
-                sample.min = s.min;
-                sample.max = s.max;
+                continue;
             }
             else
             {
@@ -156,9 +153,9 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
     // Note: the data structure also contains the min and max, but they are left out here for
     // brevity.
     //
-    // Thus, each element contains the sum of 2^R raw samples, where R is the index of the row in
+    // Each element contains the sum of 2^R raw samples, where R is the index of the row in
     // which it lives. The job of this algorithm is to return the sum, min & max for each element in
-    // this list.
+    // this list, by visiting the smallest numver of elements possible.
 
 #if defined(__GNUC__) || defined(__GNUG__)
     auto count_trailing_zeros = [](unsigned long long value) {
