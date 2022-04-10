@@ -170,12 +170,12 @@ void AppContext::draw_gui()
             update_multisampling();
         }
 
-        if (ImGui::ColorEdit3("BG Colour", &(m_bgcolor.x)))
+        if (ImGui::ColorEdit3("Clear colour", &(m_bgcolor.x)))
         {
             update_bgcolour();
         }
 
-        ImGui::SliderInt("Line Width", &m_plot_width, 1, 16);
+        ImGui::SliderInt("Line width", &m_plot_width, 1, 64, "%d", ImGuiSliderFlags_Logarithmic);
 
         ImGui::Checkbox("Show line segments", &m_show_line_segments);
     }
@@ -191,7 +191,7 @@ void AppContext::draw_gui()
             ImGui::SameLine();
             ImGui::ColorEdit3(
                 plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
-            const auto slider_name = "Y Offset##" + plugin.name;
+            const auto slider_name = "Y offset##" + plugin.name;
             ImGui::DragFloat(slider_name.c_str(), &(plugin.y_offset), 0.01);
         }
     }
