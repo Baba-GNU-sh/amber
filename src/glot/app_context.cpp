@@ -62,6 +62,11 @@ AppContext::AppContext(
         // Work out where the pointer is in graph space
         auto cursor_in_gs_old = screen2graph(m_window.cursor());
         m_view_matrix = glm::scale(m_view_matrix, zoom_delta_vec);
+
+        // Limit zoom
+        m_view_matrix[0][0] = std::min(m_view_matrix[0][0], ZOOM_MIN_X);
+        m_view_matrix[1][1] = std::min(m_view_matrix[1][1], ZOOM_MIN_Y);
+
         auto cursor_in_gs_new = screen2graph(m_window.cursor());
         auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
         m_view_matrix = glm::translate(m_view_matrix, cursor_delta);

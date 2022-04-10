@@ -35,6 +35,9 @@ class AppContext
     void update_bgcolour() const;
     glm::dvec2 screen2graph(const glm::ivec2 &value) const;
 
+    static constexpr double ZOOM_MIN_X = 1'000'000.0;
+    static constexpr double ZOOM_MIN_Y = 1'000'000.0;
+
     Database &m_database;
     Graph &m_graph;
     Plot &m_plot;
