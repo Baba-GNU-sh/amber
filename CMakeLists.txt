@@ -35,4 +35,4 @@ configure_file(shaders/glyph/vertex.glsl glyph/vertex.glsl COPYONLY)
 configure_file(shaders/glyph/fragment.glsl glyph/fragment.glsl COPYONLY)
 configure_file(fonts/proggy_clean.png fonts/proggy_clean.png COPYONLY)
 
-configure_file(audio/CantinaBand60.wav audio/CantinaBand60.wav COPYONLY)
+configure_file(audio/Lurking_Threat_3.wav audio/Lurking_Threat_3.wav COPYONLY)
