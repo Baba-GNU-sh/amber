@@ -195,8 +195,6 @@ void Graph::_draw_lines(const glm::dmat3 &view_matrix) const
         start = ceil(left_gs.x / tick_spacing.x) * tick_spacing.x;
         end = ceil(right_gs.x / tick_spacing.x) * tick_spacing.x;
 
-        spdlog::info("{}->{}", start, end);
-
         // Place a tick at every unit along the x axis
         for (double i = start; i < end; i += tick_spacing.x)
         {
