@@ -47,4 +47,5 @@ class AppContext
     bool m_enable_multisampling = true;
     glm::vec3 m_bgcolor;
     glm::mat3 m_view_matrix;
+    bool m_show_line_segments = false;
 };

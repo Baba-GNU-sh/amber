@@ -87,7 +87,7 @@ void AppContext::draw()
                         m_plot_width,
                         time_series.colour,
                         time_series.y_offset,
-                        false);
+                        m_show_line_segments);
         }
     }
     m_graph.draw_decorations(m_view_matrix);
@@ -143,12 +143,11 @@ void AppContext::draw_gui()
                     1000.0f / ImGui::GetIO().Framerate,
                     ImGui::GetIO().Framerate);
 
-        // auto viewmat = m_graph->view_matrix();
-        // ImGui::Text("View Matrix:");
-        // for (int i = 0; i < 3; i++)
-        // {
-        //     ImGui::Text("%f %f %f", viewmat[0][i], viewmat[1][i], viewmat[2][i]);
-        // }
+        ImGui::Text("View Matrix:");
+        for (int i = 0; i < 3; i++)
+        {
+            ImGui::Text("%f %f %f", m_view_matrix[0][i], m_view_matrix[1][i], m_view_matrix[2][i]);
+        }
 
         // auto cursor_gs = m_graph->cursor_graphspace(_vp_matrix);
         // ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
@@ -172,6 +171,8 @@ void AppContext::draw_gui()
         }
 
         ImGui::SliderInt("Line Width", &m_plot_width, 1, 16);
+
+        ImGui::Checkbox("Show line segments", &m_show_line_segments);
     }
 
     if (ImGui::CollapsingHeader("Plots", ImGuiTreeNodeFlags_DefaultOpen))
