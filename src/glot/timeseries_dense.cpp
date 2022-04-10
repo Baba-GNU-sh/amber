@@ -43,47 +43,65 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
                                          double bin_width,
                                          std::size_t num_samples) const
 {
+    // TODO find a more efficient solution to concurrent access
     std::lock_guard<std::recursive_mutex> _(_mut);
-    std::size_t index = 0;
-    for (std::size_t i = 0; i < num_samples; ++i)
+
+    // Keep track of which sample we are writing to
+    auto *current_sample = samples;
+
+    // The span is important for use later on
+    auto span = get_span();
+
+    // Iterate through the bins
+    for (std::size_t bin_index = 0; bin_index < num_samples; ++bin_index)
     {
-        double first = timestamp_start + bin_width * i;
-        double last = timestamp_start + bin_width * (i + 1);
+        // Work out the timestamps of the start and end of the bin
+        const auto bin_span = std::make_pair<double, double>(
+            timestamp_start + bin_width * bin_index, timestamp_start + bin_width * (bin_index + 1));
 
-        TSSample &sample = samples[index];
-
-        auto span = get_span();
-        if (_data[0].empty() || (first < span.first && last < span.first) ||
-            (first > span.second && last > span.second))
+        const bool bin_is_before_first_sample = bin_span.second < span.first;
+        const bool bin_is_after_last_sample = bin_span.first > span.second;
+        if (_data[0].empty() || bin_is_before_first_sample || bin_is_after_last_sample)
         {
-            sample.timestamp = first;
-            sample.average = sample.min = sample.max = std::numeric_limits<double>::quiet_NaN();
+            // The bin is completely devoid of any samples - don't output anything
+            continue;
         }
         else
         {
-            sample.timestamp = first;
-            auto index_first = static_cast<long long>((first - _start) / _interval);
+            current_sample->timestamp = bin_span.first;
+            auto index_first = static_cast<long long>((bin_span.first - span.first) / _interval);
             index_first = std::max(index_first, static_cast<long long>(0));
-            auto index_last = static_cast<long long>((last - _start) / _interval);
+            auto index_last = static_cast<long long>((bin_span.second - span.first) / _interval);
             index_last = std::min(index_last, static_cast<long long>(_data[0].size()));
 
             if (index_first == index_last)
             {
-                continue;
+                const auto value = _data[0][index_first].sum;
+                if (current_sample - samples)
+                {
+                    if ((current_sample - 1)->average == value)
+                    {
+                        continue;
+                    }
+                }
+
+                // TODO always return something for the final bin
+
+                current_sample->average = current_sample->min = current_sample->max = value;
+                ++current_sample;
             }
             else
             {
                 const auto results = _reduce(index_first, index_last);
-                sample.average = std::get<0>(results);
-                sample.min = std::get<1>(results);
-                sample.max = std::get<2>(results);
+                current_sample->average = std::get<0>(results);
+                current_sample->min = std::get<1>(results);
+                current_sample->max = std::get<2>(results);
+                ++current_sample;
             }
         }
-
-        index++;
     }
 
-    return index;
+    return current_sample - samples;
 }
 
 TSSample TimeSeriesDense::get_sample(double timestamp, double bin_width) const
