@@ -3,7 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 #include <imgui.h>
-#include <unistd.h>
 #include "graph.hpp"
 #include "database.hpp"
 #include "plugin_context.hpp"

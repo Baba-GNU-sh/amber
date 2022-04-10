@@ -7,7 +7,6 @@
 #include "plugin_manager.hpp"
 #include "window.hpp"
 #include <imgui.h>
-#include <unistd.h>
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 #include "imgui_window.hpp"
