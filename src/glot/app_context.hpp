@@ -44,7 +44,7 @@ class AppContext
     Window &m_window;
     PluginManager &m_plugin_manager;
     std::vector<TimeSeriesContainer> m_ts;
-    int m_plot_width = 1;
+    int m_plot_width = 2;
     bool m_enable_vsync = true;
     bool m_enable_multisampling = true;
     glm::vec3 m_bgcolor;
