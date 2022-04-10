@@ -376,9 +376,9 @@ void Graph::_draw_label(const std::string_view text,
     const auto vp_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
+    glBindTexture(GL_TEXTURE_2D, _glyph_texture);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glyphbuf_ebo);
     glDrawElements(GL_TRIANGLES, 6 * count, GL_UNSIGNED_INT, 0);
-    // glDrawArrays(GL_TRIANGLES, 0, 4 * (bufptr - buffer));
 }
 
 void Graph::_draw_glyph(
