@@ -33,8 +33,7 @@ class AppContext
     void update_multisampling() const;
     void update_vsync() const;
     void update_bgcolour() const;
-    void update_view_matrix(const glm::mat3 &value);
-    glm::vec2 screen2graph(const glm::ivec2 &value) const;
+    glm::dvec2 screen2graph(const glm::ivec2 &value) const;
 
     Database &m_database;
     Graph &m_graph;
@@ -46,6 +45,6 @@ class AppContext
     bool m_enable_vsync = true;
     bool m_enable_multisampling = true;
     glm::vec3 m_bgcolor;
-    glm::mat3 m_view_matrix;
+    glm::dmat3 m_view_matrix;
     bool m_show_line_segments = false;
 };

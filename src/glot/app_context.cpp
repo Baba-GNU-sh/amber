@@ -46,25 +46,25 @@ AppContext::AppContext(
     update_bgcolour();
 
     m_graph.on_drag.connect([this](double x, double y) {
-        const glm::vec2 in(x, y);
-        const auto txform = glm::inverse(m_view_matrix) * m_window.vp_matrix_inv();
-        const auto a = txform * glm::vec3(0.0f);
-        const auto b = txform * glm::vec3(in, 0.0f);
+        glm::dmat3 dvp_matrix_inv = m_window.vp_matrix_inv();
+        const auto txform = glm::inverse(m_view_matrix) * dvp_matrix_inv;
+        const auto a = txform * glm::dvec3(0.0f);
+        const auto b = txform * glm::dvec3(x, y, 0.0f);
         const auto delta = b - a;
-        glm::vec2 cursor_gs_delta(delta.x, delta.y);
+        glm::dvec2 cursor_gs_delta(delta.x, delta.y);
 
         m_view_matrix = glm::translate(m_view_matrix, cursor_gs_delta);
     });
 
     m_graph.on_zoom.connect([this](double x, double y) {
-        glm::vec2 zoom_delta_vec(x, y);
+        glm::dvec2 zoom_delta_vec(x, y);
 
         // Work out where the pointer is in graph space
         auto cursor_in_gs_old = screen2graph(m_window.cursor());
-        update_view_matrix(glm::scale(m_view_matrix, zoom_delta_vec));
+        m_view_matrix = glm::scale(m_view_matrix, zoom_delta_vec);
         auto cursor_in_gs_new = screen2graph(m_window.cursor());
         auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
-        update_view_matrix(glm::translate(m_view_matrix, cursor_delta));
+        m_view_matrix = glm::translate(m_view_matrix, cursor_delta);
     });
 
     m_window.framebuffer_size.connect([this](int width, int height) {
@@ -220,16 +220,10 @@ void AppContext::update_bgcolour() const
     m_window.set_bg_colour(m_bgcolor);
 }
 
-void AppContext::update_view_matrix(const glm::mat3 &value)
+glm::dvec2 AppContext::screen2graph(const glm::ivec2 &value) const
 {
-    m_view_matrix = value;
-    // _view_matrix_inv = glm::inverse(value);
-}
-
-glm::vec2 AppContext::screen2graph(const glm::ivec2 &value) const
-{
-    const glm::vec3 value3(value, 1.0f);
-    auto value_cs = m_window.vp_matrix_inv() * value3;
-    auto value_gs = glm::inverse(m_view_matrix) * value_cs;
+    const glm::dvec3 value3(value, 1.0f);
+    glm::dvec3 value_cs = m_window.vp_matrix_inv() * value3;
+    glm::dvec3 value_gs = glm::inverse(m_view_matrix) * value_cs;
     return value_gs;
 }

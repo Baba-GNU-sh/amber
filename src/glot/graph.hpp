@@ -61,9 +61,7 @@ class Graph
     void set_size(const glm::ivec2 &size);
 
     /**
-     * @brief Get the size of the graph in the viewport.
-     *
-     * @return glm::vec2 2D vector containing the size of the graph in pixels.
+     * @brief Get the size of the graph in the pixels.
      */
     glm::ivec2 size() const;
 
@@ -77,9 +75,6 @@ class Graph
 
     /**
      * @brief Get the posiiton of the graph in the viewport.
-     *
-     * @return glm::vec2 2D vector containing the posiiton of the graph in
-     * pixels.
      */
     glm::ivec2 position() const;
 
@@ -109,7 +104,7 @@ class Graph
      * @param minmax_colour
      * @param show_plot_segments
      */
-    void draw_decorations(const glm::mat3 &view_matrix) const;
+    void draw_decorations(const glm::dmat3 &view_matrix) const;
 
     boost::signals2::signal<void(double, double)> on_drag;
     boost::signals2::signal<void(double, double)> on_zoom;
@@ -124,54 +119,53 @@ class Graph
      * @return true The coordinate is within the bounding box.
      * @return false The coordinate is outside the bounding box.
      */
-    bool _hittest(glm::vec2 value, glm::vec2 tl, glm::vec2 br) const;
+    bool _hittest(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br) const;
 
     /**
      * @brief Converts a vector from viewport space (pixels w/ origin at TL) to
      * graph space.
      *
      * @param value The vector to convert.
-     * @return glm::vec2 The resultant vector in graph space.
+     * @return glm::dvec2 The resultant vector in graph space.
      */
-    glm::vec2 screen2graph(const glm::mat3 &view_matrix, const glm::ivec2 &value) const;
+    glm::dvec2 screen2graph(const glm::dmat3 &view_matrix, const glm::ivec2 &value) const;
 
     void _init_line_buffers();
     void _init_glyph_buffers();
-    void _draw_lines(const glm::mat3 &view_matrix) const;
-    void _draw_labels(const glm::mat3 &view_matrix) const;
+    void _draw_lines(const glm::dmat3 &view_matrix) const;
+    void _draw_labels(const glm::dmat3 &view_matrix) const;
     void _draw_label(const std::string_view text,
-                     const glm::vec2 &pos,
-                     float height,
-                     float width,
+                     const glm::ivec2 &pos,
+                     int height,
+                     int width,
                      LabelAlignment align,
                      LabelAlignmentVertical valign) const;
     void _draw_glyph(
-        char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const;
+        char c, const glm::ivec2 &pos, int height, int width, GlyphData **buf) const;
 
-    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing(const glm::mat3 &view_matrix) const;
+    std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> _tick_spacing(
+        const glm::dmat3 &view_matrix) const;
 
     const int GUTTER_SIZE_PX = 60;
     const int TICKLEN = 8;
 
     Window &m_window;
-    glm::ivec2 _position;
-    glm::ivec2 _size;
-    glm::vec2 _cursor;
 
-    bool _dragging;
-
-    // glm::mat3 _view_matrix; // Transform from graph space to clip space
-    // glm::mat3 _view_matrix_inv;
-
-    // Line renderer
+    // Line buffers
     GLuint _linebuf_vao;
     GLuint _linebuf_vbo;
     Program _lines_shader;
 
-    // Glyph renderer
+    // Glyph buffers
     GLuint _glyphbuf_vao;
     GLuint _glyphbuf_vbo;
     GLuint _glyphbuf_ebo;
     Program _glyph_shader;
     GLuint _glyph_texture;
+
+    glm::ivec2 _position;
+    glm::ivec2 _size;
+    glm::dvec2 _cursor;
+
+    bool _dragging;
 };
