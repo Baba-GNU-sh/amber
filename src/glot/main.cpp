@@ -12,6 +12,8 @@
 #include "bindings/imgui_impl_opengl3.h"
 #include "imgui_window.hpp"
 #include "app_context.hpp"
+#include "audiofile_plugin.hpp"
+#include "wavegen_plugin.hpp"
 
 void error_callback(int error, const char *msg)
 {
@@ -38,7 +40,9 @@ int main()
     {
         Database db;
         PluginContext plugin_context(db);
-        PluginManager plugin_manager(plugin_context);
+        PluginManager plugin_manager;
+        plugin_manager.add_plugin("audiofile", std::make_shared<AudioFilePlugin>(plugin_context, "audio/Lurking_Threat_3.wav"));
+        plugin_manager.add_plugin("wavegen", std::make_shared<WaveGenPlugin>(plugin_context));
         plugin_manager.start_all();
 
         ImGuiContextWindow window(800, 600, "GLot");

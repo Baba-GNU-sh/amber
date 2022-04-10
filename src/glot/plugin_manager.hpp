@@ -6,17 +6,18 @@
 #include "plugin.hpp"
 #include "plugin_context.hpp"
 
-struct PluginInfo
-{
-    std::string name;
-    bool show_menu;
-    std::shared_ptr<Plugin> plugin;
-};
-
 class PluginManager
 {
+    struct PluginInfo
+    {
+        std::string name;
+        bool show_menu;
+        std::shared_ptr<Plugin> plugin;
+    };
+
   public:
-    PluginManager(PluginContext &context);
+    PluginManager();
+    void add_plugin(std::string_view name, std::shared_ptr<Plugin> plugin);
     void start_all();
     void stop_all();
     void draw_menu();

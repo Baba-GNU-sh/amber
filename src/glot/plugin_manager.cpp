@@ -1,15 +1,14 @@
 #include "plugin_manager.hpp"
 #include <imgui.h>
 
-#include "audiofile_plugin.hpp"
-#include "wavegen_plugin.hpp"
-
-PluginManager::PluginManager(PluginContext &context)
+PluginManager::PluginManager()
 {
-    _plugins.push_back({"audiofile",
-                        false,
-                        std::make_shared<AudioFilePlugin>(context, "audio/CantinaBand60.wav")});
-    _plugins.push_back({"wavegen", false, std::make_shared<WaveGenPlugin>(context)});
+    //
+}
+
+void PluginManager::add_plugin(std::string_view name, std::shared_ptr<Plugin> plugin)
+{
+    _plugins.push_back(PluginInfo{std::string(name), false, plugin});
 }
 
 void PluginManager::start_all()
