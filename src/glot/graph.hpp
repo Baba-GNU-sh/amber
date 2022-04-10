@@ -58,6 +58,7 @@ class Graph
      * @param height The new height of the graph view in pixels.
      */
     void set_size(int width, int height);
+    void set_size(const glm::ivec2 &size);
 
     /**
      * @brief Get the size of the graph in the viewport.

@@ -66,6 +66,14 @@ AppContext::AppContext(
         auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
         update_view_matrix(glm::translate(m_view_matrix, cursor_delta));
     });
+
+    m_window.framebuffer_size.connect([this](int width, int height) {
+        m_graph.set_size(width, height);
+        m_plot.set_size(width, height);
+    });
+
+    m_graph.set_size(m_window.size());
+    m_plot.set_size(m_window.size());
 }
 
 void AppContext::draw()

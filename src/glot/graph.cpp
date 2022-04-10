@@ -29,11 +29,6 @@ Graph::Graph(Window &window)
 
     namespace ph = std::placeholders;
 
-    _size = m_window.size();
-    m_window.framebuffer_size.connect([this](int width, int height) {
-        _size = glm::ivec2(width, height);
-    });
-
     m_window.scroll.connect(std::bind(&Graph::mouse_scroll, this, ph::_1, ph::_2));
     m_window.cursor_pos.connect(std::bind(&Graph::cursor_move, this, ph::_1, ph::_2));
     m_window.mouse_button.connect(std::bind(&Graph::mouse_button, this, ph::_1, ph::_2, ph::_3));
@@ -458,6 +453,11 @@ std::tuple<glm::vec2, glm::vec2, glm::ivec2> Graph::_tick_spacing(const glm::mat
 void Graph::set_size(int width, int height)
 {
     _size = glm::vec2(width, height);
+}
+
+void Graph::set_size(const glm::ivec2 &size)
+{
+    _size = size;
 }
 
 glm::ivec2 Graph::size() const

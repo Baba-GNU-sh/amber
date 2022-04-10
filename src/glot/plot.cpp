@@ -30,12 +30,6 @@ Plot::Plot(Window &window) : m_window(window)
         Shader(Resources::find_shader("plot/geometry.glsl"), GL_GEOMETRY_SHADER)};
 
     _lines_shader = Program(shaders);
-
-    set_size(m_window.size().x, m_window.size().y);
-    m_window.framebuffer_size.connect([this](int width, int height) {
-        _size = glm::ivec2(width, height);
-        set_size(width, height);
-    });
 }
 
 Plot::~Plot()
@@ -101,4 +95,9 @@ void Plot::draw(const glm::mat3 &view_matrix,
 void Plot::set_size(int width, int height)
 {
     _size = glm::ivec2(width, height);
+}
+
+void Plot::set_size(const glm::ivec2 &size)
+{
+    _size = size;
 }

@@ -20,6 +20,7 @@ class Plot
               float y_offset,
               bool show_line_segments) const;
     void set_size(int width, int height);
+    void set_size(const glm::ivec2 &size);
 
   private:
     static constexpr int COLS_MAX = 8192; // Max number of columns to allocate buffers for (enough to fill a DCI 8K monitor!)
