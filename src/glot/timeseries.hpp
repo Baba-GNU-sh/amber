@@ -23,8 +23,6 @@ struct TimeSeries
     /**
      * @brief Pull information from the time series at a fixed interval.
      *
-     * Extract and reduce timestamps from the samples
-     *
      * @param samples Where to put the samples.
      * @param timestamp_start Timestamp of the first sample.
      * @param bin_width The width of each bin in seconds.
