@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <boost/signals2.hpp>
 #include "plot.hpp"
 #include "shader_utils.hpp"
 #include "database.hpp"
@@ -107,18 +108,10 @@ class Graph
      * @param minmax_colour
      * @param show_plot_segments
      */
-    void draw_decorations() const;
+    void draw_decorations(const glm::mat3 &view_matrix) const;
 
-    void draw_plot(int plot_width, const glm::vec3 &colour, float y_offset, const TimeSeries &ts);
-
-    glm::mat3 view_matrix() const;
-
-    /**
-     * @brief Get the cursor's position in graph space.
-     *
-     * @return glm::vec2
-     */
-    glm::vec2 cursor_graphspace() const;
+    boost::signals2::signal<void(double, double)> on_drag;
+    boost::signals2::signal<void(double, double)> on_zoom;
 
   private:
     /**
@@ -139,14 +132,12 @@ class Graph
      * @param value The vector to convert.
      * @return glm::vec2 The resultant vector in graph space.
      */
-    glm::vec2 screen2graph(const glm::ivec2 &value) const;
-
-    void _update_view_matrix(const glm::mat3 &value);
+    glm::vec2 screen2graph(const glm::mat3 &view_matrix, const glm::ivec2 &value) const;
 
     void _init_line_buffers();
     void _init_glyph_buffers();
-    void _draw_lines() const;
-    void _draw_labels() const;
+    void _draw_lines(const glm::mat3 &view_matrix) const;
+    void _draw_labels(const glm::mat3 &view_matrix) const;
     void _draw_label(const std::string_view text,
                      const glm::vec2 &pos,
                      float height,
@@ -156,7 +147,10 @@ class Graph
     void _draw_glyph(
         char c, const glm::vec2 &pos, float height, float width, GlyphData **buf) const;
 
-    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing() const;
+    std::tuple<glm::vec2, glm::vec2, glm::ivec2> _tick_spacing(const glm::mat3 &view_matrix) const;
+
+    const int GUTTER_SIZE_PX = 60;
+    const int TICKLEN = 8;
 
     Window &m_window;
     glm::ivec2 _position;
@@ -165,8 +159,8 @@ class Graph
 
     bool _dragging;
 
-    glm::mat3 _view_matrix; // Transform from graph space to clip space
-    glm::mat3 _view_matrix_inv;
+    // glm::mat3 _view_matrix; // Transform from graph space to clip space
+    // glm::mat3 _view_matrix_inv;
 
     // Line renderer
     GLuint _linebuf_vao;
@@ -179,9 +173,4 @@ class Graph
     GLuint _glyphbuf_ebo;
     Program _glyph_shader;
     GLuint _glyph_texture;
-
-    const int GUTTER_SIZE_PX = 60;
-    const int TICKLEN = 8;
-
-    Plot _plot;
 };

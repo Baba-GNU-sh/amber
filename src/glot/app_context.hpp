@@ -22,6 +22,7 @@ class AppContext
   public:
     AppContext(Database &database,
                Graph &graph,
+               Plot &plot,
                Window &window,
                PluginManager &plugin_manager);
 
@@ -29,13 +30,15 @@ class AppContext
 
   private:
     void draw_gui();
-
-    void _update_multisampling();
-    void _update_vsync() const;
-    void _update_bgcolour() const;
+    void update_multisampling() const;
+    void update_vsync() const;
+    void update_bgcolour() const;
+    void update_view_matrix(const glm::mat3 &value);
+    glm::vec2 screen2graph(const glm::ivec2 &value) const;
 
     Database &m_database;
     Graph &m_graph;
+    Plot &m_plot;
     Window &m_window;
     PluginManager &m_plugin_manager;
     std::vector<TimeSeriesContainer> m_ts;
@@ -43,4 +46,5 @@ class AppContext
     bool m_enable_vsync = true;
     bool m_enable_multisampling = true;
     glm::vec3 m_bgcolor;
+    glm::mat3 m_view_matrix;
 };

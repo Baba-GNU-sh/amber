@@ -22,6 +22,9 @@ class Window
     GLFWwindow *handle();
     bool should_close() const;
     void request_close();
+    glm::dvec2 cursor() const;
+    void set_bg_colour(const glm::vec3 &col);
+    glm::vec3 bg_colour();
 
     boost::signals2::signal<void(int, int)> framebuffer_size;
     boost::signals2::signal<void(double, double)> cursor_pos;
@@ -49,4 +52,5 @@ class Window
     glm::mat3 m_vp_matrix_inv;
     std::shared_ptr<spdlog::logger> m_logger;
     glm::ivec2 m_size;
+    glm::vec3 m_bg_colour;
 };

@@ -4,6 +4,7 @@ find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(audiofile REQUIRED)
+find_package(Boost REQUIRED)
 
 add_subdirectory(bindings)
 
@@ -37,6 +38,7 @@ target_link_libraries(
 		imgui::imgui
 		spdlog::spdlog
 		audiofile::audiofile
+		Boost::boost
 )
 
 if (NOT MSVC)

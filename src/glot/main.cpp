@@ -58,7 +58,8 @@ int main()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         Graph graph(window);
-        AppContext context(db, graph, window, plugin_manager);
+        Plot plot(window);
+        AppContext context(db, graph, plot, window, plugin_manager);
 
         spdlog::info("Initialization OK, starting main loop");
 

@@ -3,22 +3,18 @@
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
 #include "timeseries.hpp"
+#include "window.hpp"
 
-struct Sample
-{
-    float x;
-    float y;
-    float min;
-    float max;
-};
-
+/**
+ * @brief Defines how to draw plots.
+ */
 class Plot
 {
   public:
-    Plot(const glm::mat3 &view_matrix);
+    Plot(Window &window);
     ~Plot();
-    void draw(const TimeSeries &ts,
-              const glm::mat3 &vp_matrix,
+    void draw(const glm::mat3 &view_matrix,
+              const TimeSeries &ts,
               int plot_width,
               glm::vec3 plot_colour,
               float y_offset,
@@ -26,11 +22,13 @@ class Plot
     void set_size(int width, int height);
 
   private:
-    const glm::mat3 &_view_matrix;
+    static constexpr int COLS_MAX = 8192; // Max number of columns to allocate buffers for (enough to fill a DCI 8K monitor!)
+    static constexpr int PIXELS_PER_COL = 1; // How wide the column are in pixels
+    
+    Window &m_window;
     unsigned int _plot_vao;
     unsigned int _plot_vbo;
     Program _lines_shader;
-    static constexpr int COLS_MAX = 8000; // This could come back to bit me!
     glm::ivec2 _size;
     mutable TSSample _samples[COLS_MAX];
 };

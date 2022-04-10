@@ -1,6 +1,7 @@
 #include "window.hpp"
+#include <GL/gl.h>
 
-Window::Window(int width, int height, const std::string &title)
+Window::Window(int width, int height, const std::string &title) : m_bg_colour(0.0)
 {
     m_window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     if (!m_window)
@@ -30,6 +31,7 @@ Window::~Window()
 void Window::use() const
 {
     glfwMakeContextCurrent(m_window);
+    glClearColor(m_bg_colour.r, m_bg_colour.g, m_bg_colour.b, 1.0f);
 }
 
 void Window::finish() const
@@ -65,6 +67,23 @@ bool Window::should_close() const
 void Window::request_close()
 {
     glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+}
+
+glm::dvec2 Window::cursor() const
+{
+    glm::dvec2 ret;
+    glfwGetCursorPos(m_window, &ret.x, &ret.y);
+    return ret;
+}
+
+void Window::set_bg_colour(const glm::vec3 &col)
+{
+    m_bg_colour = col;
+}
+
+glm::vec3 Window::bg_colour()
+{
+    return m_bg_colour;
 }
 
 void Window::handle_framebuffer_size_callback(int width, int height)
