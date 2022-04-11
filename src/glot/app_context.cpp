@@ -150,8 +150,10 @@ void AppContext::draw_gui()
             ImGui::Text("%f %f %f", m_view_matrix[0][i], m_view_matrix[1][i], m_view_matrix[2][i]);
         }
 
-        // auto cursor_gs = m_graph->cursor_graphspace(_vp_matrix);
-        // ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
+        glm::dmat3 vp_matrix_inv = m_window.vp_matrix_inv();
+        const auto cursor_gs =
+            glm::inverse(m_view_matrix) * vp_matrix_inv * glm::dvec3(m_window.cursor(), 1.0);
+        ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
     }
 
     if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))
