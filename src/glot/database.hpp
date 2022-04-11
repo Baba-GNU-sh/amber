@@ -28,6 +28,8 @@ class Database
 
     std::size_t num_samples() const;
 
+  double get_latest_sample_time() const;
+
   private:
     std::map<std::string, std::shared_ptr<TimeSeries>> _data;
 };

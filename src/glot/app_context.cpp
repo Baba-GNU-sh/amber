@@ -75,6 +75,15 @@ AppContext::AppContext(
 
     m_graph.set_size(m_window.size());
     m_plot.set_size(m_window.size());
+
+    m_window.key.connect([this](int key, int, int action, int) {
+        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        {
+            m_view_matrix[2][0] = 0;
+            auto latest = m_database.get_latest_sample_time();
+            m_view_matrix = glm::translate(m_view_matrix, glm::dvec2(-latest, 0));
+        }
+    });
 }
 
 void AppContext::draw()

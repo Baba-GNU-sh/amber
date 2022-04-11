@@ -31,3 +31,13 @@ std::size_t Database::num_samples() const
         return sum + ts.second->size();
     });
 }
+
+double Database::get_latest_sample_time() const
+{
+    double latest = 0.0;
+    for (const auto &ts : _data)
+    {
+        latest = std::max(ts.second->get_span().second, latest);
+    }
+    return latest;
+}
