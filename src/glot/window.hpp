@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>

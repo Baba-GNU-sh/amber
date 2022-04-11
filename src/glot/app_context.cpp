@@ -1,17 +1,14 @@
 #include "app_context.hpp"
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <spdlog/spdlog.h>
 #include <imgui.h>
 #include "graph.hpp"
 #include "database.hpp"
-#include "plugin_context.hpp"
 #include "plugin_manager.hpp"
 #include "window.hpp"
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
-#include "imgui_window.hpp"
-#include "app_context.hpp"
 
 AppContext::AppContext(
     Database &database, Graph &graph, Plot &plot, Window &window, PluginManager &plugin_manager)
