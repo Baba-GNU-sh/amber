@@ -37,7 +37,7 @@ class WaveGenPlugin : public Plugin
     void thread_handler();
     double sample_value(WaveType settings, double time) const;
     PluginContext &_ctx;
-    const unsigned int _sample_rate = 1000;
+    const unsigned int _sample_rate = 10'000;
     std::shared_ptr<spdlog::logger> _logger;
     std::atomic<bool> _running = false;
     std::thread _thread;

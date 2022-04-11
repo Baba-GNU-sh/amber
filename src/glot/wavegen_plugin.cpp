@@ -69,7 +69,8 @@ void WaveGenPlugin::draw_menu()
     std::lock_guard<std::mutex> _(_mutex);
     ImGui::Combo(
         "Signal Type", reinterpret_cast<int *>(&_settings.type), items, IM_ARRAYSIZE(items));
-    ImGui::SliderFloat("Frequency", &_settings.frequency, 0.1, 10);
+    ImGui::SliderFloat(
+        "Frequency", &_settings.frequency, 0.1, 1000, "%.1f", ImGuiSliderFlags_Logarithmic);
     ImGui::SliderFloat("Amplitude", &_settings.amplitude, 0.1, 10);
 }
 
