@@ -78,28 +78,29 @@ void WaveGenPlugin::thread_handler()
     using namespace std::chrono;
     using namespace std::chrono_literals;
 
+    const auto sample_period = std::chrono::duration<double>(1s) / _sample_rate;
     auto prevtime = std::chrono::steady_clock::now();
-    double time = 0.0;
+    double x = 0.0;
 
     while (_running)
     {
         std::this_thread::sleep_for(10ms);
+
+        const auto now = steady_clock::now();
+        auto delta = std::chrono::duration<double>(now - prevtime);
+        prevtime = now;
 
         WaveSettings settings = [this]() {
             std::lock_guard<std::mutex> _(_mutex);
             return _settings;
         }();
 
-        const auto timenow = steady_clock::now();
-        const auto duration = duration_cast<milliseconds>(timenow - prevtime);
-        prevtime = timenow;
-
-        for (int i = 0; i < duration.count(); i++)
+        while (delta > seconds(0))
         {
-            time += settings.frequency / _sample_rate;
-            // const auto time = static_cast<double>(_ticks++) * settings.frequency / _sample_rate;
-            const auto value = settings.amplitude * sample_value(settings.type, time);
+            x += settings.frequency / _sample_rate;
+            const auto value = settings.amplitude * sample_value(settings.type, x);
             _ts->push_sample(value);
+            delta -= sample_period;
         }
     }
 }

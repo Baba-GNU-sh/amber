@@ -39,28 +39,28 @@ void AudioFilePlugin::thread()
     using namespace std::chrono;
     using namespace std::chrono_literals;
 
+    const auto sample_period = std::chrono::duration<double>(1s) / _audioFile.getSampleRate();
     auto prevtime = std::chrono::steady_clock::now();
 
     while (_running)
     {
         std::this_thread::sleep_for(10ms);
 
-        const auto timenow = steady_clock::now();
-        const auto duration = duration_cast<milliseconds>(timenow - prevtime);
-        prevtime = timenow;
+        const auto now = steady_clock::now();
+        auto delta = std::chrono::duration<double>(now - prevtime);
+        prevtime = now;
 
-        const auto sample_count = duration.count() * _audioFile.getSampleRate() / 1000;
-        for (int i = 0; i < sample_count; ++i)
+        while (delta > seconds(0))
         {
             if (_current_sample >= static_cast<std::size_t>(_audioFile.getNumSamplesPerChannel()))
             {
                 _current_sample = 0;
             }
 
-            auto sample = _audioFile.samples[0][_current_sample];
+            auto sample = _audioFile.samples[0][_current_sample++];
             _ts->push_sample(sample);
 
-            _current_sample++;
+            delta -= sample_period;
         }
     }
 }
