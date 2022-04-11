@@ -1,7 +1,7 @@
 # GLot
 
-[![Actions Status](https://github.com/stevegolton/glot/workflows/ci/badge.svg?branch=master)](https://github.com/stevegolton/glot/actions)
-[![codecov](https://codecov.io/gh/stevegolton/glot/branch/main/graph/badge.svg?token=1UFSHJ5BEP)](https://codecov.io/gh/stevegolton/glot)
+[![Actions Status](https://github.com/baba-GNU-sh/glot/workflows/ci/badge.svg?branch=main)](https://github.com/baba-GNU-sh/glot/actions)
+[![codecov](https://codecov.io/gh/baba-GNU-sh/glot/branch/main/graph/badge.svg?token=TYEKEONCCL)](https://codecov.io/gh/baba-GNU-sh/glot)
 
 > :warning: **This project is under heavy development, and thus is unlikely to be very useful to anyone in its current state!**
 
