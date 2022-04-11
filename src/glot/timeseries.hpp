@@ -45,4 +45,14 @@ struct TimeSeries
      * @brief Get the timestamps of the oldest and newest samples.
      */
     virtual std::pair<double, double> get_span() const = 0;
+
+    /**
+     * @brief Gets the amount of memory used by the timeseries in bytes.
+     */
+    virtual std::size_t memory_usage() const = 0;
+
+    /**
+     * @brief Get the total number of samples in this timeseries.
+     */
+    virtual std::size_t size() const = 0;
 };

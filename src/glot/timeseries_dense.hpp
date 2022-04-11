@@ -84,6 +84,10 @@ class TimeSeriesDense : public TimeSeries
      */
     std::pair<double, double> get_span() const override;
 
+    std::size_t memory_usage() const override;
+
+    std::size_t size() const override;
+
     /**
      * @brief Adds a new sample to the end of the timeseries. The timestamp of this sample will be
      *
@@ -92,9 +96,10 @@ class TimeSeriesDense : public TimeSeries
     void push_sample(double value);
 
   private:
+    static constexpr std::size_t CHUNK_SIZE = 16 * 1024;
     std::tuple<double, double, double> _reduce(std::size_t, std::size_t) const;
     mutable std::recursive_mutex _mut;
-    std::vector<ChunkedVector<DataStore, 16 * 1024>> _data;
+    std::vector<ChunkedVector<DataStore, CHUNK_SIZE>> _data;
     double _interval;
     double _start;
 };

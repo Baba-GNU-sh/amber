@@ -154,6 +154,22 @@ void AppContext::draw_gui()
         // ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
     }
 
+    if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        // Show database stats
+        auto [total_bytes, suffix] =
+            human_readable(m_database.memory_usage(), 1024, {"KiB", "MiB", "GiB", "TiB"});
+        ImGui::Text("Memory Used: %.1f%s", total_bytes, suffix);
+
+        auto [total_samples, samples_suffix] =
+            human_readable(m_database.num_samples(), 1000, {"K", "M", "B"});
+        ImGui::Text("Total Samples: %.1f%s", total_samples, samples_suffix);
+
+        ImGui::Text("Bytes/sample: %.1f",
+                    static_cast<double>(m_database.memory_usage()) /
+                        static_cast<double>(m_database.num_samples()));
+    }
+
     if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen))
     {
         if (ImGui::Checkbox("Enable VSync", &m_enable_vsync))
@@ -227,4 +243,30 @@ glm::dvec2 AppContext::screen2graph(const glm::ivec2 &value) const
     glm::dvec3 value_cs = m_window.vp_matrix_inv() * value3;
     glm::dvec3 value_gs = glm::inverse(m_view_matrix) * value_cs;
     return value_gs;
+}
+
+/**
+ * @brief Turns an unsigned "size" value into a human readable value with a suffix. Useful for
+ * displaying things like number of bytes.
+ *
+ * @param size The size to process.
+ * @param divisor The interval between each suffix. Should be something like 1000 or 1024.
+ * @param suffixes A list of suffixes such as "K", "M", "B".
+ * @return std::pair<double, const char *> The divided down value, as well as the string suffix.
+ */
+std::pair<double, const char *> AppContext::human_readable(std::size_t size,
+                                                           double divisor,
+                                                           std::vector<const char *> suffixes)
+{
+    double size_hr = size;
+    const char *suffix = "";
+    for (auto s : suffixes)
+    {
+        if (size_hr < divisor)
+            break;
+
+        size_hr = size_hr / divisor;
+        suffix = s;
+    }
+    return std::make_pair(size_hr, suffix);
 }

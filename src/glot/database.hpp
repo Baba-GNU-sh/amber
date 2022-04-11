@@ -24,6 +24,10 @@ class Database
      */
     const std::map<std::string, std::shared_ptr<TimeSeries>> &data() const;
 
+    std::size_t memory_usage() const;
+
+    std::size_t num_samples() const;
+
   private:
     std::map<std::string, std::shared_ptr<TimeSeries>> _data;
 };

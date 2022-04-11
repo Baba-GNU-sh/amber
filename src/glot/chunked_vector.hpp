@@ -73,6 +73,11 @@ template <typename T, unsigned int ChunkSize> class ChunkedVector
         return _size == 0;
     }
 
+    std::size_t capacity() const
+    {
+        return _map.size() * ChunkSize;
+    }
+
   private:
     std::vector<std::unique_ptr<Chunk>> _map;
     std::size_t _size;

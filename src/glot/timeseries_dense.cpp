@@ -118,6 +118,22 @@ std::pair<double, double> TimeSeriesDense::get_span() const
     return std::make_pair(_start, last);
 }
 
+std::size_t TimeSeriesDense::memory_usage() const
+{
+    std::size_t size = _data.size() * sizeof(ChunkedVector<DataStore, CHUNK_SIZE>);
+    std::size_t total_bytes =
+        std::accumulate(_data.begin(), _data.end(), size, [](std::size_t total, const auto &row) {
+            const std::size_t capacity = row.capacity();
+            return total + (capacity * sizeof(row[0]));
+        });
+    return total_bytes;
+}
+
+std::size_t TimeSeriesDense::size() const
+{
+    return _data[0].size();
+}
+
 void TimeSeriesDense::push_sample(double value)
 {
     std::lock_guard<std::recursive_mutex> _(_mut);
