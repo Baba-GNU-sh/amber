@@ -11,7 +11,7 @@ template <typename T, unsigned int ChunkSize> class ChunkedVector
     typedef std::array<T, ChunkSize> Chunk;
 
   public:
-    ChunkedVector() : _size(0), _chunks(0)
+    ChunkedVector() : _size(0)
     {
         //
     }
@@ -24,9 +24,8 @@ template <typename T, unsigned int ChunkSize> class ChunkedVector
     void push(const T &value)
     {
         ++_size;
-        if (_size > ChunkSize * _chunks)
+        if (_size > ChunkSize * _map.size())
         {
-            ++_chunks;
             _map.push_back(std::make_unique<Chunk>());
         }
 
@@ -81,5 +80,4 @@ template <typename T, unsigned int ChunkSize> class ChunkedVector
   private:
     std::vector<std::unique_ptr<Chunk>> _map;
     std::size_t _size;
-    std::size_t _chunks;
 };
