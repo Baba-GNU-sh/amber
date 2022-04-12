@@ -1,14 +1,12 @@
 #include <glad/glad.h>
-
-#include "plot.hpp"
-
-#include "resources.hpp"
-#include "timeseries.hpp"
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
+#include "plot.hpp"
+#include "timeseries.hpp"
+#include "resources.hpp"
 
-Plot::Plot(Window &window) : m_window(window)
+Plot::Plot(Window &window) : m_window(window), _position(0), _size(100, 100)
 {
     glGenVertexArrays(1, &_plot_vao);
     glBindVertexArray(_plot_vao);
@@ -19,9 +17,11 @@ Plot::Plot(Window &window) : m_window(window)
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TSSample), (void *)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(TSSample), (void *)offsetof(TSSample, min));
+    glVertexAttribPointer(
+        1, 1, GL_FLOAT, GL_FALSE, sizeof(TSSample), (void *)offsetof(TSSample, min));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(TSSample), (void *)offsetof(TSSample, max));
+    glVertexAttribPointer(
+        2, 1, GL_FLOAT, GL_FALSE, sizeof(TSSample), (void *)offsetof(TSSample, max));
     glEnableVertexAttribArray(2);
 
     std::vector<Shader> shaders{
@@ -78,26 +78,42 @@ void Plot::draw(const glm::mat3 &view_matrix,
     const int width = std::min(_size.x / PIXELS_PER_COL, COLS_MAX);
 
     // Work out where on the graph the first column of pixels lives
-    glm::vec3 begin(0.0f, 0.0f, 1.0f);
+    glm::vec3 begin(_position.x, 0.0f, 1.0f);
     auto begin_gs = view_matrix_inv * m_window.vp_matrix_inv() * begin;
 
-    glm::vec3 end(width, 0.0f, 1.0f);
+    glm::vec3 end(_position.x + width, 0.0f, 1.0f);
     auto end_gs = view_matrix_inv * m_window.vp_matrix_inv() * end;
 
     auto interval = PIXELS_PER_COL * (end_gs.x - begin_gs.x) / width;
 
     auto n_samples = ts.get_samples(&_samples[0], begin_gs.x, interval, width);
 
+    // glScissor uses coordinates starting at the bottom left
+    glEnable(GL_SCISSOR_TEST);
+    const auto window_size = m_window.size();
+    glScissor(_position.x, window_size.y - (_position.y + _size.y), _size.x, _size.y);
+
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * n_samples, _samples);
     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, n_samples);
-}
-
-void Plot::set_size(int width, int height)
-{
-    _size = glm::ivec2(width, height);
+    glDisable(GL_SCISSOR_TEST);
 }
 
 void Plot::set_size(const glm::ivec2 &size)
 {
     _size = size;
+}
+
+glm::ivec2 Plot::size() const
+{
+    return _size;
+}
+
+void Plot::set_position(const glm::ivec2 &position)
+{
+    _position = position;
+}
+
+glm::ivec2 Plot::position() const
+{
+    return _position;
 }

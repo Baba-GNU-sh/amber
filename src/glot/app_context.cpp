@@ -11,8 +11,8 @@
 #include "bindings/imgui_impl_opengl3.h"
 
 AppContext::AppContext(
-    Database &database, Graph &graph, Plot &plot, Window &window, PluginManager &plugin_manager)
-    : m_database(database), m_graph(graph), m_plot(plot), m_window(window),
+    Database &database, Graph &graph, Window &window, PluginManager &plugin_manager)
+    : m_database(database), m_graph(graph), m_window(window),
       m_plugin_manager(plugin_manager), m_view_matrix(1.0)
 {
     std::vector<glm::vec3> plot_colours = {
@@ -69,12 +69,11 @@ AppContext::AppContext(
     });
 
     m_window.framebuffer_size.connect([this](int width, int height) {
-        m_graph.set_size(width, height);
-        m_plot.set_size(width, height);
+        m_graph.set_size(glm::ivec2(width, height));
     });
 
     m_graph.set_size(m_window.size());
-    m_plot.set_size(m_window.size());
+    m_graph.set_position(glm::ivec2(0, 0));
 
     m_window.key.connect([this](int key, int, int action, int) {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
@@ -92,7 +91,7 @@ void AppContext::draw()
     {
         if (time_series.visible)
         {
-            m_plot.draw(m_view_matrix,
+            m_graph.draw_plot(m_view_matrix,
                         *(time_series.ts),
                         m_plot_width,
                         time_series.colour,

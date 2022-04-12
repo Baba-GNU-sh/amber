@@ -19,17 +19,21 @@ class Plot
               glm::vec3 plot_colour,
               float y_offset,
               bool show_line_segments) const;
-    void set_size(int width, int height);
     void set_size(const glm::ivec2 &size);
+    glm::ivec2 size() const;
+    void set_position(const glm::ivec2 &position);
+    glm::ivec2 position() const;
 
   private:
-    static constexpr int COLS_MAX = 8192; // Max number of columns to allocate buffers for (enough to fill a DCI 8K monitor!)
+    static constexpr int COLS_MAX =
+        8192; // Max number of columns to allocate buffers for (enough to fill a DCI 8K monitor!)
     static constexpr int PIXELS_PER_COL = 1; // How wide the column are in pixels
-    
+
     Window &m_window;
     unsigned int _plot_vao;
     unsigned int _plot_vbo;
     Program _lines_shader;
+    glm::ivec2 _position;
     glm::ivec2 _size;
     mutable TSSample _samples[COLS_MAX];
 };

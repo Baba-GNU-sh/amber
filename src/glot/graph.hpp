@@ -48,7 +48,7 @@ struct TimeSeriesContainer
 class Graph
 {
   public:
-    Graph(Window &window);
+    Graph(Window &window, int gutter_size_px = 60, int tick_len_px = 5);
     ~Graph();
 
     /**
@@ -57,7 +57,6 @@ class Graph
      * @param width The new width of the graph view in pixels.
      * @param height The new height of the graph view in pixels.
      */
-    void set_size(int width, int height);
     void set_size(const glm::ivec2 &size);
 
     /**
@@ -71,7 +70,7 @@ class Graph
      * @param x The new x position in pixels.
      * @param y The new y position in pixels.
      */
-    void set_position(int x, int y);
+    void set_position(const glm::ivec2 &position);
 
     /**
      * @brief Get the posiiton of the graph in the viewport.
@@ -105,6 +104,13 @@ class Graph
      * @param show_plot_segments
      */
     void draw_decorations(const glm::dmat3 &view_matrix) const;
+
+    void draw_plot(const glm::mat3 &view_matrix,
+                   const TimeSeries &ts,
+                   int plot_width,
+                   glm::vec3 plot_colour,
+                   float y_offset,
+                   bool show_line_segments) const;
 
     boost::signals2::signal<void(double, double)> on_drag;
     boost::signals2::signal<void(double, double)> on_zoom;
@@ -140,16 +146,15 @@ class Graph
                      int width,
                      LabelAlignment align,
                      LabelAlignmentVertical valign) const;
-    void _draw_glyph(
-        char c, const glm::ivec2 &pos, int height, int width, GlyphData **buf) const;
+    void _draw_glyph(char c, const glm::ivec2 &pos, int height, int width, GlyphData **buf) const;
 
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> _tick_spacing(
         const glm::dmat3 &view_matrix) const;
 
-    const int GUTTER_SIZE_PX = 60;
-    const int TICKLEN = 8;
-
     Window &m_window;
+    const int m_gutter_size_px;
+    const int m_tick_len_px;
+    Plot m_plot;
 
     // Line buffers
     GLuint _linebuf_vao;

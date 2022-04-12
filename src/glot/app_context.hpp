@@ -22,7 +22,6 @@ class AppContext
   public:
     AppContext(Database &database,
                Graph &graph,
-               Plot &plot,
                Window &window,
                PluginManager &plugin_manager);
 
@@ -43,7 +42,6 @@ class AppContext
 
     Database &m_database;
     Graph &m_graph;
-    Plot &m_plot;
     Window &m_window;
     PluginManager &m_plugin_manager;
     std::vector<TimeSeriesContainer> m_ts;
