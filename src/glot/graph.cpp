@@ -151,9 +151,7 @@ void Graph::_draw_lines(const glm::dmat3 &view_matrix) const
 {
     int offset = 0;
 
-    const auto tick_spacing = _tick_spacing(view_matrix);
-    const auto tick_spacing_major = std::get<0>(tick_spacing);
-    const auto tick_spacing_minor = std::get<1>(tick_spacing);
+    const auto [tick_spacing_major, tick_spacing_minor, _] = _tick_spacing(view_matrix);
 
     glBindVertexArray(_linebuf_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
@@ -258,10 +256,7 @@ void Graph::_draw_labels(const glm::dmat3 &view_matrix) const
     glm::ivec2 bl(m_gutter_size_px, _size.y - m_gutter_size_px);
     glm::ivec2 br(_size.x, _size.y - m_gutter_size_px);
 
-    auto tick_spacing = _tick_spacing(view_matrix);
-    auto tick_spacing_major = std::get<0>(tick_spacing);
-    // auto tick_spacing_minor = std::get<1>(tick_spacing);
-    auto precision = std::get<2>(tick_spacing);
+    auto [tick_spacing_major, _, precision] = _tick_spacing(view_matrix);
 
     // Draw one label per tick on the y axis
     auto top_gs = screen2graph(view_matrix, tl);
