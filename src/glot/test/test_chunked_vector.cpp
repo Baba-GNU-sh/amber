@@ -47,3 +47,27 @@ TEST(ChunkedVector, outOfBoundsAccess)
     ChunkedVector<int, 1024> data;
     ASSERT_THROW(data.at(100), std::out_of_range);
 }
+
+TEST(ChunkedVector, iteration)
+{
+    ChunkedVector<int, 1024> data;
+    data.push_back(0);
+    data.push_back(1);
+    data.push_back(2);
+
+    int i = 0;
+    for (auto iter = data.begin(); iter != data.end(); ++iter)
+    {
+        ASSERT_EQ(*iter, i++);
+    }
+
+    ASSERT_TRUE(std::binary_search(
+        data.begin(), data.end(), 1, [](const auto &r1, const auto &r2) {
+            return r1 < r2;
+        }));
+
+    ASSERT_FALSE(std::binary_search(
+        data.begin(), data.end(), 5, [](const auto &r1, const auto &r2) {
+            return r1 < r2;
+        }));
+}
