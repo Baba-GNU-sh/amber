@@ -123,27 +123,18 @@ void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height
 
 void Window::cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
-    // if (ImGui::GetIO().WantCaptureMouse)
-    //     return;
-
     auto *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
     win->handle_cursor_pos_callback(xpos, ypos);
 }
 
 void Window::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
-    // if (ImGui::GetIO().WantCaptureMouse)
-    //     return;
-
     auto *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
     win->handle_scroll_callback(xoffset, yoffset);
 }
 
 void Window::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
-    // if (ImGui::GetIO().WantCaptureMouse)
-    //     return;
-
     auto *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
     win->handle_mouse_button_callback(button, action, mods);
 }

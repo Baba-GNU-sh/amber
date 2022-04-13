@@ -20,10 +20,7 @@ class AppContext
     };
 
   public:
-    AppContext(Database &database,
-               Graph &graph,
-               Window &window,
-               PluginManager &plugin_manager);
+    AppContext(Database &database, Graph &graph, Window &window, PluginManager &plugin_manager);
 
     void draw();
 
@@ -34,8 +31,9 @@ class AppContext
     void update_bgcolour() const;
     glm::dvec2 screen2graph(const glm::ivec2 &value) const;
     static std::pair<double, const char *> human_readable(std::size_t size,
-                                                          double divisor=1000,
-                                                          std::vector<const char *> suffixes={"K", "M", "B", "T"});
+                                                          double divisor = 1000,
+                                                          std::vector<const char *> suffixes = {
+                                                              "K", "M", "B", "T"});
 
     static constexpr double ZOOM_MIN_X = 1'000'000.0;
     static constexpr double ZOOM_MIN_Y = 1'000'000.0;

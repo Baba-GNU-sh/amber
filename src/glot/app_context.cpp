@@ -68,9 +68,8 @@ AppContext::AppContext(
         m_view_matrix = glm::translate(m_view_matrix, cursor_delta);
     });
 
-    m_window.framebuffer_size.connect([this](int width, int height) {
-        m_graph.set_size(glm::ivec2(width, height));
-    });
+    m_window.framebuffer_size.connect(
+        [this](int width, int height) { m_graph.set_size(glm::ivec2(width, height)); });
 
     m_graph.set_size(m_window.size());
     m_graph.set_position(glm::ivec2(0, 0));
@@ -92,11 +91,11 @@ void AppContext::draw()
         if (time_series.visible)
         {
             m_graph.draw_plot(m_view_matrix,
-                        *(time_series.ts),
-                        m_plot_width,
-                        time_series.colour,
-                        time_series.y_offset,
-                        m_show_line_segments);
+                              *(time_series.ts),
+                              m_plot_width,
+                              time_series.colour,
+                              time_series.y_offset,
+                              m_show_line_segments);
         }
     }
     m_graph.draw_decorations(m_view_matrix);
