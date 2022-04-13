@@ -20,12 +20,14 @@ add_library(
 		database.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
-		timeseries_dense.cpp
 		window.cpp
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
+		random_data_plugin.cpp
 		imgui_window.cpp
 		app_context.cpp
+		timeseries_dense.cpp
+		timeseries_sparse.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(
@@ -71,6 +73,7 @@ if (BUILD_TESTS)
 	find_package(GTest REQUIRED)
 	add_executable(tests
 		test/test_timeseries_dense.cpp
+		test/test_timeseries_sparse.cpp
 		test/test_chunked_vector.cpp
 	)
 	target_link_libraries(
