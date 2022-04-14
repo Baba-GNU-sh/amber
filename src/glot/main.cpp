@@ -5,6 +5,7 @@
 #include "database.hpp"
 #include "plugin_context.hpp"
 #include "plugin_manager.hpp"
+#include "random_data_plugin.hpp"
 #include "window.hpp"
 #include <imgui.h>
 #include "bindings/imgui_impl_glfw.h"
@@ -16,7 +17,7 @@
 
 void error_callback(int error, const char *msg)
 {
-    spdlog::error("[{}] {}", error, msg);
+    spdlog::error("GLFW ERROR: [{}] {}", error, msg);
 }
 
 int main()
@@ -40,8 +41,11 @@ int main()
         Database db;
         PluginContext plugin_context(db);
         PluginManager plugin_manager;
-        plugin_manager.add_plugin("audiofile", std::make_shared<AudioFilePlugin>(plugin_context, "audio/Lurking_Threat_3.wav"));
+        plugin_manager.add_plugin(
+            "audiofile",
+            std::make_shared<AudioFilePlugin>(plugin_context, "audio/Lurking_Threat_3.wav"));
         plugin_manager.add_plugin("wavegen", std::make_shared<WaveGenPlugin>(plugin_context));
+        plugin_manager.add_plugin("sparse", std::make_shared<RandomDataPlugin>(plugin_context));
         plugin_manager.start_all();
 
         ImGuiContextWindow window(800, 600, "GLot");
