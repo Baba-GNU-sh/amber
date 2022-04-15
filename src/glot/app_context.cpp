@@ -107,6 +107,23 @@ void AppContext::draw()
     draw_gui();
 }
 
+void AppContext::spin()
+{
+    while (!m_window.should_close())
+    {
+        glfwPollEvents();
+        m_window.use();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        draw();
+        m_window.finish();
+
+        if (m_call_glfinish)
+        {
+            glFinish();
+        }
+    }
+}
+
 void AppContext::draw_gui()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -212,6 +229,8 @@ void AppContext::draw_gui()
         ImGui::SliderInt("Line width", &m_plot_width, 1, 64, "%d", ImGuiSliderFlags_Logarithmic);
 
         ImGui::Checkbox("Show line segments", &m_show_line_segments);
+
+        ImGui::Checkbox("Call glFinish", &m_call_glfinish);
     }
 
     if (ImGui::CollapsingHeader("Plots", ImGuiTreeNodeFlags_DefaultOpen))
