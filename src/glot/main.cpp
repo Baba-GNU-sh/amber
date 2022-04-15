@@ -70,15 +70,7 @@ int main()
         spdlog::info("Initialization OK, starting main loop");
 
         // Main loop go brr
-        while (!window.should_close())
-        {
-            glfwPollEvents();
-
-            window.use();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            context.draw();
-            window.finish();
-        }
+        context.spin();
     }
     catch (const std::exception &e)
     {

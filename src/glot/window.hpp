@@ -26,6 +26,8 @@ class Window
     glm::dvec2 cursor() const;
     void set_bg_colour(const glm::vec3 &col);
     glm::vec3 bg_colour();
+    void set_fullscreen(bool enable);
+    bool is_fullscreen();
 
     boost::signals2::signal<void(int, int)> framebuffer_size;
     boost::signals2::signal<void(double, double)> cursor_pos;
@@ -49,9 +51,13 @@ class Window
     static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
     void update_vp_matrix(int width, int height);
 
+    std::string m_title;
+    glm::vec3 m_bg_colour;
+    bool m_fullscreen_mode;
     glm::mat3 m_vp_matrix;
     glm::mat3 m_vp_matrix_inv;
     std::shared_ptr<spdlog::logger> m_logger;
     glm::ivec2 m_size;
-    glm::vec3 m_bg_colour;
+    glm::ivec2 m_windowed_size;
+    glm::ivec2 m_windowed_pos;
 };

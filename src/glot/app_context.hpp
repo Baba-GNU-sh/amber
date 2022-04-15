@@ -23,6 +23,7 @@ class AppContext
     AppContext(Database &database, Graph &graph, Window &window, PluginManager &plugin_manager);
 
     void draw();
+    void spin();
 
   private:
     void draw_gui();
@@ -49,4 +50,5 @@ class AppContext
     glm::vec3 m_bgcolor;
     glm::dmat3 m_view_matrix;
     bool m_show_line_segments = false;
+    bool m_call_glfinish = false;
 };
