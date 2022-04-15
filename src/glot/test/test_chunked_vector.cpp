@@ -1,5 +1,6 @@
 #include <chunked_vector.hpp>
 #include <gtest/gtest.h>
+#include <algorithm>
 
 TEST(ChunkedVector, nullTest)
 {
