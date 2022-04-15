@@ -81,6 +81,10 @@ AppContext::AppContext(
             auto latest = m_database.get_latest_sample_time();
             m_view_matrix = glm::translate(m_view_matrix, glm::dvec2(-latest, 0));
         }
+        else if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
+        {
+            m_window.set_fullscreen(!m_window.is_fullscreen());
+        }
     });
 }
 
@@ -114,9 +118,18 @@ void AppContext::draw_gui()
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("Close"))
+            if (ImGui::MenuItem("Close", "Esc"))
             {
                 m_window.request_close();
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("View"))
+        {
+            if (ImGui::MenuItem("Toggle Fullscreen", "F11"))
+            {
+                m_window.set_fullscreen(!m_window.is_fullscreen());
             }
             ImGui::EndMenu();
         }

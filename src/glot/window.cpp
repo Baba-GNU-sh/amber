@@ -1,9 +1,11 @@
 #include "window.hpp"
 #include <GL/gl.h>
+#include <GLFW/glfw3.h>
 
-Window::Window(int width, int height, const std::string &title) : m_bg_colour(0.0)
+Window::Window(int width, int height, const std::string &title)
+    : m_title(title), m_bg_colour(0.0), m_fullscreen_mode(false)
 {
-    m_window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+    m_window = glfwCreateWindow(width, height, m_title.c_str(), NULL, NULL);
     if (!m_window)
     {
         throw std::runtime_error("Failed to create GLFW window");
@@ -19,7 +21,7 @@ Window::Window(int width, int height, const std::string &title) : m_bg_colour(0.
 
     update_vp_matrix(width, height);
 
-    m_logger = spdlog::stdout_color_mt("Window::" + std::string(title));
+    m_logger = spdlog::stdout_color_mt("Window::" + m_title);
     m_logger->info("Initialized");
 }
 
@@ -84,6 +86,37 @@ void Window::set_bg_colour(const glm::vec3 &col)
 glm::vec3 Window::bg_colour()
 {
     return m_bg_colour;
+}
+
+void Window::set_fullscreen(bool enable)
+{
+    m_fullscreen_mode = enable;
+
+    if (m_fullscreen_mode)
+    {
+        // Backup the windowed size and position
+        glfwGetWindowSize(m_window, &m_windowed_size.x, &m_windowed_size.y);
+        glfwGetWindowPos(m_window, &m_windowed_pos.x, &m_windowed_pos.y);
+
+        auto *monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+        glfwSetWindowMonitor(m_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    }
+    else
+    {
+        glfwSetWindowMonitor(m_window,
+                             NULL,
+                             m_windowed_pos.x,
+                             m_windowed_pos.y,
+                             m_windowed_size.x,
+                             m_windowed_size.y,
+                             GLFW_DONT_CARE);
+    }
+}
+
+bool Window::is_fullscreen()
+{
+    return m_fullscreen_mode;
 }
 
 void Window::handle_framebuffer_size_callback(int width, int height)
