@@ -5,6 +5,11 @@
 Window::Window(int width, int height, const std::string &title)
     : m_title(title), m_bg_colour(0.0), m_fullscreen_mode(false)
 {
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    
     m_window = glfwCreateWindow(width, height, m_title.c_str(), NULL, NULL);
     if (!m_window)
     {
