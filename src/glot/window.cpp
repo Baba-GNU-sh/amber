@@ -9,7 +9,7 @@ Window::Window(int width, int height, const std::string &title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
+
     m_window = glfwCreateWindow(width, height, m_title.c_str(), NULL, NULL);
     if (!m_window)
     {
@@ -26,7 +26,7 @@ Window::Window(int width, int height, const std::string &title)
 
     update_vp_matrix(width, height);
 
-    m_logger = spdlog::stdout_color_mt("Window::" + m_title);
+    m_logger = spdlog::stdout_color_mt("Window(" + m_title + ")");
     m_logger->info("Initialized");
 }
 
@@ -56,9 +56,11 @@ const glm::mat3 &Window::vp_matrix_inv() const
     return m_vp_matrix_inv;
 }
 
-const glm::ivec2 &Window::size() const
+glm::ivec2 Window::size() const
 {
-    return m_size;
+    glm::ivec2 size(0.0);
+    glfwGetWindowSize(m_window, &size.x, &size.y);
+    return size;
 }
 
 GLFWwindow *Window::handle()
@@ -194,5 +196,4 @@ void Window::update_vp_matrix(int width, int height)
     auto vp_matrix = glm::scale(identity, glm::vec2(width / 2, -height / 2));
     m_vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
     m_vp_matrix_inv = glm::inverse(m_vp_matrix);
-    m_size = glm::ivec2(width, height);
 }

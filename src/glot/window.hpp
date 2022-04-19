@@ -19,7 +19,7 @@ class Window
     void finish() const;
     const glm::mat3 &vp_matrix() const;
     const glm::mat3 &vp_matrix_inv() const;
-    const glm::ivec2 &size() const;
+    glm::ivec2 size() const;
     GLFWwindow *handle();
     bool should_close() const;
     void request_close();
@@ -57,7 +57,6 @@ class Window
     glm::mat3 m_vp_matrix;
     glm::mat3 m_vp_matrix_inv;
     std::shared_ptr<spdlog::logger> m_logger;
-    glm::ivec2 m_size;
     glm::ivec2 m_windowed_size;
     glm::ivec2 m_windowed_pos;
 };
