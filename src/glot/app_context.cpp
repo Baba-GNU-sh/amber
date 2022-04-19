@@ -85,6 +85,21 @@ AppContext::AppContext(
         {
             m_window.set_fullscreen(!m_window.is_fullscreen());
         }
+        else if (key == GLFW_KEY_A && action == GLFW_PRESS)
+        {
+            auto cursor_gs = screen2graph(m_window.cursor());
+            m_markers.first = cursor_gs.x;
+        }
+        else if (key == GLFW_KEY_B && action == GLFW_PRESS)
+        {
+            auto cursor_gs = screen2graph(m_window.cursor());
+            m_markers.second = cursor_gs.x;
+        }
+        else if (key == GLFW_KEY_C && action == GLFW_PRESS)
+        {
+            m_markers.first.reset();
+            m_markers.second.reset();
+        }
     });
 }
 
@@ -103,6 +118,18 @@ void AppContext::draw()
         }
     }
     m_graph.draw_decorations(m_view_matrix);
+
+    if (m_markers.first)
+    {
+        m_graph.draw_marker(
+            m_view_matrix, m_markers.first.value(), MarkerStyle::Left, glm::vec3(1.0, 1.0, 1.0));
+    }
+
+    if (m_markers.second)
+    {
+        m_graph.draw_marker(
+            m_view_matrix, m_markers.second.value(), MarkerStyle::Right, glm::vec3(1.0, 1.0, 1.0));
+    }
 
     draw_gui();
 }
@@ -191,6 +218,12 @@ void AppContext::draw_gui()
         const auto cursor_gs =
             glm::inverse(m_view_matrix) * vp_matrix_inv * glm::dvec3(m_window.cursor(), 1.0);
         ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
+
+        if (m_markers.first && m_markers.second)
+        {
+            const auto marker_interval = *m_markers.second - *m_markers.first;
+            ImGui::Text("Markers: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
+        }
     }
 
     if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))

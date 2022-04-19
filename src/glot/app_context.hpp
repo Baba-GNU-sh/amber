@@ -35,7 +35,6 @@ class AppContext
                                                           double divisor = 1000,
                                                           std::vector<const char *> suffixes = {
                                                               "K", "M", "B", "T"});
-
     static constexpr double ZOOM_MIN_X = 1'000'000.0;
     static constexpr double ZOOM_MIN_Y = 1'000'000.0;
 
@@ -51,4 +50,5 @@ class AppContext
     glm::dmat3 m_view_matrix;
     bool m_show_line_segments = false;
     bool m_call_glfinish = false;
+    std::pair<std::optional<double>, std::optional<double>> m_markers;
 };

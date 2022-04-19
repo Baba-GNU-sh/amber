@@ -250,6 +250,49 @@ void Graph::draw_plot(const glm::mat3 &view_matrix,
     m_plot.draw(view_matrix, ts, plot_width, plot_colour, y_offset, show_line_segments);
 }
 
+void Graph::draw_marker(const glm::mat3 &view_matrix,
+                        double marker_pos,
+                        MarkerStyle style,
+                        const glm::vec3 &colour) const
+{
+    (void)style;
+    (void)colour;
+
+    int offset = 0;
+
+    glBindVertexArray(_linebuf_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
+
+    // Get a pointer to the underlying buffer
+    void *raw_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+    auto *ptr = reinterpret_cast<glm::vec2 *>(raw_ptr);
+
+    auto pos_pixels = m_window.vp_matrix() * (view_matrix * glm::dvec3(marker_pos, 0.0, 1.0));
+    pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
+
+    ptr[offset++] = glm::vec2(pos_pixels.x, 0.0);
+    ptr[offset++] = glm::vec2(pos_pixels.x, _size.y - m_gutter_size_px);
+
+    // make sure to tell OpenGL we're done with the pointer
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+
+    _lines_shader.use();
+    int uniform_id = _lines_shader.uniform_location("view_matrix");
+    const auto viewport_matrix_inv = m_window.vp_matrix_inv();
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
+    glDrawArrays(GL_LINES, 0, offset);
+
+    auto [_1, _2, precision] = _tick_spacing(view_matrix);
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(precision.x * 2) << marker_pos;
+    _draw_label(ss.str(),
+                glm::ivec2(pos_pixels.x, _size.y - m_gutter_size_px / 2),
+                18,
+                7,
+                LabelAlignment::Center,
+                LabelAlignmentVertical::Top);
+}
+
 void Graph::_draw_labels(const glm::dmat3 &view_matrix) const
 {
     glm::ivec2 tl(m_gutter_size_px, 0);

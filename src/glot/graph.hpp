@@ -33,6 +33,13 @@ enum class LabelAlignmentVertical
     Bottom
 };
 
+enum class MarkerStyle
+{
+    Left,
+    Right,
+    Standalone
+};
+
 struct TimeSeriesContainer
 {
     std::shared_ptr<TimeSeries> ts;
@@ -111,6 +118,11 @@ class Graph
                    glm::vec3 plot_colour,
                    float y_offset,
                    bool show_line_segments) const;
+
+    void draw_marker(const glm::mat3 &view_matrix,
+                     double marker_x_pos,
+                     MarkerStyle style,
+                     const glm::vec3 &colour) const;
 
     boost::signals2::signal<void(double, double)> on_drag;
     boost::signals2::signal<void(double, double)> on_zoom;
