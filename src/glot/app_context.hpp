@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <glm/glm.hpp>
 #include "database.hpp"
 #include "graph.hpp"
