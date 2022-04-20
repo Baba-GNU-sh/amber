@@ -30,8 +30,8 @@ Graph::Graph(Window &window, int gutter_size_px, int tick_len_px)
 
     namespace ph = std::placeholders;
 
-    m_window.scroll.connect(std::bind(&Graph::mouse_scroll, this, ph::_1, ph::_2));
-    m_window.cursor_pos.connect(std::bind(&Graph::cursor_move, this, ph::_1, ph::_2));
+    m_window.scroll.connect(std::bind(&Graph::on_mouse_scroll, this, ph::_1, ph::_2));
+    m_window.cursor_pos.connect(std::bind(&Graph::on_cursor_move, this, ph::_1, ph::_2));
     m_window.mouse_button.connect(std::bind(&Graph::mouse_button, this, ph::_1, ph::_2, ph::_3));
 }
 
@@ -44,7 +44,7 @@ Graph::~Graph()
     glDeleteBuffers(1, &_glyphbuf_ebo);
 }
 
-bool Graph::_hittest(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br) const
+bool Graph::hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br)
 {
     if (value.x < tl.x)
         return false;
@@ -211,12 +211,12 @@ void Graph::_draw_lines(const glm::dmat3 &view_matrix) const
         tick_spacing_minor, glm::dvec2(-m_tick_len_px / 2, 0), glm::dvec2(0, m_tick_len_px / 2));
 
     // Add one additional vertical line where the cursor is
-    if (_hittest(_cursor, glm::ivec2(m_gutter_size_px, _size.y - m_gutter_size_px), _size))
+    if (hit_test(_cursor, glm::ivec2(m_gutter_size_px, _size.y - m_gutter_size_px), _size))
     {
         ptr[offset++] = glm::vec2(_cursor.x, 0.0);
         ptr[offset++] = glm::vec2(_cursor.x, _size.y);
     }
-    else if (_hittest(
+    else if (hit_test(
                  _cursor, glm::ivec2(0), glm::ivec2(m_gutter_size_px, _size.y - m_gutter_size_px)))
     {
         ptr[offset++] = glm::vec2(0.0, _cursor.y);
@@ -356,7 +356,7 @@ void Graph::_draw_labels(const glm::dmat3 &view_matrix) const
                     glm::vec3(1.0, 1.0, 1.0));
     }
 
-    if (_hittest(_cursor,
+    if (hit_test(_cursor,
                  glm::ivec2(m_gutter_size_px, _size.y - m_gutter_size_px),
                  glm::ivec2(_size.x, _size.y)))
     {
@@ -564,7 +564,7 @@ void Graph::mouse_button(int button, int action, int mods)
     }
 }
 
-void Graph::cursor_move(double xpos, double ypos)
+void Graph::on_cursor_move(double xpos, double ypos)
 {
     glm::dvec2 new_cursor(xpos, ypos);
 
@@ -577,24 +577,24 @@ void Graph::cursor_move(double xpos, double ypos)
     _cursor = new_cursor;
 }
 
-void Graph::mouse_scroll(double /*xoffset*/, double yoffset)
+void Graph::on_mouse_scroll(double /*xoffset*/, double yoffset)
 {
     const double zoom_delta = 1.0f + (yoffset / 10.0f);
 
-    if (_hittest(
+    if (hit_test(
             _cursor, glm::ivec2(0, 0), glm::ivec2(m_gutter_size_px, _size.y - m_gutter_size_px)))
     {
         // Cursor is in the vertical gutter, only zoom the y axis
         on_zoom(1.0, zoom_delta);
     }
-    else if (_hittest(_cursor,
+    else if (hit_test(_cursor,
                       glm::ivec2(m_gutter_size_px, _size.y - m_gutter_size_px),
                       glm::ivec2(_size.x, _size.y)))
     {
         // Cursor is in the horizontal gutter, only zoom the x axis
         on_zoom(zoom_delta, 1.0);
     }
-    else if (_hittest(_cursor,
+    else if (hit_test(_cursor,
                       glm::ivec2(m_gutter_size_px, 0),
                       glm::ivec2(_size.x, _size.y - m_gutter_size_px)))
     {

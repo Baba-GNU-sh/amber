@@ -91,18 +91,6 @@ class Graph
     void mouse_button(int button, int action, int mods);
 
     /**
-     * @brief Call this to pass through cursor move events from GLFW to control
-     * the graph.
-     */
-    void cursor_move(double xpos, double ypos);
-
-    /**
-     * @brief Call this to pass through mouse scroll events from GLFW to control
-     * the graph.
-     */
-    void mouse_scroll(double xoffset, double yoffset);
-
-    /**
      * @brief Draw the graph to the screen.
      *
      * @param plot_width
@@ -128,6 +116,9 @@ class Graph
     boost::signals2::signal<void(double, double)> on_zoom;
 
   private:
+    void on_cursor_move(double xpos, double ypos);
+    void on_mouse_scroll(double xoffset, double yoffset);
+
     /**
      * @brief Check if a coodinate is inside a bounding box defined by two corners.
      *
@@ -137,7 +128,7 @@ class Graph
      * @return true The coordinate is within the bounding box.
      * @return false The coordinate is outside the bounding box.
      */
-    bool _hittest(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br) const;
+    static bool hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br);
 
     /**
      * @brief Converts a vector from viewport space (pixels w/ origin at TL) to
