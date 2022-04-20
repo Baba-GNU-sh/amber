@@ -38,21 +38,12 @@ GraphController::GraphController(Database &database,
 
     update_view_matrix(glm::dmat3(1.0));
 
-    m_bgcolor = glm::vec3(0.1, 0.1, 0.1);
-    update_multisampling();
-    update_vsync();
-    update_bgcolour();
-
     m_window.key.connect([this](int key, int, int action, int) {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
             m_view_matrix[2][0] = 0;
             auto latest = m_database.get_latest_sample_time();
             m_view_matrix = glm::translate(m_view_matrix, glm::dvec2(-latest, 0));
-        }
-        else if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
-        {
-            m_window.set_fullscreen(!m_window.is_fullscreen());
         }
         else if (key == GLFW_KEY_A && action == GLFW_PRESS)
         {
@@ -77,8 +68,7 @@ GraphController::GraphController(Database &database,
         const auto cursor = m_window.cursor();
         const auto size = m_window.size();
 
-        if (hit_test(
-                cursor, glm::ivec2(0, 0), glm::ivec2(GUTTER_SIZE_PX, size.y - GUTTER_SIZE_PX)))
+        if (hit_test(cursor, glm::ivec2(0, 0), glm::ivec2(GUTTER_SIZE_PX, size.y - GUTTER_SIZE_PX)))
         {
             // Cursor is in the vertical gutter, only zoom the y axis
             on_zoom(1.0, zoom_delta);
@@ -164,8 +154,8 @@ GraphController::GraphController(Database &database,
 
 void GraphController::draw()
 {
-    m_graph.set_gutter_size(60);
-    m_graph.set_tick_len(5);
+    m_graph.set_gutter_size(GUTTER_SIZE_PX);
+    m_graph.set_tick_len(TICKLEN_PX);
     m_graph.set_view_matrix(m_view_matrix);
     m_graph.set_size(m_window.size());
 
@@ -194,185 +184,38 @@ void GraphController::draw()
         m_graph.draw_marker(
             "B", m_markers.second.value(), MarkerStyle::Right, glm::vec3(1.0, 1.0, 0.0));
     }
-
-    draw_gui();
-}
-
-void GraphController::spin()
-{
-    while (!m_window.should_close())
-    {
-        glfwPollEvents();
-        m_window.use();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        draw();
-        m_window.finish();
-
-        if (m_call_glfinish)
-        {
-            glFinish();
-        }
-    }
 }
 
 void GraphController::draw_gui()
 {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImVec2 menubar_size;
-    if (ImGui::BeginMainMenuBar())
+    ImGui::Text("View Matrix:");
+    for (int i = 0; i < 3; i++)
     {
-        if (ImGui::BeginMenu("File"))
-        {
-            if (ImGui::MenuItem("Close", "Esc"))
-            {
-                m_window.request_close();
-            }
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("View"))
-        {
-            if (ImGui::MenuItem("Toggle Fullscreen", "F11"))
-            {
-                m_window.set_fullscreen(!m_window.is_fullscreen());
-            }
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("Plugins"))
-        {
-            m_plugin_manager.draw_menu();
-            ImGui::EndMenu();
-        }
-
-        menubar_size = ImGui::GetWindowSize();
-        ImGui::EndMainMenuBar();
+        ImGui::Text("%f %f %f", m_view_matrix[0][i], m_view_matrix[1][i], m_view_matrix[2][i]);
     }
 
-    ImGui::Begin("Info",
-                 0,
-                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
-                     ImGuiWindowFlags_NoMove);
-    ImGui::SetWindowPos(ImVec2(m_window.size().x - ImGui::GetWindowWidth() - 10, menubar_size.y),
-                        true);
+    glm::dmat3 vp_matrix_inv = m_window.vp_matrix_inv();
+    const auto cursor_gs =
+        glm::inverse(m_view_matrix) * vp_matrix_inv * glm::dvec3(m_window.cursor(), 1.0);
+    ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
 
-    if (ImGui::CollapsingHeader("Help", ImGuiTreeNodeFlags_DefaultOpen))
+    if (m_markers.first && m_markers.second)
     {
-        ImGui::BulletText("Left mouse + drag to pan");
-        ImGui::BulletText("Scroll to zoom");
-        ImGui::BulletText("Scroll on gutters to zoom individual axes");
+        const auto marker_interval = *m_markers.second - *m_markers.first;
+        ImGui::Text("Markers: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
     }
 
-    if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen))
+    for (auto &plugin : m_ts)
     {
-        ImGui::Text("%.1f ms/frame (%.1f FPS)",
-                    1000.0f / ImGui::GetIO().Framerate,
-                    ImGui::GetIO().Framerate);
-
-        ImGui::Text("View Matrix:");
-        for (int i = 0; i < 3; i++)
-        {
-            ImGui::Text("%f %f %f", m_view_matrix[0][i], m_view_matrix[1][i], m_view_matrix[2][i]);
-        }
-
-        glm::dmat3 vp_matrix_inv = m_window.vp_matrix_inv();
-        const auto cursor_gs =
-            glm::inverse(m_view_matrix) * vp_matrix_inv * glm::dvec3(m_window.cursor(), 1.0);
-        ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
-
-        if (m_markers.first && m_markers.second)
-        {
-            const auto marker_interval = *m_markers.second - *m_markers.first;
-            ImGui::Text("Markers: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
-        }
+        // Im ImGui, widgets need unique label names
+        // Anything after the "##" is counted towards the uniqueness but is not displayed
+        const auto label_name = "##" + plugin.name;
+        ImGui::Checkbox(label_name.c_str(), &(plugin.visible));
+        ImGui::SameLine();
+        ImGui::ColorEdit3(plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
+        const auto slider_name = "Y offset##" + plugin.name;
+        ImGui::DragFloat(slider_name.c_str(), &(plugin.y_offset), 0.01);
     }
-
-    if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        // Show database stats
-        auto [total_bytes, suffix] =
-            human_readable(m_database.memory_usage(), 1024, {"KiB", "MiB", "GiB", "TiB"});
-        ImGui::Text("Memory Used: %.1f%s", total_bytes, suffix);
-
-        auto [total_samples, samples_suffix] =
-            human_readable(m_database.num_samples(), 1000, {"K", "M", "B"});
-        ImGui::Text("Total Samples: %.1f%s", total_samples, samples_suffix);
-
-        ImGui::Text("Bytes/sample: %.1f",
-                    static_cast<double>(m_database.memory_usage()) /
-                        static_cast<double>(m_database.num_samples()));
-    }
-
-    if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        if (ImGui::Checkbox("Enable VSync", &m_enable_vsync))
-        {
-            update_vsync();
-        }
-
-        if (ImGui::Checkbox("Multisampling", &m_enable_multisampling))
-        {
-            update_multisampling();
-        }
-
-        if (ImGui::ColorEdit3("Clear colour", &(m_bgcolor.x)))
-        {
-            update_bgcolour();
-        }
-
-        ImGui::SliderInt("Line width", &m_plot_width, 1, 64, "%d", ImGuiSliderFlags_Logarithmic);
-
-        ImGui::Checkbox("Show line segments", &m_show_line_segments);
-
-        ImGui::Checkbox("Call glFinish", &m_call_glfinish);
-    }
-
-    if (ImGui::CollapsingHeader("Plots", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        for (auto &plugin : m_ts)
-        {
-            // Im ImGui, widgets need unique label names
-            // Anything after the "##" is counted towards the uniqueness but is not displayed
-            const auto label_name = "##" + plugin.name;
-            ImGui::Checkbox(label_name.c_str(), &(plugin.visible));
-            ImGui::SameLine();
-            ImGui::ColorEdit3(
-                plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
-            const auto slider_name = "Y offset##" + plugin.name;
-            ImGui::DragFloat(slider_name.c_str(), &(plugin.y_offset), 0.01);
-        }
-    }
-
-    m_plugin_manager.draw_dialogs();
-
-    ImGui::End();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void GraphController::update_multisampling() const
-{
-    if (m_enable_multisampling)
-    {
-        glEnable(GL_MULTISAMPLE);
-    }
-    else
-    {
-        glDisable(GL_MULTISAMPLE);
-    }
-}
-
-void GraphController::update_vsync() const
-{
-    glfwSwapInterval(m_enable_vsync ? 1 : 0);
-}
-
-void GraphController::update_bgcolour() const
-{
-    m_window.set_bg_colour(m_bgcolor);
 }
 
 glm::dvec2 GraphController::screen2graph(const glm::ivec2 &value) const
@@ -381,32 +224,6 @@ glm::dvec2 GraphController::screen2graph(const glm::ivec2 &value) const
     glm::dvec3 value_cs = m_window.vp_matrix_inv() * value3;
     glm::dvec3 value_gs = glm::inverse(m_view_matrix) * value_cs;
     return value_gs;
-}
-
-/**
- * @brief Turns an unsigned "size" value into a human readable value with a suffix. Useful for
- * displaying things like number of bytes.
- *
- * @param size The size to process.
- * @param divisor The interval between each suffix. Should be something like 1000 or 1024.
- * @param suffixes A list of suffixes such as "K", "M", "B".
- * @return std::pair<double, const char *> The divided down value, as well as the string suffix.
- */
-std::pair<double, const char *> GraphController::human_readable(std::size_t size,
-                                                                double divisor,
-                                                                std::vector<const char *> suffixes)
-{
-    double size_hr = size;
-    const char *suffix = "";
-    for (auto s : suffixes)
-    {
-        if (size_hr < divisor)
-            break;
-
-        size_hr = size_hr / divisor;
-        suffix = s;
-    }
-    return std::make_pair(size_hr, suffix);
 }
 
 void GraphController::on_zoom(double x, double y)

@@ -42,18 +42,10 @@ class GraphController
      */
     const glm::dvec3 &view_matrix() const;
     void draw();
-    void spin();
+    void draw_gui();
 
   private:
-    void draw_gui();
-    void update_multisampling() const;
-    void update_vsync() const;
-    void update_bgcolour() const;
     glm::dvec2 screen2graph(const glm::ivec2 &value) const;
-    static std::pair<double, const char *> human_readable(std::size_t size,
-                                                          double divisor = 1000,
-                                                          std::vector<const char *> suffixes = {
-                                                              "K", "M", "B", "T"});
 
     void on_zoom(double x, double y);
     static bool hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br);
@@ -74,7 +66,6 @@ class GraphController
     int m_plot_width = 2;
     glm::dmat3 m_view_matrix;
     glm::dmat3 m_view_matrix_inv;
-    glm::vec3 m_bgcolor;
     bool m_show_line_segments = false;
     std::pair<std::optional<double>, std::optional<double>> m_markers;
     
