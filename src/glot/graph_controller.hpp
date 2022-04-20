@@ -6,7 +6,6 @@
 #include "database.hpp"
 #include "graph_renderer_opengl.hpp"
 #include "window.hpp"
-#include "plugin_manager.hpp"
 #include "timeseries.hpp"
 
 /**
@@ -34,8 +33,7 @@ class GraphController
   public:
     GraphController(Database &database,
                     GraphRendererOpenGL &graph,
-                    Window &window,
-                    PluginManager &plugin_manager);
+                    Window &window);
 
     /**
      * @brief Get immutable access to the viewmatrix.
@@ -59,7 +57,6 @@ class GraphController
     Database &m_database;
     GraphRendererOpenGL &m_graph;
     Window &m_window;
-    PluginManager &m_plugin_manager;
     std::vector<TimeSeriesContainer> m_ts;
 
     // Ephemeral graph state

@@ -3,17 +3,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include "database.hpp"
-#include "plugin_manager.hpp"
-#include "window.hpp"
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 
 GraphController::GraphController(Database &database,
                                  GraphRendererOpenGL &graph,
-                                 Window &window,
-                                 PluginManager &plugin_manager)
-    : m_database(database), m_graph(graph), m_window(window), m_plugin_manager(plugin_manager)
+                                 Window &window)
+    : m_database(database), m_graph(graph), m_window(window)
 {
     std::vector<glm::vec3> plot_colours = {
         glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)};
