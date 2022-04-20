@@ -49,21 +49,29 @@ Graph::Graph(Window &window, int gutter_size_px, int tick_len_px)
     m_window.cursor_pos.connect([this](double xpos, double ypos) {
         glm::dvec2 cursor(xpos, ypos);
 
+        // Work out how much the cursor moved since the last time
+        const auto cursor_delta = cursor - m_cursor_old;
+
+        // Work out the delta in graph space
+        const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
+        const auto a = txform * glm::dvec3(0.0f);
+        const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
+        const auto delta = b - a;
+
+        // Convert the delta back to a 2D vector
+        glm::dvec2 cursor_gs_delta(delta.x, delta.y);
+
         if (m_is_dragging)
         {
-            // Work out how much the cursor moved since the last time
-            const auto cursor_delta = cursor - m_cursor_old;
-
-            // Work out the delta in graph space
-            const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
-            const auto a = txform * glm::dvec3(0.0f);
-            const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
-            const auto delta = b - a;
-
-            // Convert the delta back to a 2D vector
-            glm::dvec2 cursor_gs_delta(delta.x, delta.y);
-
             update_view_matrix(glm::translate(*m_view_matrix, cursor_gs_delta));
+        }
+
+        for (auto &marker : m_markers)
+        {
+            if (marker.second.is_dragging)
+            {
+                *marker.second.position = *marker.second.position + cursor_gs_delta.x;
+            }
         }
 
         // Cache the position of the cursor for next time
@@ -73,11 +81,30 @@ Graph::Graph(Window &window, int gutter_size_px, int tick_len_px)
     m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         {
+            for (auto &marker : m_markers)
+            {
+                const auto marker_pos = *marker.second.position;
+                glm::vec3 marker_pos_vs =
+                    m_window.vp_matrix() * (*m_view_matrix * glm::dvec3(marker_pos, 0.0, 1.0));
+                auto cursor = m_window.cursor();
+                if (std::abs(cursor.x - marker_pos_vs.x) < 5)
+                {
+                    spdlog::info("Clicked on marker {}", marker.first);
+                    marker.second.is_dragging = true;
+                    return;
+                }
+            }
             m_is_dragging = true;
+            return;
         }
-        else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
         {
             m_is_dragging = false;
+            for (auto &marker : m_markers)
+            {
+                marker.second.is_dragging = false;
+            }
         }
     });
 }
@@ -96,7 +123,7 @@ void Graph::init(glm::dmat3 *view_matrix, const glm::ivec2 &size)
     m_view_matrix = view_matrix;
     m_view_matrix_inv = glm::inverse(*view_matrix);
     m_size = size;
-    m_markers.clear();
+    //m_markers.clear();
 
     // Draw the graph axes
     draw_lines();
@@ -124,9 +151,18 @@ void Graph::draw_marker(const std::string &label,
                         MarkerStyle style,
                         const glm::vec3 &colour)
 {
-    // Store the marker's info away for later
-    m_markers[label] = MarkerInfo{position, style, colour};
+    auto iter = m_markers.find(label);
+    if (iter != m_markers.end())
+    {
+        spdlog::info("{}", iter->second.is_dragging);
+        m_markers[label] = MarkerInfo{position, style, colour, iter->second.is_dragging};
+    }
+    else
+    {
+        m_markers[label] = MarkerInfo{position, style, colour, false};
+    }
 
+    // Store the marker's info away for later
     int offset = 0;
 
     glBindVertexArray(_linebuf_vao);

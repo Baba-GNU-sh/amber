@@ -40,11 +40,13 @@ enum class MarkerStyle
     Right,
     Standalone
 };
+
 struct MarkerInfo
 {
     double *position;
     MarkerStyle style;
     glm::vec3 colour;
+    bool is_dragging;
 };
 
 struct TimeSeriesContainer
