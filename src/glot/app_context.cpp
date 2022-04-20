@@ -3,7 +3,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include "graph.hpp"
 #include "database.hpp"
 #include "plugin_manager.hpp"
 #include "window.hpp"

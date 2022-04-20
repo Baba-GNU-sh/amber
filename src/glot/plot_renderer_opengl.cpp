@@ -2,7 +2,7 @@
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
-#include "plot.hpp"
+#include "plot_renderer_opengl.hpp"
 #include "timeseries.hpp"
 #include "resources.hpp"
 

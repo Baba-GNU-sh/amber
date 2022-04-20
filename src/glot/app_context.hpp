@@ -4,7 +4,7 @@
 #include <optional>
 #include <glm/glm.hpp>
 #include "database.hpp"
-#include "graph.hpp"
+#include "graph_renderer_opengl.hpp"
 #include "window.hpp"
 #include "plugin_manager.hpp"
 #include "timeseries.hpp"

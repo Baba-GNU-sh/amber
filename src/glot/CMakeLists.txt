@@ -15,8 +15,8 @@ add_library(
 	STATIC
 		shader.cpp
 		shader_program.cpp
-		graph.cpp
-		plot.cpp
+		graph_renderer_opengl.cpp
+		plot_renderer_opengl.cpp
 		database.cpp
 		plugin_context.cpp
 		plugin_manager.cpp

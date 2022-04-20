@@ -9,7 +9,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "graph.hpp"
+#include "graph_renderer_opengl.hpp"
 #include "resources.hpp"
 
 Graph::Graph(Window &window, int gutter_size_px, int tick_len_px)

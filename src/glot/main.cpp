@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
-#include "graph.hpp"
+#include "graph_renderer_opengl.hpp"
 #include "database.hpp"
 #include "plugin_context.hpp"
 #include "plugin_manager.hpp"

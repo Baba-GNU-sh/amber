@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <boost/signals2.hpp>
 #include <map>
-#include "plot.hpp"
+#include "plot_renderer_opengl.hpp"
 #include "shader_utils.hpp"
 #include "database.hpp"
 #include "timeseries.hpp"
