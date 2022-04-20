@@ -237,6 +237,11 @@ void Graph::_draw_lines(const glm::dmat3 &view_matrix) const
     int uniform_id = _lines_shader.uniform_location("view_matrix");
     const auto viewport_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
+
+    uniform_id = _lines_shader.uniform_location("line_colour");
+    glm::vec3 white(1.0, 1.0, 1.0);
+    glUniform3fv(uniform_id, 1, &white[0]);
+    
     glDrawArrays(GL_LINES, 0, offset);
 }
 
@@ -256,7 +261,6 @@ void Graph::draw_marker(const glm::mat3 &view_matrix,
                         const glm::vec3 &colour) const
 {
     (void)style;
-    (void)colour;
 
     int offset = 0;
 
@@ -280,17 +284,23 @@ void Graph::draw_marker(const glm::mat3 &view_matrix,
     int uniform_id = _lines_shader.uniform_location("view_matrix");
     const auto viewport_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
+
+    uniform_id = _lines_shader.uniform_location("line_colour");
+    glm::vec3 white(1.0, 1.0, 1.0);
+    glUniform3fv(uniform_id, 1, &colour[0]);
+
     glDrawArrays(GL_LINES, 0, offset);
 
     auto [_1, _2, precision] = _tick_spacing(view_matrix);
     std::stringstream ss;
-    ss << std::fixed << std::setprecision(precision.x * 2) << marker_pos;
+    ss << std::fixed << std::setprecision(precision.x + 2) << marker_pos;
     _draw_label(ss.str(),
                 glm::ivec2(pos_pixels.x, _size.y - m_gutter_size_px / 2),
                 18,
                 7,
                 LabelAlignment::Center,
-                LabelAlignmentVertical::Top);
+                LabelAlignmentVertical::Top,
+                colour);
 }
 
 void Graph::_draw_labels(const glm::dmat3 &view_matrix) const
@@ -315,7 +325,7 @@ void Graph::_draw_labels(const glm::dmat3 &view_matrix) const
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision.y) << i;
-        _draw_label(ss.str(), point, 18, 7, LabelAlignment::Right, LabelAlignmentVertical::Center);
+        _draw_label(ss.str(), point, 18, 7, LabelAlignment::Right, LabelAlignmentVertical::Center, glm::vec3(1.0, 1.0, 1.0));
     }
 
     // Draw the y axis ticks
@@ -332,7 +342,7 @@ void Graph::_draw_labels(const glm::dmat3 &view_matrix) const
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision.x) << i;
-        _draw_label(ss.str(), point, 18, 7, LabelAlignment::Center, LabelAlignmentVertical::Top);
+        _draw_label(ss.str(), point, 18, 7, LabelAlignment::Center, LabelAlignmentVertical::Top, glm::vec3(1.0, 1.0, 1.0));
     }
 
     if (_hittest(_cursor,
@@ -381,7 +391,8 @@ void Graph::_draw_label(const std::string_view text,
                         int height,
                         int width,
                         LabelAlignment align,
-                        LabelAlignmentVertical valign) const
+                        LabelAlignmentVertical valign,
+                        const glm::vec3 &colour) const
 {
     glm::ivec2 offset = pos;
     glm::ivec2 char_stride = glm::ivec2(width, 0);
@@ -426,6 +437,10 @@ void Graph::_draw_label(const std::string_view text,
     int uniform_id = _glyph_shader.uniform_location("view_matrix");
     const auto vp_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
+
+    uniform_id = _glyph_shader.uniform_location("glyph_colour");
+    glm::vec3 white(1.0, 1.0, 1.0);
+    glUniform3fv(uniform_id, 1, &colour[0]);
 
     glBindTexture(GL_TEXTURE_2D, _glyph_texture);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glyphbuf_ebo);

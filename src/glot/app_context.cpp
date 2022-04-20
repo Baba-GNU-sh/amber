@@ -122,13 +122,13 @@ void AppContext::draw()
     if (m_markers.first)
     {
         m_graph.draw_marker(
-            m_view_matrix, m_markers.first.value(), MarkerStyle::Left, glm::vec3(1.0, 1.0, 1.0));
+            m_view_matrix, m_markers.first.value(), MarkerStyle::Left, glm::vec3(0.0, 0.0, 1.0));
     }
 
     if (m_markers.second)
     {
         m_graph.draw_marker(
-            m_view_matrix, m_markers.second.value(), MarkerStyle::Right, glm::vec3(1.0, 1.0, 1.0));
+            m_view_matrix, m_markers.second.value(), MarkerStyle::Right, glm::vec3(1.0, 0.0, 0.0));
     }
 
     draw_gui();

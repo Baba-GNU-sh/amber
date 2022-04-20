@@ -157,7 +157,8 @@ class Graph
                      int height,
                      int width,
                      LabelAlignment align,
-                     LabelAlignmentVertical valign) const;
+                     LabelAlignmentVertical valign,
+                     const glm::vec3 &colour) const;
     void _draw_glyph(char c, const glm::ivec2 &pos, int height, int width, GlyphData **buf) const;
 
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> _tick_spacing(
