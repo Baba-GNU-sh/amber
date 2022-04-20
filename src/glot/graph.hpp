@@ -98,16 +98,12 @@ class Graph
                      const glm::vec3 &colour);
 
   private:
-    void on_cursor_move(double xpos, double ypos);
-    void on_mouse_scroll(double xoffset, double yoffset);
-    void on_mouse_button(int button, int action, int mods);
-
     /**
-     * @brief Check if a coodinate is inside a bounding box defined by two corners.
+     * @brief Check if a coodinate is inside a bounding box.
      *
-     * @param value The value to test.
-     * @param tl Top-left coordinate of the bounding box.
-     * @param br Bottom-right coordinate of the bounding box.
+     * @param value The coordinate to test.
+     * @param tl Position of the top-left corner of the bounding box.
+     * @param br Position of the bottom-right corner of the bounding box.
      * @return true The coordinate is within the bounding box.
      * @return false The coordinate is outside the bounding box.
      */

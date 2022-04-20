@@ -19,11 +19,67 @@ Graph::Graph(Window &window, int gutter_size_px, int tick_len_px)
     init_line_buffers();
     init_glyph_buffers();
 
-    namespace ph = std::placeholders;
+    m_window.scroll.connect([this](double /*xoffset*/, double yoffset) {
+        const double zoom_delta = 1.0f + (yoffset / 10.0f);
+        const auto cursor = m_window.cursor();
 
-    m_window.scroll.connect(std::bind(&Graph::on_mouse_scroll, this, ph::_1, ph::_2));
-    m_window.cursor_pos.connect(std::bind(&Graph::on_cursor_move, this, ph::_1, ph::_2));
-    m_window.mouse_button.connect(std::bind(&Graph::on_mouse_button, this, ph::_1, ph::_2, ph::_3));
+        if (hit_test(cursor,
+                     glm::ivec2(0, 0),
+                     glm::ivec2(m_gutter_size_px, m_size.y - m_gutter_size_px)))
+        {
+            // Cursor is in the vertical gutter, only zoom the y axis
+            on_zoom(1.0, zoom_delta);
+        }
+        else if (hit_test(cursor,
+                          glm::ivec2(m_gutter_size_px, m_size.y - m_gutter_size_px),
+                          glm::ivec2(m_size.x, m_size.y)))
+        {
+            // Cursor is in the horizontal gutter, only zoom the x axis
+            on_zoom(zoom_delta, 1.0);
+        }
+        else if (hit_test(cursor,
+                          glm::ivec2(m_gutter_size_px, 0),
+                          glm::ivec2(m_size.x, m_size.y - m_gutter_size_px)))
+        {
+            // Cursor is in the main part of the graph, zoom both axes
+            on_zoom(zoom_delta, zoom_delta);
+        }
+    });
+
+    m_window.cursor_pos.connect([this](double xpos, double ypos) {
+        glm::dvec2 cursor(xpos, ypos);
+
+        if (m_is_dragging)
+        {
+            // Work out how much the cursor moved since the last time
+            const auto cursor_delta = cursor - m_cursor_old;
+
+            // Work out the delta in graph space
+            const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
+            const auto a = txform * glm::dvec3(0.0f);
+            const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
+            const auto delta = b - a;
+
+            // Convert the delta back to a 2D vector
+            glm::dvec2 cursor_gs_delta(delta.x, delta.y);
+
+            update_view_matrix(glm::translate(*m_view_matrix, cursor_gs_delta));
+        }
+
+        // Cache the position of the cursor for next time
+        m_cursor_old = cursor;
+    });
+
+    m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            m_is_dragging = true;
+        }
+        else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+        {
+            m_is_dragging = false;
+        }
+    });
 }
 
 Graph::~Graph()
@@ -529,72 +585,6 @@ std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> Graph::tick_spacing() const
         precision.y = 0;
 
     return std::tuple(tick_spacing, minor_tick_spacing, precision);
-}
-
-void Graph::on_cursor_move(double xpos, double ypos)
-{
-    glm::dvec2 cursor(xpos, ypos);
-
-    if (m_is_dragging)
-    {
-        // Work out how much the cursor moved since the last time
-        const auto cursor_delta = cursor - m_cursor_old;
-
-        // Work out the delta in graph space
-        const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
-        const auto a = txform * glm::dvec3(0.0f);
-        const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
-        const auto delta = b - a;
-
-        // Convert the delta back to a 2D vector
-        glm::dvec2 cursor_gs_delta(delta.x, delta.y);
-
-        update_view_matrix(glm::translate(*m_view_matrix, cursor_gs_delta));
-    }
-
-    // Cache the position of the cursor for next time
-    m_cursor_old = cursor;
-}
-
-void Graph::on_mouse_scroll(double /*xoffset*/, double yoffset)
-{
-    const double zoom_delta = 1.0f + (yoffset / 10.0f);
-    const auto cursor = m_window.cursor();
-
-    if (hit_test(
-            cursor, glm::ivec2(0, 0), glm::ivec2(m_gutter_size_px, m_size.y - m_gutter_size_px)))
-    {
-        // Cursor is in the vertical gutter, only zoom the y axis
-        on_zoom(1.0, zoom_delta);
-    }
-    else if (hit_test(cursor,
-                      glm::ivec2(m_gutter_size_px, m_size.y - m_gutter_size_px),
-                      glm::ivec2(m_size.x, m_size.y)))
-    {
-        // Cursor is in the horizontal gutter, only zoom the x axis
-        on_zoom(zoom_delta, 1.0);
-    }
-    else if (hit_test(cursor,
-                      glm::ivec2(m_gutter_size_px, 0),
-                      glm::ivec2(m_size.x, m_size.y - m_gutter_size_px)))
-    {
-        // Cursor is in the main part of the graph, zoom both axes
-        on_zoom(zoom_delta, zoom_delta);
-    }
-}
-
-void Graph::on_mouse_button(int button, int action, int mods)
-{
-    (void)mods;
-
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    {
-        m_is_dragging = true;
-    }
-    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-    {
-        m_is_dragging = false;
-    }
 }
 
 glm::dvec2 Graph::screen2graph(const glm::ivec2 &value) const
