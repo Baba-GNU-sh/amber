@@ -6,9 +6,7 @@
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 
-GraphController::GraphController(Database &database,
-                                 GraphRendererOpenGL &graph,
-                                 Window &window)
+GraphController::GraphController(Database &database, GraphRendererOpenGL &graph, Window &window)
     : m_database(database), m_graph(graph), m_window(window)
 {
     std::vector<glm::vec3> plot_colours = {
