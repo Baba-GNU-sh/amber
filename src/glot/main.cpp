@@ -10,7 +10,7 @@
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 #include "imgui_window.hpp"
-#include "app_context.hpp"
+#include "graph_controller.hpp"
 #include "audiofile_plugin.hpp"
 #include "wavegen_plugin.hpp"
 
@@ -33,13 +33,17 @@ int main()
 
     try
     {
+        // Create the timeseries database and plugins
         Database db;
         PluginContext plugin_context(db);
         PluginManager plugin_manager;
-        plugin_manager.add_plugin("audiofile", std::make_shared<AudioFilePlugin>(plugin_context, "audio/Lurking_Threat_3.wav"));
+        plugin_manager.add_plugin(
+            "audiofile",
+            std::make_shared<AudioFilePlugin>(plugin_context, "audio/Lurking_Threat_3.wav"));
         plugin_manager.add_plugin("wavegen", std::make_shared<WaveGenPlugin>(plugin_context));
         plugin_manager.start_all();
 
+        // Create a new window using GLFW, OpenGL and initializing ImGui
         ImGuiContextWindow window(1024, 768, "GLot");
 
         // We need to do this after creating our GL context which is done when the first GLFW window
@@ -57,7 +61,7 @@ int main()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         GraphRendererOpenGL graph(window);
-        AppContext context(db, graph, window, plugin_manager);
+        GraphController context(db, graph, window, plugin_manager);
 
         spdlog::info("Initialization OK, starting main loop");
 

@@ -10,11 +10,10 @@
 #include "bindings/imgui_impl_opengl3.h"
 
 GraphController::GraphController(Database &database,
-                       GraphRendererOpenGL &graph,
-                       Window &window,
-                       PluginManager &plugin_manager)
-    : m_database(database), m_graph(graph), m_window(window), m_plugin_manager(plugin_manager),
-      m_view_matrix(1.0)
+                                 GraphRendererOpenGL &graph,
+                                 Window &window,
+                                 PluginManager &plugin_manager)
+    : m_database(database), m_graph(graph), m_window(window), m_plugin_manager(plugin_manager)
 {
     std::vector<glm::vec3> plot_colours = {
         glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)};
@@ -36,6 +35,8 @@ GraphController::GraphController(Database &database,
             }
             return cont;
         });
+
+    update_view_matrix(glm::dmat3(1.0));
 
     m_bgcolor = glm::vec3(0.1, 0.1, 0.1);
     update_multisampling();
@@ -69,11 +70,106 @@ GraphController::GraphController(Database &database,
             m_markers.second.reset();
         }
     });
+
+    // Register for mouse events from the window
+    m_window.scroll.connect([this](double /*xoffset*/, double yoffset) {
+        const double zoom_delta = 1.0f + (yoffset / 10.0f);
+        const auto cursor = m_window.cursor();
+        const auto size = m_window.size();
+
+        if (hit_test(
+                cursor, glm::ivec2(0, 0), glm::ivec2(GUTTER_SIZE_PX, size.y - GUTTER_SIZE_PX)))
+        {
+            // Cursor is in the vertical gutter, only zoom the y axis
+            on_zoom(1.0, zoom_delta);
+        }
+        else if (hit_test(cursor,
+                          glm::ivec2(GUTTER_SIZE_PX, size.y - GUTTER_SIZE_PX),
+                          glm::ivec2(size.x, size.y)))
+        {
+            // Cursor is in the horizontal gutter, only zoom the x axis
+            on_zoom(zoom_delta, 1.0);
+        }
+        else if (hit_test(cursor,
+                          glm::ivec2(GUTTER_SIZE_PX, 0),
+                          glm::ivec2(size.x, size.y - GUTTER_SIZE_PX)))
+        {
+            // Cursor is in the main part of the graph, zoom both axes
+            on_zoom(zoom_delta, zoom_delta);
+        }
+    });
+
+    m_window.cursor_pos.connect([this](double xpos, double ypos) {
+        glm::dvec2 cursor(xpos, ypos);
+
+        // Work out how much the cursor moved since the last time
+        const auto cursor_delta = cursor - m_cursor_old;
+
+        // Work out the delta in graph space
+        const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
+        const auto a = txform * glm::dvec3(0.0f);
+        const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
+        const auto delta = b - a;
+
+        // Convert the delta back to a 2D vector
+        glm::dvec2 cursor_gs_delta(delta.x, delta.y);
+
+        if (m_is_dragging)
+        {
+            update_view_matrix(glm::translate(m_view_matrix, cursor_gs_delta));
+        }
+
+        // for (auto &marker : m_markers)
+        // {
+        //     if (marker.second.is_dragging)
+        //     {
+        //         *marker.second.position = *marker.second.position + cursor_gs_delta.x;
+        //     }
+        // }
+
+        // Cache the position of the cursor for next time
+        m_cursor_old = cursor;
+    });
+
+    m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            // for (auto &marker : m_markers)
+            // {
+            //     const auto marker_pos = *marker.second.position;
+            //     glm::vec3 marker_pos_vs =
+            //         m_window.vp_matrix() * (*m_view_matrix * glm::dvec3(marker_pos, 0.0, 1.0));
+            //     auto cursor = m_window.cursor();
+            //     if (std::abs(cursor.x - marker_pos_vs.x) < 5)
+            //     {
+            //         spdlog::info("Clicked on marker {}", marker.first);
+            //         marker.second.is_dragging = true;
+            //         return;
+            //     }
+            // }
+            m_is_dragging = true;
+            return;
+        }
+
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+        {
+            m_is_dragging = false;
+            // for (auto &marker : m_markers)
+            // {
+            //     marker.second.is_dragging = false;
+            // }
+        }
+    });
 }
 
 void GraphController::draw()
 {
-    m_graph.init(&m_view_matrix, m_window.size());
+    m_graph.set_gutter_size(60);
+    m_graph.set_tick_len(5);
+    m_graph.set_view_matrix(m_view_matrix);
+    m_graph.set_size(m_window.size());
+
+    m_graph.draw_graph();
 
     for (auto &time_series : m_ts)
     {
@@ -90,13 +186,13 @@ void GraphController::draw()
     if (m_markers.first)
     {
         m_graph.draw_marker(
-            "A", &m_markers.first.value(), MarkerStyle::Left, glm::vec3(0.0, 1.0, 1.0));
+            "A", m_markers.first.value(), MarkerStyle::Left, glm::vec3(0.0, 1.0, 1.0));
     }
 
     if (m_markers.second)
     {
         m_graph.draw_marker(
-            "B", &m_markers.second.value(), MarkerStyle::Right, glm::vec3(1.0, 1.0, 0.0));
+            "B", m_markers.second.value(), MarkerStyle::Right, glm::vec3(1.0, 1.0, 0.0));
     }
 
     draw_gui();
@@ -297,8 +393,8 @@ glm::dvec2 GraphController::screen2graph(const glm::ivec2 &value) const
  * @return std::pair<double, const char *> The divided down value, as well as the string suffix.
  */
 std::pair<double, const char *> GraphController::human_readable(std::size_t size,
-                                                           double divisor,
-                                                           std::vector<const char *> suffixes)
+                                                                double divisor,
+                                                                std::vector<const char *> suffixes)
 {
     double size_hr = size;
     const char *suffix = "";
@@ -311,4 +407,40 @@ std::pair<double, const char *> GraphController::human_readable(std::size_t size
         suffix = s;
     }
     return std::make_pair(size_hr, suffix);
+}
+
+void GraphController::on_zoom(double x, double y)
+{
+    glm::dvec2 zoom_delta_vec(x, y);
+
+    // Work out where the pointer is in graph space
+    auto cursor_in_gs_old = screen2graph(m_window.cursor());
+    update_view_matrix(glm::scale(m_view_matrix, zoom_delta_vec));
+
+    // Limit zoom
+    m_view_matrix[0][0] = std::min(m_view_matrix[0][0], ZOOM_MIN_X);
+    m_view_matrix[1][1] = std::min(m_view_matrix[1][1], ZOOM_MIN_Y);
+
+    auto cursor_in_gs_new = screen2graph(m_window.cursor());
+    auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
+    update_view_matrix(glm::translate(m_view_matrix, cursor_delta));
+}
+
+bool GraphController::hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br)
+{
+    if (value.x < tl.x)
+        return false;
+    if (value.x >= br.x)
+        return false;
+    if (value.y < tl.y)
+        return false;
+    if (value.y >= br.y)
+        return false;
+    return true;
+}
+
+void GraphController::update_view_matrix(const glm::dmat3 &new_view_matrix)
+{
+    m_view_matrix = new_view_matrix;
+    m_view_matrix_inv = glm::inverse(new_view_matrix);
 }

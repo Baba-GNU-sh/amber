@@ -25,7 +25,7 @@ add_library(
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
 		imgui_window.cpp
-		app_context.cpp
+		graph_controller.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

@@ -1,0 +1,89 @@
+#pragma once
+
+#include <memory>
+#include <optional>
+#include <glm/glm.hpp>
+#include "database.hpp"
+#include "graph_renderer_opengl.hpp"
+#include "window.hpp"
+#include "plugin_manager.hpp"
+#include "timeseries.hpp"
+
+/**
+ * @brief The GraphController stores the ephemeral state of the graph (such as the view matrix and
+ * markers) and listens to mouse and key events from the window, modifying the state and redrawing
+ * the graph through a renderer accordingly.
+ *
+ * The GraphController doesn't depend on any specific rendering backend and thus will need to be
+ * passed a renderer capable of actually drawing the graph to the screen. The reason for the
+ * seperation is so that we could more easily switch out to a new renderer in the future, but mainly
+ * so the GraphController can be unit tested without needing to fire up an OpenGL context in the
+ * test suite.
+ */
+class GraphController
+{
+    struct TimeSeriesContainer
+    {
+        std::shared_ptr<TimeSeries> ts;
+        glm::vec3 colour;
+        std::string name;
+        bool visible;
+        float y_offset;
+    };
+
+  public:
+    GraphController(Database &database,
+                    GraphRendererOpenGL &graph,
+                    Window &window,
+                    PluginManager &plugin_manager);
+
+    /**
+     * @brief Get immutable access to the viewmatrix.
+     */
+    const glm::dvec3 &view_matrix() const;
+    void draw();
+    void spin();
+
+  private:
+    void draw_gui();
+    void update_multisampling() const;
+    void update_vsync() const;
+    void update_bgcolour() const;
+    glm::dvec2 screen2graph(const glm::ivec2 &value) const;
+    static std::pair<double, const char *> human_readable(std::size_t size,
+                                                          double divisor = 1000,
+                                                          std::vector<const char *> suffixes = {
+                                                              "K", "M", "B", "T"});
+
+    void on_zoom(double x, double y);
+    static bool hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br);
+    void update_view_matrix(const glm::dmat3 &new_view_matrix);
+    
+    static constexpr int GUTTER_SIZE_PX = 60;
+    static constexpr int TICKLEN_PX = 5;
+    static constexpr double ZOOM_MIN_X = 10e6;
+    static constexpr double ZOOM_MIN_Y = 10e6;
+
+    Database &m_database;
+    GraphRendererOpenGL &m_graph;
+    Window &m_window;
+    PluginManager &m_plugin_manager;
+    std::vector<TimeSeriesContainer> m_ts;
+
+    // Ephemeral graph state
+    int m_plot_width = 2;
+    glm::dmat3 m_view_matrix;
+    glm::dmat3 m_view_matrix_inv;
+    glm::vec3 m_bgcolor;
+    bool m_show_line_segments = false;
+    std::pair<std::optional<double>, std::optional<double>> m_markers;
+    
+    // State used for recording screen events
+    glm::dvec2 m_cursor_old;
+    bool m_is_dragging;
+
+    // TODO move this to the window class - or some opengl context class
+    bool m_enable_vsync = true;
+    bool m_enable_multisampling = true;
+    bool m_call_glfinish = false;
+};
