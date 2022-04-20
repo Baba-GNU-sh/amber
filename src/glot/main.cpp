@@ -56,7 +56,7 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        Graph graph(window);
+        GraphRendererOpenGL graph(window);
         AppContext context(db, graph, window, plugin_manager);
 
         spdlog::info("Initialization OK, starting main loop");

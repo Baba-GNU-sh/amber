@@ -21,7 +21,7 @@ class AppContext
     };
 
   public:
-    AppContext(Database &database, Graph &graph, Window &window, PluginManager &plugin_manager);
+    AppContext(Database &database, GraphRendererOpenGL &graph, Window &window, PluginManager &plugin_manager);
 
     void draw();
     void spin();
@@ -39,7 +39,7 @@ class AppContext
     
 
     Database &m_database;
-    Graph &m_graph;
+    GraphRendererOpenGL &m_graph;
     Window &m_window;
     PluginManager &m_plugin_manager;
     std::vector<TimeSeriesContainer> m_ts;

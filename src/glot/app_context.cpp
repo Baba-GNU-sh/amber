@@ -10,7 +10,7 @@
 #include "bindings/imgui_impl_opengl3.h"
 
 AppContext::AppContext(Database &database,
-                       Graph &graph,
+                       GraphRendererOpenGL &graph,
                        Window &window,
                        PluginManager &plugin_manager)
     : m_database(database), m_graph(graph), m_window(window), m_plugin_manager(plugin_manager),

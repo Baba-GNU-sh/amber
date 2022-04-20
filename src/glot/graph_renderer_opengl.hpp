@@ -61,11 +61,11 @@ struct TimeSeriesContainer
 /**
  * @brief Stores and renders a graph with axes and zoom and pan mouse controls.
  */
-class Graph
+class GraphRendererOpenGL
 {
   public:
-    Graph(Window &window, int gutter_size_px = 60, int tick_len_px = 5);
-    ~Graph();
+    GraphRendererOpenGL(Window &window, int gutter_size_px = 60, int tick_len_px = 5);
+    ~GraphRendererOpenGL();
 
     /**
      * @brief Reset internal state and initialize the graph with a pointer to a given view matrix.
@@ -144,7 +144,7 @@ class Graph
     Window &m_window;
     const int m_gutter_size_px;
     const int m_tick_len_px;
-    Plot m_plot;
+    PlotRendererOpenGL m_plot;
 
     // Line buffers
     GLuint _linebuf_vao;

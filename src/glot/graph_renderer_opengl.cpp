@@ -12,7 +12,7 @@
 #include "graph_renderer_opengl.hpp"
 #include "resources.hpp"
 
-Graph::Graph(Window &window, int gutter_size_px, int tick_len_px)
+GraphRendererOpenGL::GraphRendererOpenGL(Window &window, int gutter_size_px, int tick_len_px)
     : m_window(window), m_gutter_size_px(gutter_size_px), m_tick_len_px(tick_len_px),
       m_plot(window), m_size(500, 500), m_is_dragging(false)
 {
@@ -109,7 +109,7 @@ Graph::Graph(Window &window, int gutter_size_px, int tick_len_px)
     });
 }
 
-Graph::~Graph()
+GraphRendererOpenGL::~GraphRendererOpenGL()
 {
     glDeleteVertexArrays(1, &_linebuf_vao);
     glDeleteBuffers(1, &_linebuf_vbo);
@@ -118,7 +118,7 @@ Graph::~Graph()
     glDeleteBuffers(1, &_glyphbuf_ebo);
 }
 
-void Graph::init(glm::dmat3 *view_matrix, const glm::ivec2 &size)
+void GraphRendererOpenGL::init(glm::dmat3 *view_matrix, const glm::ivec2 &size)
 {
     m_view_matrix = view_matrix;
     m_view_matrix_inv = glm::inverse(*view_matrix);
@@ -130,7 +130,7 @@ void Graph::init(glm::dmat3 *view_matrix, const glm::ivec2 &size)
     draw_labels();
 }
 
-void Graph::draw_plot(const TimeSeries &ts,
+void GraphRendererOpenGL::draw_plot(const TimeSeries &ts,
                       int plot_width,
                       glm::vec3 plot_colour,
                       float y_offset,
@@ -146,7 +146,7 @@ void Graph::draw_plot(const TimeSeries &ts,
                 glm::ivec2(m_size.x - m_gutter_size_px, m_size.y - m_gutter_size_px));
 }
 
-void Graph::draw_marker(const std::string &label,
+void GraphRendererOpenGL::draw_marker(const std::string &label,
                         double *position,
                         MarkerStyle style,
                         const glm::vec3 &colour)
@@ -202,7 +202,7 @@ void Graph::draw_marker(const std::string &label,
                 colour);
 }
 
-bool Graph::hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br)
+bool GraphRendererOpenGL::hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br)
 {
     if (value.x < tl.x)
         return false;
@@ -215,7 +215,7 @@ bool Graph::hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br)
     return true;
 }
 
-void Graph::init_line_buffers()
+void GraphRendererOpenGL::init_line_buffers()
 {
     glGenVertexArrays(1, &_linebuf_vao);
     glBindVertexArray(_linebuf_vao);
@@ -233,7 +233,7 @@ void Graph::init_line_buffers()
     _lines_shader = Program(shaders);
 }
 
-void Graph::init_glyph_buffers()
+void GraphRendererOpenGL::init_glyph_buffers()
 {
     glGenVertexArrays(1, &_glyphbuf_vao);
     glBindVertexArray(_glyphbuf_vao);
@@ -298,7 +298,7 @@ void Graph::init_glyph_buffers()
     stbi_image_free(tex_data);
 }
 
-void Graph::draw_lines() const
+void GraphRendererOpenGL::draw_lines() const
 {
     int offset = 0;
 
@@ -399,7 +399,7 @@ void Graph::draw_lines() const
     glDrawArrays(GL_LINES, 0, offset);
 }
 
-void Graph::draw_labels() const
+void GraphRendererOpenGL::draw_labels() const
 {
     glm::ivec2 tl(m_gutter_size_px, 0);
     glm::ivec2 bl(m_gutter_size_px, m_size.y - m_gutter_size_px);
@@ -494,7 +494,7 @@ void Graph::draw_labels() const
     // }
 }
 
-void Graph::_draw_label(const std::string_view text,
+void GraphRendererOpenGL::_draw_label(const std::string_view text,
                         const glm::ivec2 &pos,
                         int height,
                         int width,
@@ -554,7 +554,7 @@ void Graph::_draw_label(const std::string_view text,
     glDrawElements(GL_TRIANGLES, 6 * count, GL_UNSIGNED_INT, 0);
 }
 
-void Graph::_draw_glyph(
+void GraphRendererOpenGL::_draw_glyph(
     char character, const glm::ivec2 &pos, int height, int width, GlyphData **buf) const
 {
     GlyphData *data = *buf;
@@ -582,7 +582,7 @@ void Graph::_draw_glyph(
     *buf = data + 1;
 }
 
-std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> Graph::tick_spacing() const
+std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> GraphRendererOpenGL::tick_spacing() const
 {
     const glm::dvec2 MIN_TICK_SPACING_PX(80, 50);
 
@@ -623,13 +623,13 @@ std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> Graph::tick_spacing() const
     return std::tuple(tick_spacing, minor_tick_spacing, precision);
 }
 
-glm::dvec2 Graph::screen2graph(const glm::ivec2 &value) const
+glm::dvec2 GraphRendererOpenGL::screen2graph(const glm::ivec2 &value) const
 {
     const glm::dvec3 value3(value, 1.0f);
     return m_view_matrix_inv * (m_window.vp_matrix_inv() * value3);
 }
 
-void Graph::on_zoom(double x, double y)
+void GraphRendererOpenGL::on_zoom(double x, double y)
 {
     glm::dvec2 zoom_delta_vec(x, y);
 
@@ -646,7 +646,7 @@ void Graph::on_zoom(double x, double y)
     update_view_matrix(glm::translate(*m_view_matrix, cursor_delta));
 }
 
-void Graph::update_view_matrix(const glm::dmat3 &new_view_matrix)
+void GraphRendererOpenGL::update_view_matrix(const glm::dmat3 &new_view_matrix)
 {
     *m_view_matrix = new_view_matrix;
     m_view_matrix_inv = glm::inverse(new_view_matrix);

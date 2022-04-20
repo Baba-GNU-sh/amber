@@ -6,7 +6,7 @@
 #include "timeseries.hpp"
 #include "resources.hpp"
 
-Plot::Plot(Window &window) : m_window(window)
+PlotRendererOpenGL::PlotRendererOpenGL(Window &window) : m_window(window)
 {
     glGenVertexArrays(1, &_plot_vao);
     glBindVertexArray(_plot_vao);
@@ -32,13 +32,13 @@ Plot::Plot(Window &window) : m_window(window)
     _lines_shader = Program(shaders);
 }
 
-Plot::~Plot()
+PlotRendererOpenGL::~PlotRendererOpenGL()
 {
     glDeleteVertexArrays(1, &_plot_vao);
     glDeleteBuffers(1, &_plot_vbo);
 }
 
-void Plot::draw(const glm::mat3 &view_matrix,
+void PlotRendererOpenGL::draw(const glm::mat3 &view_matrix,
                 const TimeSeries &ts,
                 int line_width,
                 glm::vec3 line_colour,

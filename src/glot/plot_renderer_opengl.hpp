@@ -8,11 +8,11 @@
 /**
  * @brief Defines how to draw plots.
  */
-class Plot
+class PlotRendererOpenGL
 {
   public:
-    Plot(Window &window);
-    ~Plot();
+    PlotRendererOpenGL(Window &window);
+    ~PlotRendererOpenGL();
     void draw(const glm::mat3 &view_matrix,
               const TimeSeries &ts,
               int plot_width,
