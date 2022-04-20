@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <boost/signals2.hpp>
+#include <map>
 #include "plot.hpp"
 #include "shader_utils.hpp"
 #include "database.hpp"
@@ -39,6 +40,12 @@ enum class MarkerStyle
     Right,
     Standalone
 };
+struct MarkerInfo
+{
+    double *position;
+    MarkerStyle style;
+    glm::vec3 colour;
+};
 
 struct TimeSeriesContainer
 {
@@ -59,36 +66,9 @@ class Graph
     ~Graph();
 
     /**
-     * @brief Update the size of the graph in the viewport.
-     *
-     * @param width The new width of the graph view in pixels.
-     * @param height The new height of the graph view in pixels.
+     * @brief Reset internal state and initialize the graph with a pointer to a given view matrix.
      */
-    void set_size(const glm::ivec2 &size);
-
-    /**
-     * @brief Get the size of the graph in the pixels.
-     */
-    glm::ivec2 size() const;
-
-    /**
-     * @brief Update the position of the graph in the viewport.
-     *
-     * @param x The new x position in pixels.
-     * @param y The new y position in pixels.
-     */
-    void set_position(const glm::ivec2 &position);
-
-    /**
-     * @brief Get the posiiton of the graph in the viewport.
-     */
-    glm::ivec2 position() const;
-
-    /**
-     * @brief Call this to pass mouse button events through from GLFW to control
-     * the graph.
-     */
-    void mouse_button(int button, int action, int mods);
+    void init(glm::dmat3 *view_matrix, const glm::ivec2 &size);
 
     /**
      * @brief Draw the graph to the screen.
@@ -98,26 +78,29 @@ class Graph
      * @param minmax_colour
      * @param show_plot_segments
      */
-    void draw_decorations(const glm::dmat3 &view_matrix) const;
-
-    void draw_plot(const glm::mat3 &view_matrix,
-                   const TimeSeries &ts,
+    void draw_plot(const TimeSeries &ts,
                    int plot_width,
                    glm::vec3 plot_colour,
                    float y_offset,
                    bool show_line_segments) const;
 
-    void draw_marker(const glm::mat3 &view_matrix,
-                     double marker_x_pos,
+    /**
+     * @brief Adds a marker to the screen
+     *
+     * @param label The display name and label used internally to keep track of the marker.
+     * @param pos A pointer to the marker's position.
+     * @param style The marker's style.
+     * @param colour The colour of the marker.
+     */
+    void draw_marker(const std::string &label,
+                     double *position,
                      MarkerStyle style,
-                     const glm::vec3 &colour) const;
-
-    boost::signals2::signal<void(double, double)> on_drag;
-    boost::signals2::signal<void(double, double)> on_zoom;
+                     const glm::vec3 &colour);
 
   private:
     void on_cursor_move(double xpos, double ypos);
     void on_mouse_scroll(double xoffset, double yoffset);
+    void on_mouse_button(int button, int action, int mods);
 
     /**
      * @brief Check if a coodinate is inside a bounding box defined by two corners.
@@ -137,12 +120,12 @@ class Graph
      * @param value The vector to convert.
      * @return glm::dvec2 The resultant vector in graph space.
      */
-    glm::dvec2 screen2graph(const glm::dmat3 &view_matrix, const glm::ivec2 &value) const;
+    glm::dvec2 screen2graph(const glm::ivec2 &value) const;
 
-    void _init_line_buffers();
-    void _init_glyph_buffers();
-    void _draw_lines(const glm::dmat3 &view_matrix) const;
-    void _draw_labels(const glm::dmat3 &view_matrix) const;
+    void init_line_buffers();
+    void init_glyph_buffers();
+    void draw_lines() const;
+    void draw_labels() const;
     void _draw_label(const std::string_view text,
                      const glm::ivec2 &pos,
                      int height,
@@ -152,8 +135,13 @@ class Graph
                      const glm::vec3 &colour) const;
     void _draw_glyph(char c, const glm::ivec2 &pos, int height, int width, GlyphData **buf) const;
 
-    std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> _tick_spacing(
-        const glm::dmat3 &view_matrix) const;
+    std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
+
+    void on_zoom(double x, double y);
+    void update_view_matrix(const glm::dmat3 &new_view_matrix);
+
+    static constexpr double ZOOM_MIN_X = 1'000'000.0;
+    static constexpr double ZOOM_MIN_Y = 1'000'000.0;
 
     Window &m_window;
     const int m_gutter_size_px;
@@ -172,9 +160,11 @@ class Graph
     Program _glyph_shader;
     GLuint _glyph_texture;
 
-    glm::ivec2 _position;
-    glm::ivec2 _size;
-    glm::dvec2 _cursor;
-
-    bool _dragging;
+    // Cache variables from the previous render call
+    glm::dvec2 m_cursor_old;
+    glm::ivec2 m_size;
+    bool m_is_dragging;
+    glm::dmat3 *m_view_matrix;
+    glm::dmat3 m_view_matrix_inv;
+    std::map<std::string, MarkerInfo> m_markers;
 };

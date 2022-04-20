@@ -18,11 +18,9 @@ class Plot
               int plot_width,
               glm::vec3 plot_colour,
               float y_offset,
-              bool show_line_segments) const;
-    void set_size(const glm::ivec2 &size);
-    glm::ivec2 size() const;
-    void set_position(const glm::ivec2 &position);
-    glm::ivec2 position() const;
+              bool show_line_segments,
+              const glm::ivec2 &position,
+              const glm::ivec2 &size) const;
 
   private:
     static constexpr int COLS_MAX =
@@ -33,7 +31,5 @@ class Plot
     unsigned int _plot_vao;
     unsigned int _plot_vbo;
     Program _lines_shader;
-    glm::ivec2 _position;
-    glm::ivec2 _size;
     mutable TSSample _samples[COLS_MAX];
 };

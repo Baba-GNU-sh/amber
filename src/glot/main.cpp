@@ -40,7 +40,7 @@ int main()
         plugin_manager.add_plugin("wavegen", std::make_shared<WaveGenPlugin>(plugin_context));
         plugin_manager.start_all();
 
-        ImGuiContextWindow window(800, 600, "GLot");
+        ImGuiContextWindow window(1024, 768, "GLot");
 
         // We need to do this after creating our GL context which is done when the first GLFW window
         // is created
