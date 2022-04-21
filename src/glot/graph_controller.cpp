@@ -1,11 +1,41 @@
 #include "graph_controller.hpp"
 #include <imgui.h>
+#include <random>
 
 GraphController::GraphController(Database &database, GraphRendererOpenGL &graph, Window &window)
     : m_database(database), m_graph(graph), m_window(window)
 {
-    std::vector<glm::vec3> plot_colours = {
-        glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)};
+    const auto createGlmColour = [](int code) {
+        float r = static_cast<float>(0xFF & (code >> 16)) / 256.0f;
+        float g = static_cast<float>(0xFF & (code >> 8)) / 256.0f;
+        float b = static_cast<float>(0xFF & (code >> 0)) / 256.0f;
+        return glm::vec3(r, g, b);
+    };
+
+    // A nice selection of material colours from here (column 400):
+    // https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=F44336
+    std::vector<glm::vec3> plot_colours;
+    plot_colours.push_back(createGlmColour(0xef5350));
+    plot_colours.push_back(createGlmColour(0xec407a));
+    plot_colours.push_back(createGlmColour(0xab47bc));
+    plot_colours.push_back(createGlmColour(0x7e57c2));
+    plot_colours.push_back(createGlmColour(0x5c6bc0));
+    plot_colours.push_back(createGlmColour(0x42a5f5));
+    plot_colours.push_back(createGlmColour(0x29b6f6));
+    plot_colours.push_back(createGlmColour(0x26c6da));
+    plot_colours.push_back(createGlmColour(0x26a69a));
+    plot_colours.push_back(createGlmColour(0x66bb6a));
+    plot_colours.push_back(createGlmColour(0x9ccc65));
+    plot_colours.push_back(createGlmColour(0xd4e157));
+    plot_colours.push_back(createGlmColour(0xffee58));
+    plot_colours.push_back(createGlmColour(0xffca28));
+    plot_colours.push_back(createGlmColour(0xffa726));
+    plot_colours.push_back(createGlmColour(0xff7043));
+
+    // Shuffle the colours
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(plot_colours.begin(), plot_colours.end(), g);
 
     const auto &data = m_database.data();
     m_ts.resize(data.size());
