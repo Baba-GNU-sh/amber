@@ -74,6 +74,7 @@ if (BUILD_TESTS)
 	add_executable(tests
 		test/test_timeseries_dense.cpp
 		test/test_chunked_vector.cpp
+		test/test_graph_controller.cpp
 	)
 	target_link_libraries(
 		tests
