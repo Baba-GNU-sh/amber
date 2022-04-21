@@ -222,10 +222,9 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
     for (auto iter = begin; iter < end;)
     {
         // Count the number of least significant zeros, which gives us an idea of the largest chunk
-        // we are aligned to Note: Passing 0 to __builtin_ctzll() is UB, so set the MSB which will
-        // never affect our results
+        // we are aligned to
         auto row = count_trailing_zeros(iter);
-        row = std::min<unsigned long>(row, row_max);
+        row = std::min(row, row_max);
 
         // If the remaining number of samples is smaller than one chunk on this row then we would
         // have consumed too much Work out the largest chunk that that will fit in this chunk (by
