@@ -18,8 +18,6 @@ static bool m_call_glfinish = false;
 static bool m_enable_vsync = true;
 static bool m_enable_multisampling = true;
 static glm::vec3 m_clear_colour(0.1, 0.1, 0.1);
-static int m_plot_width = 2;
-static bool m_show_line_segments = false;
 
 static void error_callback(int error, const char *msg)
 {
@@ -100,6 +98,12 @@ static void draw_gui(Window &window,
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Graph"))
+        {
+            graph_controller.draw_menu();
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("Plugins"))
         {
             plugin_manager.draw_menu();
@@ -138,8 +142,7 @@ static void draw_gui(Window &window,
 
     if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        static bool enable_vsync;
-        if (ImGui::Checkbox("Enable VSync", &enable_vsync))
+        if (ImGui::Checkbox("Enable VSync", &m_enable_vsync))
         {
             update_vsync();
         }
@@ -153,10 +156,6 @@ static void draw_gui(Window &window,
         {
             window.set_bg_colour(m_clear_colour);
         }
-
-        ImGui::SliderInt("Line width", &m_plot_width, 1, 64, "%d", ImGuiSliderFlags_Logarithmic);
-
-        ImGui::Checkbox("Show line segments", &m_show_line_segments);
 
         ImGui::Checkbox("Call glFinish", &m_call_glfinish);
     }

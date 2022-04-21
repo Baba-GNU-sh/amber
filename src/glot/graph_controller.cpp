@@ -31,21 +31,15 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
     m_window.key.connect([this](int key, int, int action, int) {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
-            m_view_matrix[2][0] = 0;
-            auto latest = m_database.get_latest_sample_time();
-            m_view_matrix = glm::translate(m_view_matrix, glm::dvec2(-latest, 0));
+            goto_newest_sample();
         }
         else if (key == GLFW_KEY_A && action == GLFW_PRESS)
         {
-            auto cursor_gs = screen2graph(m_window.cursor());
-            m_markers.first.position = cursor_gs.x;
-            m_markers.first.visible = true;
+            show_marker(m_markers.first);
         }
         else if (key == GLFW_KEY_B && action == GLFW_PRESS)
         {
-            auto cursor_gs = screen2graph(m_window.cursor());
-            m_markers.second.position = cursor_gs.x;
-            m_markers.second.visible = true;
+            show_marker(m_markers.second);
         }
         else if (key == GLFW_KEY_C && action == GLFW_PRESS)
         {
@@ -204,6 +198,9 @@ void GraphController::draw_gui()
         ImGui::Text("Markers: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
     }
 
+    ImGui::SliderInt("Line width", &m_plot_width, 1, 64, "%d", ImGuiSliderFlags_Logarithmic);
+    ImGui::Checkbox("Show line segments", &m_show_line_segments);
+
     for (auto &plugin : m_ts)
     {
         // Im ImGui, widgets need unique label names
@@ -214,6 +211,30 @@ void GraphController::draw_gui()
         ImGui::ColorEdit3(plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
         const auto slider_name = "Y offset##" + plugin.name;
         ImGui::DragFloat(slider_name.c_str(), &(plugin.y_offset), 0.01);
+    }
+}
+
+void GraphController::draw_menu()
+{
+    if (ImGui::MenuItem("Go to newst sample", "Space"))
+    {
+        goto_newest_sample();
+    }
+
+    if (ImGui::MenuItem("Marker A", "A"))
+    {
+        show_marker(m_markers.first);
+    }
+
+    if (ImGui::MenuItem("Marker B", "B"))
+    {
+        show_marker(m_markers.second);
+    }
+
+    if (ImGui::MenuItem("Hide Markers", "C"))
+    {
+        m_markers.first.visible = false;
+        m_markers.second.visible = false;
     }
 }
 
@@ -259,4 +280,18 @@ void GraphController::update_view_matrix(const glm::dmat3 &new_view_matrix)
 {
     m_view_matrix = new_view_matrix;
     m_view_matrix_inv = glm::inverse(new_view_matrix);
+}
+
+void GraphController::goto_newest_sample()
+{
+    m_view_matrix[2][0] = 0;
+    auto latest = m_database.get_latest_sample_time();
+    m_view_matrix = glm::translate(m_view_matrix, glm::dvec2(-latest, 0));
+}
+
+void GraphController::show_marker(Marker &marker)
+{
+    auto cursor_gs = screen2graph(m_window.cursor());
+    marker.position = cursor_gs.x;
+    marker.visible = true;
 }
