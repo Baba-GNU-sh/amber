@@ -39,6 +39,22 @@ class Resources
         }
     }
 
+    static std::string find_texture(const char *name)
+    {
+        auto root = get_root() / "assets";
+        auto path = root / name;
+        if (std::filesystem::exists(path))
+        {
+            spdlog::info("Found texture: {}", path.string());
+            return path.string();
+        }
+        else
+        {
+            spdlog::error("No texture '{}' found in {}", name, root.string());
+            throw std::runtime_error("Cannot find texture");
+        }
+    }
+
   private:
     static std::filesystem::path get_root()
     {

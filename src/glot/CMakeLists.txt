@@ -17,6 +17,7 @@ add_library(
 		shader_program.cpp
 		graph_renderer_opengl.cpp
 		plot_renderer_opengl.cpp
+		marker_renderer_opengl.cpp
 		database.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
@@ -26,6 +27,7 @@ add_library(
 		wavegen_plugin.cpp
 		imgui_window.cpp
 		graph_controller.cpp
+		stb_impl.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

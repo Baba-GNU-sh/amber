@@ -6,15 +6,13 @@
 #include <sstream>
 #include <iomanip>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include "graph_renderer_opengl.hpp"
 #include "resources.hpp"
+#include "stb_image.h"
 
 GraphRendererOpenGL::GraphRendererOpenGL(Window &window)
-    : m_window(window), m_plot(window), m_view_matrix(1.0), m_view_matrix_inv(1.0),
-      m_gutter_size_px(60), m_tick_len_px(5)
+    : m_window(window), m_plot(window), m_marker_renderer(window), m_view_matrix(1.0),
+      m_view_matrix_inv(1.0), m_gutter_size_px(60), m_tick_len_px(5)
 {
     init_line_buffers();
     init_glyph_buffers();
@@ -79,6 +77,10 @@ void GraphRendererOpenGL::draw_marker(const std::string &label,
 {
     (void)label;
     (void)style;
+    
+    auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, 0.0, 1.0));
+    pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
+    m_marker_renderer.draw(label, pos_pixels.x, m_gutter_size_px, colour);
 
     // Store the marker's info away for later
     int offset = 0;
@@ -90,8 +92,7 @@ void GraphRendererOpenGL::draw_marker(const std::string &label,
     void *raw_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     auto *ptr = reinterpret_cast<glm::vec2 *>(raw_ptr);
 
-    auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, 0.0, 1.0));
-    pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
+
 
     ptr[offset++] = glm::vec2(pos_pixels.x, 0.0);
     ptr[offset++] = glm::vec2(pos_pixels.x, m_size.y - m_gutter_size_px);
@@ -276,7 +277,8 @@ void GraphRendererOpenGL::draw_lines() const
     //     ptr[offset++] = glm::vec2(cursor.x, m_size.y);
     // }
     // else if (hit_test(
-    //              cursor, glm::ivec2(0), glm::ivec2(m_gutter_size_px, m_size.y - m_gutter_size_px)))
+    //              cursor, glm::ivec2(0), glm::ivec2(m_gutter_size_px, m_size.y -
+    //              m_gutter_size_px)))
     // {
     //     ptr[offset++] = glm::vec2(0.0, cursor.y);
     //     ptr[offset++] = glm::vec2(m_size.x, cursor.y);
@@ -453,6 +455,9 @@ void GraphRendererOpenGL::_draw_label(const std::string_view text,
 
     uniform_id = _glyph_shader.uniform_location("glyph_colour");
     glUniform3fv(uniform_id, 1, &colour[0]);
+    
+    uniform_id = _glyph_shader.uniform_location("depth");
+    glUniform1f(uniform_id, -0.2);
 
     glBindTexture(GL_TEXTURE_2D, _glyph_texture);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glyphbuf_ebo);

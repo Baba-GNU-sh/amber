@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "plot_renderer_opengl.hpp"
+#include "marker_renderer_opengl.hpp"
 #include "shader_utils.hpp"
 #include "database.hpp"
 #include "timeseries.hpp"
@@ -128,6 +129,7 @@ class GraphRendererOpenGL
 
     Window &m_window;
     PlotRendererOpenGL m_plot;
+    MarkerRendererOpenGL m_marker_renderer;
 
     // Line buffers
     GLuint _linebuf_vao;
