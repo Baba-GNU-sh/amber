@@ -1,19 +1,20 @@
-#include "app_context.hpp"
+#include "graph_controller.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include "graph.hpp"
 #include "database.hpp"
 #include "plugin_manager.hpp"
 #include "window.hpp"
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 
-AppContext::AppContext(
-    Database &database, Graph &graph, Window &window, PluginManager &plugin_manager)
-    : m_database(database), m_graph(graph), m_window(window),
-      m_plugin_manager(plugin_manager), m_view_matrix(1.0)
+GraphController::GraphController(Database &database,
+                       GraphRendererOpenGL &graph,
+                       Window &window,
+                       PluginManager &plugin_manager)
+    : m_database(database), m_graph(graph), m_window(window), m_plugin_manager(plugin_manager),
+      m_view_matrix(1.0)
 {
     std::vector<glm::vec3> plot_colours = {
         glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)};
@@ -41,39 +42,6 @@ AppContext::AppContext(
     update_vsync();
     update_bgcolour();
 
-    m_graph.on_drag.connect([this](double x, double y) {
-        glm::dmat3 dvp_matrix_inv = m_window.vp_matrix_inv();
-        const auto txform = glm::inverse(m_view_matrix) * dvp_matrix_inv;
-        const auto a = txform * glm::dvec3(0.0f);
-        const auto b = txform * glm::dvec3(x, y, 0.0f);
-        const auto delta = b - a;
-        glm::dvec2 cursor_gs_delta(delta.x, delta.y);
-
-        m_view_matrix = glm::translate(m_view_matrix, cursor_gs_delta);
-    });
-
-    m_graph.on_zoom.connect([this](double x, double y) {
-        glm::dvec2 zoom_delta_vec(x, y);
-
-        // Work out where the pointer is in graph space
-        auto cursor_in_gs_old = screen2graph(m_window.cursor());
-        m_view_matrix = glm::scale(m_view_matrix, zoom_delta_vec);
-
-        // Limit zoom
-        m_view_matrix[0][0] = std::min(m_view_matrix[0][0], ZOOM_MIN_X);
-        m_view_matrix[1][1] = std::min(m_view_matrix[1][1], ZOOM_MIN_Y);
-
-        auto cursor_in_gs_new = screen2graph(m_window.cursor());
-        auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
-        m_view_matrix = glm::translate(m_view_matrix, cursor_delta);
-    });
-
-    m_window.framebuffer_size.connect(
-        [this](int width, int height) { m_graph.set_size(glm::ivec2(width, height)); });
-
-    m_graph.set_size(m_window.size());
-    m_graph.set_position(glm::ivec2(0, 0));
-
     m_window.key.connect([this](int key, int, int action, int) {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
@@ -85,29 +53,56 @@ AppContext::AppContext(
         {
             m_window.set_fullscreen(!m_window.is_fullscreen());
         }
+        else if (key == GLFW_KEY_A && action == GLFW_PRESS)
+        {
+            auto cursor_gs = screen2graph(m_window.cursor());
+            m_markers.first = cursor_gs.x;
+        }
+        else if (key == GLFW_KEY_B && action == GLFW_PRESS)
+        {
+            auto cursor_gs = screen2graph(m_window.cursor());
+            m_markers.second = cursor_gs.x;
+        }
+        else if (key == GLFW_KEY_C && action == GLFW_PRESS)
+        {
+            m_markers.first.reset();
+            m_markers.second.reset();
+        }
     });
 }
 
-void AppContext::draw()
+void GraphController::draw()
 {
+    m_graph.init(&m_view_matrix, m_window.size());
+
     for (auto &time_series : m_ts)
     {
         if (time_series.visible)
         {
-            m_graph.draw_plot(m_view_matrix,
-                              *(time_series.ts),
+            m_graph.draw_plot(*(time_series.ts),
                               m_plot_width,
                               time_series.colour,
                               time_series.y_offset,
                               m_show_line_segments);
         }
     }
-    m_graph.draw_decorations(m_view_matrix);
+
+    if (m_markers.first)
+    {
+        m_graph.draw_marker(
+            "A", &m_markers.first.value(), MarkerStyle::Left, glm::vec3(0.0, 1.0, 1.0));
+    }
+
+    if (m_markers.second)
+    {
+        m_graph.draw_marker(
+            "B", &m_markers.second.value(), MarkerStyle::Right, glm::vec3(1.0, 1.0, 0.0));
+    }
 
     draw_gui();
 }
 
-void AppContext::spin()
+void GraphController::spin()
 {
     while (!m_window.should_close())
     {
@@ -124,7 +119,7 @@ void AppContext::spin()
     }
 }
 
-void AppContext::draw_gui()
+void GraphController::draw_gui()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -191,6 +186,12 @@ void AppContext::draw_gui()
         const auto cursor_gs =
             glm::inverse(m_view_matrix) * vp_matrix_inv * glm::dvec3(m_window.cursor(), 1.0);
         ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
+
+        if (m_markers.first && m_markers.second)
+        {
+            const auto marker_interval = *m_markers.second - *m_markers.first;
+            ImGui::Text("Markers: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
+        }
     }
 
     if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))
@@ -256,7 +257,7 @@ void AppContext::draw_gui()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void AppContext::update_multisampling() const
+void GraphController::update_multisampling() const
 {
     if (m_enable_multisampling)
     {
@@ -268,17 +269,17 @@ void AppContext::update_multisampling() const
     }
 }
 
-void AppContext::update_vsync() const
+void GraphController::update_vsync() const
 {
     glfwSwapInterval(m_enable_vsync ? 1 : 0);
 }
 
-void AppContext::update_bgcolour() const
+void GraphController::update_bgcolour() const
 {
     m_window.set_bg_colour(m_bgcolor);
 }
 
-glm::dvec2 AppContext::screen2graph(const glm::ivec2 &value) const
+glm::dvec2 GraphController::screen2graph(const glm::ivec2 &value) const
 {
     const glm::dvec3 value3(value, 1.0f);
     glm::dvec3 value_cs = m_window.vp_matrix_inv() * value3;
@@ -295,7 +296,7 @@ glm::dvec2 AppContext::screen2graph(const glm::ivec2 &value) const
  * @param suffixes A list of suffixes such as "K", "M", "B".
  * @return std::pair<double, const char *> The divided down value, as well as the string suffix.
  */
-std::pair<double, const char *> AppContext::human_readable(std::size_t size,
+std::pair<double, const char *> GraphController::human_readable(std::size_t size,
                                                            double divisor,
                                                            std::vector<const char *> suffixes)
 {

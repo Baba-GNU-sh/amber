@@ -15,8 +15,9 @@ add_library(
 	STATIC
 		shader.cpp
 		shader_program.cpp
-		graph.cpp
-		plot.cpp
+		graph_renderer_opengl.cpp
+		plot_renderer_opengl.cpp
+		marker_renderer_opengl.cpp
 		database.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
@@ -25,7 +26,8 @@ add_library(
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
 		imgui_window.cpp
-		app_context.cpp
+		graph_controller.cpp
+		stb_impl.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(
@@ -72,6 +74,7 @@ if (BUILD_TESTS)
 	add_executable(tests
 		test/test_timeseries_dense.cpp
 		test/test_chunked_vector.cpp
+		test/test_graph_controller.cpp
 	)
 	target_link_libraries(
 		tests

@@ -2,11 +2,11 @@
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
-#include "plot.hpp"
+#include "plot_renderer_opengl.hpp"
 #include "timeseries.hpp"
 #include "resources.hpp"
 
-Plot::Plot(Window &window) : m_window(window), _position(0), _size(100, 100)
+PlotRendererOpenGL::PlotRendererOpenGL(Window &window) : m_window(window)
 {
     glGenVertexArrays(1, &_plot_vao);
     glBindVertexArray(_plot_vao);
@@ -32,18 +32,20 @@ Plot::Plot(Window &window) : m_window(window), _position(0), _size(100, 100)
     _lines_shader = Program(shaders);
 }
 
-Plot::~Plot()
+PlotRendererOpenGL::~PlotRendererOpenGL()
 {
     glDeleteVertexArrays(1, &_plot_vao);
     glDeleteBuffers(1, &_plot_vbo);
 }
 
-void Plot::draw(const glm::mat3 &view_matrix,
+void PlotRendererOpenGL::draw(const glm::mat3 &view_matrix,
                 const TimeSeries &ts,
                 int line_width,
                 glm::vec3 line_colour,
                 float y_offset,
-                bool show_line_segments) const
+                bool show_line_segments,
+                const glm::ivec2 &position,
+                const glm::ivec2 &size) const
 {
     glBindVertexArray(_plot_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _plot_vbo);
@@ -75,13 +77,13 @@ void Plot::draw(const glm::mat3 &view_matrix,
     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
 
     // Pull out samples binned by vertical columns of pixels
-    const int width = std::min(_size.x / PIXELS_PER_COL, COLS_MAX);
+    const int width = std::min(size.x / PIXELS_PER_COL, COLS_MAX);
 
     // Work out where on the graph the first column of pixels lives
-    glm::vec3 begin(_position.x, 0.0f, 1.0f);
+    glm::vec3 begin(position.x, 0.0f, 1.0f);
     auto begin_gs = view_matrix_inv * m_window.vp_matrix_inv() * begin;
 
-    glm::vec3 end(_position.x + width, 0.0f, 1.0f);
+    glm::vec3 end(position.x + width, 0.0f, 1.0f);
     auto end_gs = view_matrix_inv * m_window.vp_matrix_inv() * end;
 
     auto interval = PIXELS_PER_COL * (end_gs.x - begin_gs.x) / width;
@@ -91,29 +93,9 @@ void Plot::draw(const glm::mat3 &view_matrix,
     // glScissor uses coordinates starting at the bottom left
     glEnable(GL_SCISSOR_TEST);
     const auto window_size = m_window.size();
-    glScissor(_position.x, window_size.y - (_position.y + _size.y), _size.x, _size.y);
+    glScissor(position.x, window_size.y - (position.y + size.y), size.x, size.y);
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * n_samples, _samples);
     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, n_samples);
     glDisable(GL_SCISSOR_TEST);
-}
-
-void Plot::set_size(const glm::ivec2 &size)
-{
-    _size = size;
-}
-
-glm::ivec2 Plot::size() const
-{
-    return _size;
-}
-
-void Plot::set_position(const glm::ivec2 &position)
-{
-    _position = position;
-}
-
-glm::ivec2 Plot::position() const
-{
-    return _position;
 }
