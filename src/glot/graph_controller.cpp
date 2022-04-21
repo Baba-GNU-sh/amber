@@ -1,10 +1,6 @@
 #include "graph_controller.hpp"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <imgui.h>
-#include "bindings/imgui_impl_glfw.h"
-#include "bindings/imgui_impl_opengl3.h"
 
 GraphController::GraphController(Database &database, GraphRendererOpenGL &graph, Window &window)
     : m_database(database), m_graph(graph), m_window(window)
@@ -42,17 +38,19 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
         else if (key == GLFW_KEY_A && action == GLFW_PRESS)
         {
             auto cursor_gs = screen2graph(m_window.cursor());
-            m_markers.first = cursor_gs.x;
+            m_markers.first.position = cursor_gs.x;
+            m_markers.first.visible = true;
         }
         else if (key == GLFW_KEY_B && action == GLFW_PRESS)
         {
             auto cursor_gs = screen2graph(m_window.cursor());
-            m_markers.second = cursor_gs.x;
+            m_markers.second.position = cursor_gs.x;
+            m_markers.second.visible = true;
         }
         else if (key == GLFW_KEY_C && action == GLFW_PRESS)
         {
-            m_markers.first.reset();
-            m_markers.second.reset();
+            m_markers.first.visible = false;
+            m_markers.second.visible = false;
         }
     });
 
@@ -103,13 +101,15 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
             update_view_matrix(glm::translate(m_view_matrix, cursor_gs_delta));
         }
 
-        // for (auto &marker : m_markers)
-        // {
-        //     if (marker.second.is_dragging)
-        //     {
-        //         *marker.second.position = *marker.second.position + cursor_gs_delta.x;
-        //     }
-        // }
+        if (m_markers.first.is_dragging)
+        {
+            m_markers.first.position = m_markers.first.position + cursor_gs_delta.x;
+        }
+
+        if (m_markers.second.is_dragging)
+        {
+            m_markers.second.position = m_markers.second.position + cursor_gs_delta.x;
+        }
 
         // Cache the position of the cursor for next time
         m_cursor_old = cursor;
@@ -118,30 +118,35 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
     m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         {
-            // for (auto &marker : m_markers)
-            // {
-            //     const auto marker_pos = *marker.second.position;
-            //     glm::vec3 marker_pos_vs =
-            //         m_window.vp_matrix() * (*m_view_matrix * glm::dvec3(marker_pos, 0.0, 1.0));
-            //     auto cursor = m_window.cursor();
-            //     if (std::abs(cursor.x - marker_pos_vs.x) < 5)
-            //     {
-            //         spdlog::info("Clicked on marker {}", marker.first);
-            //         marker.second.is_dragging = true;
-            //         return;
-            //     }
-            // }
-            m_is_dragging = true;
-            return;
-        }
+            // Work out what the user has clicked on
+            auto marker_clicked = [this](Marker &marker) -> bool {
+                if (!marker.visible)
+                    return false;
 
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+                glm::vec3 marker_pos_vs =
+                    m_window.vp_matrix() * (m_view_matrix * glm::dvec3(marker.position, 0.0, 1.0));
+                auto cursor = m_window.cursor();
+
+                return (std::abs(cursor.x - marker_pos_vs.x) < 5);
+            };
+            if (marker_clicked(m_markers.first))
+            {
+                m_markers.first.is_dragging = true;
+            }
+            else if (marker_clicked(m_markers.second))
+            {
+                m_markers.second.is_dragging = true;
+            }
+            else
+            {
+                m_is_dragging = true;
+            }
+        }
+        else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
         {
             m_is_dragging = false;
-            // for (auto &marker : m_markers)
-            // {
-            //     marker.second.is_dragging = false;
-            // }
+            m_markers.first.is_dragging = false;
+            m_markers.second.is_dragging = false;
         }
     });
 }
@@ -167,16 +172,16 @@ void GraphController::draw()
         }
     }
 
-    if (m_markers.first)
+    if (m_markers.first.visible)
     {
         m_graph.draw_marker(
-            "A", m_markers.first.value(), MarkerStyle::Left, glm::vec3(0.0, 1.0, 1.0));
+            "A", m_markers.first.position, MarkerStyle::Left, glm::vec3(0.0, 1.0, 1.0));
     }
 
-    if (m_markers.second)
+    if (m_markers.second.visible)
     {
         m_graph.draw_marker(
-            "B", m_markers.second.value(), MarkerStyle::Right, glm::vec3(1.0, 1.0, 0.0));
+            "B", m_markers.second.position, MarkerStyle::Right, glm::vec3(1.0, 1.0, 0.0));
     }
 }
 
@@ -193,9 +198,9 @@ void GraphController::draw_gui()
         glm::inverse(m_view_matrix) * vp_matrix_inv * glm::dvec3(m_window.cursor(), 1.0);
     ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
 
-    if (m_markers.first && m_markers.second)
+    if (m_markers.first.visible && m_markers.second.visible)
     {
-        const auto marker_interval = *m_markers.second - *m_markers.first;
+        const auto marker_interval = m_markers.second.position - m_markers.first.position;
         ImGui::Text("Markers: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
     }
 

@@ -30,10 +30,15 @@ class GraphController
         float y_offset;
     };
 
+    struct Marker
+    {
+        bool visible = false;
+        bool is_dragging = false;
+        double position;
+    };
+
   public:
-    GraphController(Database &database,
-                    GraphRendererOpenGL &graph,
-                    Window &window);
+    GraphController(Database &database, GraphRendererOpenGL &graph, Window &window);
 
     /**
      * @brief Get immutable access to the viewmatrix.
@@ -48,7 +53,7 @@ class GraphController
     void on_zoom(double x, double y);
     static bool hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br);
     void update_view_matrix(const glm::dmat3 &new_view_matrix);
-    
+
     static constexpr int GUTTER_SIZE_PX = 60;
     static constexpr int TICKLEN_PX = 5;
     static constexpr double ZOOM_MIN_X = 10e6;
@@ -64,14 +69,9 @@ class GraphController
     glm::dmat3 m_view_matrix;
     glm::dmat3 m_view_matrix_inv;
     bool m_show_line_segments = false;
-    std::pair<std::optional<double>, std::optional<double>> m_markers;
-    
+    std::pair<Marker, Marker> m_markers;
+
     // State used for recording screen events
     glm::dvec2 m_cursor_old;
     bool m_is_dragging;
-
-    // TODO move this to the window class - or some opengl context class
-    bool m_enable_vsync = true;
-    bool m_enable_multisampling = true;
-    bool m_call_glfinish = false;
 };
