@@ -55,6 +55,7 @@ class GraphController
     static bool hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br);
     void update_view_matrix(const glm::dmat3 &new_view_matrix);
     void goto_newest_sample();
+    void show_marker_at_cursor(Marker &marker);
     void show_marker(Marker &marker);
 
     static constexpr int GUTTER_SIZE_PX = 60;

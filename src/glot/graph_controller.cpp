@@ -1,5 +1,4 @@
 #include "graph_controller.hpp"
-
 #include <imgui.h>
 
 GraphController::GraphController(Database &database, GraphRendererOpenGL &graph, Window &window)
@@ -28,18 +27,32 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
 
     update_view_matrix(glm::dmat3(1.0));
 
-    m_window.key.connect([this](int key, int, int action, int) {
+    m_window.key.connect([this](int key, int, int action, int mods) {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
             goto_newest_sample();
         }
         else if (key == GLFW_KEY_A && action == GLFW_PRESS)
         {
-            show_marker(m_markers.first);
+            if (mods == GLFW_MOD_SHIFT)
+            {
+                m_markers.first.visible = false;
+            }
+            else
+            {
+                show_marker_at_cursor(m_markers.first);
+            }
         }
         else if (key == GLFW_KEY_B && action == GLFW_PRESS)
         {
-            show_marker(m_markers.second);
+            if (mods == GLFW_MOD_SHIFT)
+            {
+                m_markers.second.visible = false;
+            }
+            else
+            {
+                show_marker_at_cursor(m_markers.second);
+            }
         }
         else if (key == GLFW_KEY_C && action == GLFW_PRESS)
         {
@@ -192,10 +205,21 @@ void GraphController::draw_gui()
         glm::inverse(m_view_matrix) * vp_matrix_inv * glm::dvec3(m_window.cursor(), 1.0);
     ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
 
+    if (m_markers.first.visible)
+    {
+        ImGui::Text("Marker A: %0.3fs", m_markers.first.position);
+    }
+
+    if (m_markers.second.visible)
+    {
+        ImGui::Text("Marker B: %0.3fs", m_markers.second.position);
+    }
+
     if (m_markers.first.visible && m_markers.second.visible)
     {
         const auto marker_interval = m_markers.second.position - m_markers.first.position;
-        ImGui::Text("Markers: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
+        ImGui::Text(
+            "Markers Delta: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
     }
 
     ImGui::SliderInt("Line width", &m_plot_width, 1, 64, "%d", ImGuiSliderFlags_Logarithmic);
@@ -221,20 +245,46 @@ void GraphController::draw_menu()
         goto_newest_sample();
     }
 
-    if (ImGui::MenuItem("Marker A", "A"))
+    ImGui::Separator();
+
+    if (!m_markers.first.visible)
     {
-        show_marker(m_markers.first);
+        if (ImGui::MenuItem("Show Marker A", "A"))
+        {
+            show_marker(m_markers.first);
+        }
+    }
+    else
+    {
+        if (ImGui::MenuItem("Hide Marker A", "Shift+A"))
+        {
+            m_markers.first.visible = false;
+        }
     }
 
-    if (ImGui::MenuItem("Marker B", "B"))
+    if (!m_markers.second.visible)
     {
-        show_marker(m_markers.second);
+        if (ImGui::MenuItem("Show Marker B", "B"))
+        {
+            show_marker(m_markers.second);
+        }
+    }
+    else
+    {
+        if (ImGui::MenuItem("Hide Marker B", "Shift+B"))
+        {
+            m_markers.second.visible = false;
+        }
     }
 
-    if (ImGui::MenuItem("Hide Markers", "C"))
+    if (m_markers.first.visible || m_markers.second.visible)
     {
-        m_markers.first.visible = false;
-        m_markers.second.visible = false;
+        ImGui::Separator();
+        if (ImGui::MenuItem("Hide Markers", "C"))
+        {
+            m_markers.first.visible = false;
+            m_markers.second.visible = false;
+        }
     }
 }
 
@@ -289,9 +339,16 @@ void GraphController::goto_newest_sample()
     m_view_matrix = glm::translate(m_view_matrix, glm::dvec2(-latest, 0));
 }
 
-void GraphController::show_marker(Marker &marker)
+void GraphController::show_marker_at_cursor(Marker &marker)
 {
     auto cursor_gs = screen2graph(m_window.cursor());
     marker.position = cursor_gs.x;
+    marker.visible = true;
+}
+
+void GraphController::show_marker(Marker &marker)
+{
+    auto start_pos_gs = screen2graph(m_window.size() / 2);
+    marker.position = start_pos_gs.x;
     marker.visible = true;
 }
