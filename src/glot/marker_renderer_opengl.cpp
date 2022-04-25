@@ -15,7 +15,9 @@ struct TextureCoord
 
 MarkerRendererOpenGL::MarkerRendererOpenGL(Window &window) : m_window(window)
 {
-    m_handle_texture = load_texture("marker_center.png");
+    m_handle_texture_center = load_texture("marker_center.png");
+    m_handle_texture_left = load_texture("marker_left.png");
+    m_handle_texture_right = load_texture("marker_right.png");
 
     // Allocate enough buffer space for 4 verts and 4 texture coords
     glGenBuffers(1, &m_handle_vertex_buffer);
@@ -45,7 +47,9 @@ MarkerRendererOpenGL::MarkerRendererOpenGL(Window &window) : m_window(window)
 
 MarkerRendererOpenGL::~MarkerRendererOpenGL()
 {
-    glDeleteTextures(1, &m_handle_texture);
+    glDeleteTextures(1, &m_handle_texture_center);
+    glDeleteTextures(1, &m_handle_texture_left);
+    glDeleteTextures(1, &m_handle_texture_right);
     glDeleteBuffers(1, &m_handle_vertex_buffer);
     glDeleteVertexArrays(1, &m_handle_vao);
 }
@@ -53,16 +57,27 @@ MarkerRendererOpenGL::~MarkerRendererOpenGL()
 void MarkerRendererOpenGL::draw(const std::string &label,
                                 int position_px,
                                 int gutter_size_px,
-                                const glm::vec3 &colour) const
+                                const glm::vec3 &colour,
+                                MarkerStyle style) const
 {
     (void)label;
-    (void)position_px;
-    (void)gutter_size_px;
 
     m_shader_program.use();
     glBindBuffer(GL_ARRAY_BUFFER, m_handle_vertex_buffer);
     glBindVertexArray(m_handle_vao);
-    glBindTexture(GL_TEXTURE_2D, m_handle_texture);
+
+    switch (style)
+    {
+    case MarkerStyle::Center:
+        glBindTexture(GL_TEXTURE_2D, m_handle_texture_center);
+        break;
+    case MarkerStyle::Left:
+        glBindTexture(GL_TEXTURE_2D, m_handle_texture_left);
+        break;
+    case MarkerStyle::Right:
+        glBindTexture(GL_TEXTURE_2D, m_handle_texture_right);
+        break;
+    }
 
     int uniform_id = m_shader_program.uniform_location("view_matrix");
     const auto vp_matrix_inv = m_window.vp_matrix_inv();

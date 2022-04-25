@@ -33,13 +33,6 @@ enum class LabelAlignmentVertical
     Bottom
 };
 
-enum class MarkerStyle
-{
-    Left,
-    Right,
-    Standalone
-};
-
 /**
  * @brief The GraphRendererOpenGL is responsible for rendering the graph using OpenGL calls.
  *

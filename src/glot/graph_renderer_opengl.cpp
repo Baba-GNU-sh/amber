@@ -77,10 +77,10 @@ void GraphRendererOpenGL::draw_marker(const std::string &label,
 {
     (void)label;
     (void)style;
-    
+
     auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, 0.0, 1.0));
     pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
-    m_marker_renderer.draw(label, pos_pixels.x, m_gutter_size_px, colour);
+    m_marker_renderer.draw(label, pos_pixels.x, m_gutter_size_px, colour, style);
 
     // Store the marker's info away for later
     int offset = 0;
@@ -91,8 +91,6 @@ void GraphRendererOpenGL::draw_marker(const std::string &label,
     // Get a pointer to the underlying buffer
     void *raw_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     auto *ptr = reinterpret_cast<glm::vec2 *>(raw_ptr);
-
-
 
     ptr[offset++] = glm::vec2(pos_pixels.x, 0.0);
     ptr[offset++] = glm::vec2(pos_pixels.x, m_size.y - m_gutter_size_px);
@@ -456,7 +454,7 @@ void GraphRendererOpenGL::_draw_label(const std::string_view text,
 
     uniform_id = _glyph_shader.uniform_location("glyph_colour");
     glUniform3fv(uniform_id, 1, &colour[0]);
-    
+
     uniform_id = _glyph_shader.uniform_location("depth");
     glUniform1f(uniform_id, -0.2);
 
