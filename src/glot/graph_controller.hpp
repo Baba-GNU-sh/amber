@@ -68,6 +68,11 @@ class GraphController
     Window &m_window;
     std::vector<TimeSeriesContainer> m_ts;
 
+    boost::signals2::scoped_connection m_window_on_key_connecttion;
+    boost::signals2::scoped_connection m_window_on_scroll_connection;
+    boost::signals2::scoped_connection m_window_on_cursor_move_connection;
+    boost::signals2::scoped_connection m_window_on_mouse_button_connection;
+
     // Ephemeral graph state
     int m_plot_width = 2;
     glm::dmat3 m_view_matrix;

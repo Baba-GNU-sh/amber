@@ -1,3 +1,4 @@
+#include <boost/signals2/connection.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
@@ -213,12 +214,17 @@ int main()
         ImGuiContextWindow window(1024, 768, "GLot");
 
         // Listen to the keyboard events for hotkeys
-        window.key.connect([&window](int key, int, int action, int) {
-            if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
-            {
-                window.set_fullscreen(!window.is_fullscreen());
-            }
-        });
+        boost::signals2::scoped_connection _(
+            window.key.connect([&window](int key, int, int action, int) {
+                if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
+                {
+                    window.set_fullscreen(!window.is_fullscreen());
+                }
+                if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+                {
+                    window.request_close();
+                }
+            }));
 
         // We need to do this after creating our GL context which is done when the first GLFW window
         // is created

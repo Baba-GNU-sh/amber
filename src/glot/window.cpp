@@ -181,11 +181,6 @@ void Window::mouse_button_callback(GLFWwindow *window, int button, int action, i
 
 void Window::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-
     auto *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
     win->handle_key_callback(key, scancode, action, mods);
 }

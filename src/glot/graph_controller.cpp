@@ -57,7 +57,7 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
 
     update_view_matrix(glm::dmat3(1.0));
 
-    m_window.key.connect([this](int key, int, int action, int mods) {
+    m_window_on_key_connecttion = m_window.key.connect([this](int key, int, int action, int mods) {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
             goto_newest_sample();
@@ -92,7 +92,7 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
     });
 
     // Register for mouse events from the window
-    m_window.scroll.connect([this](double /*xoffset*/, double yoffset) {
+    m_window_on_scroll_connection = m_window.scroll.connect([this](double /*xoffset*/, double yoffset) {
         const double zoom_delta = 1.0f + (yoffset / 10.0f);
         const auto cursor = m_window.cursor();
         const auto size = m_window.size();
@@ -118,7 +118,7 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
         }
     });
 
-    m_window.cursor_pos.connect([this](double xpos, double ypos) {
+    m_window_on_cursor_move_connection = m_window.cursor_pos.connect([this](double xpos, double ypos) {
         glm::dvec2 cursor(xpos, ypos);
 
         // Work out how much the cursor moved since the last time
@@ -152,7 +152,7 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
         m_cursor_old = cursor;
     });
 
-    m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
+    m_window_on_mouse_button_connection = m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         {
             // Work out what the user has clicked on
