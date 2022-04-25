@@ -57,7 +57,7 @@ MarkerRendererOpenGL::MarkerRendererOpenGL(Window &window) : m_window(window)
 
     m_shader_program = Program(shaders);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, tex_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
     stbi_image_free(tex_data);
 }
 

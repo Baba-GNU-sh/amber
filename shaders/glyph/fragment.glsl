@@ -1,6 +1,6 @@
 #version 330 core
 out vec4 FragColor;
-  
+
 in vec2 TexCoord;
 
 uniform sampler2D tex;
@@ -8,6 +8,19 @@ uniform vec3 glyph_colour;
 
 void main()
 {
-    vec4 color = texture(tex, TexCoord);
-    FragColor = vec4(glyph_colour, color.r);
+    // Sample the texture first
+    vec4 tex = texture(tex, TexCoord);
+
+    // Discard early if the this pixel is going to be transparent
+    // This allows us to display simple transparency even when alpha blending is disabled
+    if (tex.a == 0.0)
+    {
+        discard;
+    }
+
+    // Tint the texure with the specified tint
+    vec3 tinted_tex = tex.rgb * glyph_colour;
+
+    // Build the output colour from the tinted texture and the alpha channel of the original texture
+    FragColor = vec4(tinted_tex, tex.a);
 }

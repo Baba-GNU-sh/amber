@@ -190,6 +190,8 @@ void GraphRendererOpenGL::init_glyph_buffers()
         throw std::runtime_error("Unable to load font map: " + std::string(stbi_failure_reason()));
     }
 
+    spdlog::info("font atlas: {}", nrChannels);
+
     glGenTextures(1, &_glyph_texture);
     glBindTexture(GL_TEXTURE_2D, _glyph_texture);
 
@@ -197,9 +199,8 @@ void GraphRendererOpenGL::init_glyph_buffers()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glGenerateMipmap(GL_TEXTURE_2D);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, tex_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
 
     stbi_image_free(tex_data);
 }
