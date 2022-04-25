@@ -39,7 +39,7 @@ class Resources
         }
     }
 
-    static std::string find_texture(const char *name)
+    static std::string find_texture(const std::string &name)
     {
         auto root = get_root() / "assets";
         auto path = root / name;

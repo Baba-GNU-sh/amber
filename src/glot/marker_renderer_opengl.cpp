@@ -15,22 +15,7 @@ struct TextureCoord
 
 MarkerRendererOpenGL::MarkerRendererOpenGL(Window &window) : m_window(window)
 {
-    glGenTextures(1, &m_handle_texture);
-    glBindTexture(GL_TEXTURE_2D, m_handle_texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    int width, height, nrChannels;
-    unsigned char *tex_data = stbi_load(
-        Resources::find_texture("marker_center.png").c_str(), &width, &height, &nrChannels, 0);
-    if (!tex_data)
-    {
-        throw std::runtime_error("Unable to load marker texture: " +
-                                 std::string(stbi_failure_reason()));
-    }
+    m_handle_texture = load_texture("marker_center.png");
 
     // Allocate enough buffer space for 4 verts and 4 texture coords
     glGenBuffers(1, &m_handle_vertex_buffer);
@@ -56,9 +41,6 @@ MarkerRendererOpenGL::MarkerRendererOpenGL(Window &window) : m_window(window)
         Shader(Resources::find_shader("glyph/fragment.glsl"), GL_FRAGMENT_SHADER)};
 
     m_shader_program = Program(shaders);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
-    stbi_image_free(tex_data);
 }
 
 MarkerRendererOpenGL::~MarkerRendererOpenGL()
@@ -68,7 +50,10 @@ MarkerRendererOpenGL::~MarkerRendererOpenGL()
     glDeleteVertexArrays(1, &m_handle_vao);
 }
 
-void MarkerRendererOpenGL::draw(const std::string &label, int position_px, int gutter_size_px, const glm::vec3 &colour) const
+void MarkerRendererOpenGL::draw(const std::string &label,
+                                int position_px,
+                                int gutter_size_px,
+                                const glm::vec3 &colour) const
 {
     (void)label;
     (void)position_px;
@@ -85,7 +70,7 @@ void MarkerRendererOpenGL::draw(const std::string &label, int position_px, int g
 
     uniform_id = m_shader_program.uniform_location("glyph_colour");
     glUniform3fv(uniform_id, 1, &colour[0]);
-    
+
     uniform_id = m_shader_program.uniform_location("depth");
     glUniform1f(uniform_id, -0.5);
 
@@ -106,4 +91,30 @@ void MarkerRendererOpenGL::draw(const std::string &label, int position_px, int g
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+unsigned int MarkerRendererOpenGL::load_texture(const std::string &file_name) const
+{
+    unsigned int texture_handle;
+    glGenTextures(1, &texture_handle);
+    glBindTexture(GL_TEXTURE_2D, texture_handle);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    int width, height, nrChannels;
+    auto file_path = Resources::find_texture(file_name);
+    unsigned char *tex_data = stbi_load(file_path.c_str(), &width, &height, &nrChannels, 0);
+    if (!tex_data)
+    {
+        throw std::runtime_error("Unable to load marker texture: " +
+                                 std::string(stbi_failure_reason()));
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
+    stbi_image_free(tex_data);
+
+    return texture_handle;
 }
