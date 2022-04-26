@@ -13,7 +13,7 @@ enum class MarkerStyle
 };
 
 /**
- * @brief Routines and buffers for drawing makers - vertical lines with draggable handles.
+ * @brief Routines and buffers for drawing makers - vertical lines with draggable handles and a little text label.
  */
 class MarkerRendererOpenGL
 {
