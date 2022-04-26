@@ -10,7 +10,7 @@ class Resources
     static std::string find_shader(const char *name)
     {
         auto root = get_root();
-        auto path = root / name;
+        auto path = root / "shaders" / name;
         if (std::filesystem::exists(path))
         {
             spdlog::info("Found shader: {}", path.string());
@@ -25,7 +25,7 @@ class Resources
 
     static std::string find_font(const char *name)
     {
-        auto root = get_root() / "fonts";
+        auto root = get_root() / "assets" / "fonts";
         auto path = root / name;
         if (std::filesystem::exists(path))
         {
@@ -39,9 +39,9 @@ class Resources
         }
     }
 
-    static std::string find_texture(const std::string &name)
+    static std::string find_sprite(const std::string &name)
     {
-        auto root = get_root() / "assets";
+        auto root = get_root() / "assets" / "sprites";
         auto path = root / name;
         if (std::filesystem::exists(path))
         {
@@ -50,8 +50,8 @@ class Resources
         }
         else
         {
-            spdlog::error("No texture '{}' found in {}", name, root.string());
-            throw std::runtime_error("Cannot find texture");
+            spdlog::error("No sprite '{}' found in {}", name, root.string());
+            throw std::runtime_error("Cannot find sprite");
         }
     }
 

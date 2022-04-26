@@ -176,8 +176,8 @@ void GraphRendererOpenGL::init_glyph_buffers()
     glEnableVertexAttribArray(1);
 
     std::vector<Shader> shaders{
-        Shader(Resources::find_shader("glyph/vertex.glsl"), GL_VERTEX_SHADER),
-        Shader(Resources::find_shader("glyph/fragment.glsl"), GL_FRAGMENT_SHADER)};
+        Shader(Resources::find_shader("sprite/vertex.glsl"), GL_VERTEX_SHADER),
+        Shader(Resources::find_shader("sprite/fragment.glsl"), GL_FRAGMENT_SHADER)};
     _glyph_shader = Program(shaders);
 
     int width, height, nrChannels;
@@ -452,7 +452,7 @@ void GraphRendererOpenGL::_draw_label(const std::string_view text,
     const auto vp_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
-    uniform_id = _glyph_shader.uniform_location("glyph_colour");
+    uniform_id = _glyph_shader.uniform_location("tint_colour");
     glUniform3fv(uniform_id, 1, &colour[0]);
 
     uniform_id = _glyph_shader.uniform_location("depth");

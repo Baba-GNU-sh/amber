@@ -39,8 +39,8 @@ MarkerRendererOpenGL::MarkerRendererOpenGL(Window &window) : m_window(window)
     glEnableVertexAttribArray(1);
 
     std::vector<Shader> shaders{
-        Shader(Resources::find_shader("glyph/vertex.glsl"), GL_VERTEX_SHADER),
-        Shader(Resources::find_shader("glyph/fragment.glsl"), GL_FRAGMENT_SHADER)};
+        Shader(Resources::find_shader("sprite/vertex.glsl"), GL_VERTEX_SHADER),
+        Shader(Resources::find_shader("sprite/fragment.glsl"), GL_FRAGMENT_SHADER)};
 
     m_shader_program = Program(shaders);
 }
@@ -83,7 +83,7 @@ void MarkerRendererOpenGL::draw(const std::string &label,
     const auto vp_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
-    uniform_id = m_shader_program.uniform_location("glyph_colour");
+    uniform_id = m_shader_program.uniform_location("tint_colour");
     glUniform3fv(uniform_id, 1, &colour[0]);
 
     uniform_id = m_shader_program.uniform_location("depth");
@@ -120,7 +120,7 @@ unsigned int MarkerRendererOpenGL::load_texture(const std::string &file_name) co
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     int width, height, nrChannels;
-    auto file_path = Resources::find_texture(file_name);
+    auto file_path = Resources::find_sprite(file_name);
     unsigned char *tex_data = stbi_load(file_path.c_str(), &width, &height, &nrChannels, 0);
     if (!tex_data)
     {
