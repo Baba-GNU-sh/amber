@@ -11,7 +11,7 @@
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 #include "imgui_window.hpp"
-#include "graph_controller.hpp"
+#include "graph.hpp"
 #include "audiofile_plugin.hpp"
 #include "wavegen_plugin.hpp"
 

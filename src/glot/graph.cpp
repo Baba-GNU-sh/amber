@@ -1,4 +1,4 @@
-#include "graph_controller.hpp"
+#include "graph.hpp"
 #include <imgui.h>
 
 GraphController::GraphController(Database &database, GraphRendererOpenGL &graph, Window &window)

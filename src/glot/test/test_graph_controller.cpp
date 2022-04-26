@@ -1,4 +1,4 @@
-#include <graph_controller.hpp>
+#include <graph.hpp>
 #include <gtest/gtest.h>
 
 TEST(GraphController, example)

@@ -26,7 +26,7 @@ add_library(
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
 		imgui_window.cpp
-		graph_controller.cpp
+		graph.cpp
 		stb_impl.cpp
 )
 target_include_directories(glot PUBLIC .)
