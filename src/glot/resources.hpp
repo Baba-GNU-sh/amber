@@ -23,7 +23,7 @@ class Resources
         }
     }
 
-    static std::string find_font(const char *name)
+    static std::string find_font(const std::string &name)
     {
         auto root = get_root() / "assets" / "fonts";
         auto path = root / name;

@@ -2,26 +2,26 @@
 
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
+#include "text_renderer_opengl.hpp"
 #include "timeseries.hpp"
 #include "window.hpp"
 
-enum class MarkerStyle
-{
-    Center,
-    Left,
-    Right
-};
-
 /**
- * @brief Routines and buffers for drawing makers - vertical lines with draggable handles and a little text label.
+ * @brief Routines and buffers for drawing makers - which are vertical lines and a little handle for
+ * dragging.
  */
 class MarkerRendererOpenGL
 {
   public:
+    enum class MarkerStyle
+    {
+        Center,
+        Left,
+        Right
+    };
     MarkerRendererOpenGL(Window &window);
     ~MarkerRendererOpenGL();
-    void draw(const std::string &label,
-              int position_px,
+    void draw(int position_px,
               int gutter_size_px,
               const glm::vec3 &colour,
               MarkerStyle style) const;

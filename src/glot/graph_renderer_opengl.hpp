@@ -1,37 +1,13 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "text_renderer_opengl.hpp"
 #include "plot_renderer_opengl.hpp"
 #include "marker_renderer_opengl.hpp"
 #include "shader_utils.hpp"
 #include "database.hpp"
 #include "timeseries.hpp"
 #include "window.hpp"
-
-struct GlyphVertex
-{
-    glm::vec2 vert;
-    glm::vec2 tex_coords;
-};
-
-struct GlyphData
-{
-    GlyphVertex verts[4]; // Order: [TL, TR, BL, BR]
-};
-
-enum class LabelAlignment
-{
-    Left,
-    Right,
-    Center
-};
-
-enum class LabelAlignmentVertical
-{
-    Top,
-    Center,
-    Bottom
-};
 
 /**
  * @brief The GraphRendererOpenGL is responsible for rendering the graph using OpenGL calls.
@@ -85,14 +61,12 @@ class GraphRendererOpenGL
     /**
      * @brief Adds a marker to the graph.
      *
-     * @param label The display name of the marker.
      * @param position The marker's position.
      * @param style The marker's style.
      * @param colour The colour of the marker.
      */
-    void draw_marker(const std::string &label,
-                     double position,
-                     MarkerStyle style,
+    void draw_marker(double position,
+                     MarkerRendererOpenGL::MarkerStyle style,
                      const glm::vec3 &colour) const;
 
   private:
@@ -100,14 +74,6 @@ class GraphRendererOpenGL
     void init_glyph_buffers();
     void draw_lines() const;
     void draw_labels() const;
-    void _draw_label(const std::string_view text,
-                     const glm::ivec2 &pos,
-                     int height,
-                     int width,
-                     LabelAlignment align,
-                     LabelAlignmentVertical valign,
-                     const glm::vec3 &colour) const;
-    void _draw_glyph(char c, const glm::ivec2 &pos, int height, int width, GlyphData **buf) const;
 
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
 
@@ -122,19 +88,13 @@ class GraphRendererOpenGL
 
     Window &m_window;
     PlotRendererOpenGL m_plot;
+    TextRendererOpenGL m_text_renderer;
     MarkerRendererOpenGL m_marker_renderer;
 
     // Line buffers
     GLuint _linebuf_vao;
     GLuint _linebuf_vbo;
     Program _lines_shader;
-
-    // Glyph buffers
-    GLuint _glyphbuf_vao;
-    GLuint _glyphbuf_vbo;
-    GLuint _glyphbuf_ebo;
-    Program _glyph_shader;
-    GLuint _glyph_texture;
 
     // Variants
     glm::dmat3 m_view_matrix;

@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include "marker_renderer_opengl.hpp"
+#include "text_renderer_opengl.hpp"
 #include "timeseries.hpp"
 #include "resources.hpp"
 #include "stb_image.h"
@@ -54,14 +55,11 @@ MarkerRendererOpenGL::~MarkerRendererOpenGL()
     glDeleteVertexArrays(1, &m_handle_vao);
 }
 
-void MarkerRendererOpenGL::draw(const std::string &label,
-                                int position_px,
+void MarkerRendererOpenGL::draw(int position_px,
                                 int gutter_size_px,
                                 const glm::vec3 &colour,
                                 MarkerStyle style) const
 {
-    (void)label;
-
     m_shader_program.use();
     glBindBuffer(GL_ARRAY_BUFFER, m_handle_vertex_buffer);
     glBindVertexArray(m_handle_vao);

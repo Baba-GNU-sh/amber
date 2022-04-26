@@ -28,6 +28,7 @@ add_library(
 		imgui_window.cpp
 		graph.cpp
 		stb_impl.cpp
+		text_renderer_opengl.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

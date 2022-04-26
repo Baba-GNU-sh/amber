@@ -9,22 +9,20 @@
 #include "graph_renderer_opengl.hpp"
 #include "resources.hpp"
 #include "stb_image.h"
+#include "text_renderer_opengl.hpp"
 
 GraphRendererOpenGL::GraphRendererOpenGL(Window &window)
-    : m_window(window), m_plot(window), m_marker_renderer(window), m_view_matrix(1.0),
-      m_view_matrix_inv(1.0), m_gutter_size_px(60), m_tick_len_px(5)
+    : m_window(window), m_plot(window), m_text_renderer(m_window, "proggy_clean.png"),
+      m_marker_renderer(window), m_view_matrix(1.0), m_view_matrix_inv(1.0), m_gutter_size_px(60),
+      m_tick_len_px(5)
 {
     init_line_buffers();
-    init_glyph_buffers();
 }
 
 GraphRendererOpenGL::~GraphRendererOpenGL()
 {
     glDeleteVertexArrays(1, &_linebuf_vao);
     glDeleteBuffers(1, &_linebuf_vbo);
-    glDeleteVertexArrays(1, &_glyphbuf_vao);
-    glDeleteBuffers(1, &_glyphbuf_vbo);
-    glDeleteBuffers(1, &_glyphbuf_ebo);
 }
 
 void GraphRendererOpenGL::set_view_matrix(const glm::dmat3 &view_matrix)
@@ -70,17 +68,14 @@ void GraphRendererOpenGL::draw_plot(const TimeSeries &ts,
                 glm::ivec2(m_size.x - m_gutter_size_px, m_size.y - m_gutter_size_px));
 }
 
-void GraphRendererOpenGL::draw_marker(const std::string &label,
-                                      double position,
-                                      MarkerStyle style,
+void GraphRendererOpenGL::draw_marker(double position,
+                                      MarkerRendererOpenGL::MarkerStyle style,
                                       const glm::vec3 &colour) const
 {
-    (void)label;
-    (void)style;
 
     auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, 0.0, 1.0));
     pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
-    m_marker_renderer.draw(label, pos_pixels.x, m_gutter_size_px, colour, style);
+    m_marker_renderer.draw(pos_pixels.x, m_gutter_size_px, colour, style);
 
     // Store the marker's info away for later
     int offset = 0;
@@ -110,13 +105,11 @@ void GraphRendererOpenGL::draw_marker(const std::string &label,
     auto [_1, _2, precision] = tick_spacing();
     std::stringstream ss;
     ss << std::fixed << std::setprecision(precision.x + 2) << position;
-    _draw_label(ss.str(),
-                glm::ivec2(pos_pixels.x, m_size.y - m_gutter_size_px / 2),
-                18,
-                7,
-                LabelAlignment::Center,
-                LabelAlignmentVertical::Top,
-                colour);
+    m_text_renderer.draw_text(ss.str(),
+                              glm::ivec2(pos_pixels.x, m_size.y - m_gutter_size_px / 2),
+                              TextRendererOpenGL::LabelAlignmentHorizontal::Center,
+                              TextRendererOpenGL::LabelAlignmentVertical::Top,
+                              colour);
 }
 
 void GraphRendererOpenGL::init_line_buffers()
@@ -135,72 +128,6 @@ void GraphRendererOpenGL::init_line_buffers()
         Shader(Resources::find_shader("line/vertex.glsl"), GL_VERTEX_SHADER),
         Shader(Resources::find_shader("line/fragment.glsl"), GL_FRAGMENT_SHADER)};
     _lines_shader = Program(shaders);
-}
-
-void GraphRendererOpenGL::init_glyph_buffers()
-{
-    glGenVertexArrays(1, &_glyphbuf_vao);
-    glBindVertexArray(_glyphbuf_vao);
-
-    glGenBuffers(1, &_glyphbuf_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _glyphbuf_vbo);
-
-    glGenBuffers(1, &_glyphbuf_ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glyphbuf_ebo);
-
-    const int sz = 6 * 128 / 4;
-    unsigned int indices[sz];
-    for (int i = 0, j = 0; j < sz; i += 4, j += 6)
-    {
-        indices[j] = i;
-        indices[j + 1] = i + 1;
-        indices[j + 2] = i + 2;
-        indices[j + 3] = i + 1;
-        indices[j + 4] = i + 2;
-        indices[j + 5] = i + 3;
-    }
-
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // A glyph is rendered as a quad so we only need 4 verts and 4 texture
-    // lookups
-    glBufferData(GL_ARRAY_BUFFER, 128 * sizeof(GlyphData), nullptr, GL_STREAM_DRAW);
-
-    // Define an attribute for the glyph verticies
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void *)0);
-    glEnableVertexAttribArray(0);
-
-    // Define an attribute for the texture lookups
-    glVertexAttribPointer(
-        1, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void *)offsetof(GlyphVertex, tex_coords));
-    glEnableVertexAttribArray(1);
-
-    std::vector<Shader> shaders{
-        Shader(Resources::find_shader("sprite/vertex.glsl"), GL_VERTEX_SHADER),
-        Shader(Resources::find_shader("sprite/fragment.glsl"), GL_FRAGMENT_SHADER)};
-    _glyph_shader = Program(shaders);
-
-    int width, height, nrChannels;
-    unsigned char *tex_data = stbi_load(
-        Resources::find_font("proggy_clean.png").c_str(), &width, &height, &nrChannels, 0);
-    if (!tex_data)
-    {
-        throw std::runtime_error("Unable to load font map: " + std::string(stbi_failure_reason()));
-    }
-
-    spdlog::info("font atlas: {}", nrChannels);
-
-    glGenTextures(1, &_glyph_texture);
-    glBindTexture(GL_TEXTURE_2D, _glyph_texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
-
-    stbi_image_free(tex_data);
 }
 
 void GraphRendererOpenGL::draw_lines() const
@@ -327,13 +254,11 @@ void GraphRendererOpenGL::draw_labels() const
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision.y) << i;
-        _draw_label(ss.str(),
-                    point,
-                    18,
-                    7,
-                    LabelAlignment::Right,
-                    LabelAlignmentVertical::Center,
-                    glm::vec3(1.0, 1.0, 1.0));
+        m_text_renderer.draw_text(ss.str(),
+                                  point,
+                                  TextRendererOpenGL::LabelAlignmentHorizontal::Right,
+                                  TextRendererOpenGL::LabelAlignmentVertical::Center,
+                                  glm::vec3(1.0, 1.0, 1.0));
     }
 
     // Draw the y axis ticks
@@ -350,13 +275,11 @@ void GraphRendererOpenGL::draw_labels() const
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision.x) << i;
-        _draw_label(ss.str(),
-                    point,
-                    18,
-                    7,
-                    LabelAlignment::Center,
-                    LabelAlignmentVertical::Top,
-                    glm::vec3(1.0, 1.0, 1.0));
+        m_text_renderer.draw_text(ss.str(),
+                                  point,
+                                  TextRendererOpenGL::LabelAlignmentHorizontal::Center,
+                                  TextRendererOpenGL::LabelAlignmentVertical::Top,
+                                  glm::vec3(1.0, 1.0, 1.0));
     }
 
     // if (hit_test(m_window.cursor(),
@@ -398,97 +321,6 @@ void GraphRendererOpenGL::draw_labels() const
     //         }
     //     }
     // }
-}
-
-void GraphRendererOpenGL::_draw_label(const std::string_view text,
-                                      const glm::ivec2 &pos,
-                                      int height,
-                                      int width,
-                                      LabelAlignment align,
-                                      LabelAlignmentVertical valign,
-                                      const glm::vec3 &colour) const
-{
-    glm::ivec2 offset = pos;
-    glm::ivec2 char_stride = glm::ivec2(width, 0);
-
-    if (align == LabelAlignment::Right)
-    {
-        offset -= char_stride * static_cast<int>(text.size());
-    }
-    else if (align == LabelAlignment::Center)
-    {
-        offset -= char_stride * static_cast<int>(text.size()) / 2;
-    }
-
-    if (valign == LabelAlignmentVertical::Center)
-    {
-        offset -= glm::ivec2(0, height / 2);
-    }
-    else if (valign == LabelAlignmentVertical::Bottom)
-    {
-        offset -= glm::ivec2(0, height);
-    }
-
-    GlyphData buffer[128];
-    GlyphData *bufptr = &buffer[0];
-
-    // offset.x = roundf(offset.x);
-    // offset.y = roundf(offset.y);
-
-    for (auto character : text)
-    {
-        _draw_glyph(character, offset, height, width, &bufptr);
-        offset += char_stride;
-    }
-
-    std::size_t count = (bufptr - buffer);
-
-    glBindVertexArray(_glyphbuf_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _glyphbuf_vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphData) * count, buffer);
-
-    _glyph_shader.use();
-    int uniform_id = _glyph_shader.uniform_location("view_matrix");
-    const auto vp_matrix_inv = m_window.vp_matrix_inv();
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
-
-    uniform_id = _glyph_shader.uniform_location("tint_colour");
-    glUniform3fv(uniform_id, 1, &colour[0]);
-
-    uniform_id = _glyph_shader.uniform_location("depth");
-    glUniform1f(uniform_id, -0.2);
-
-    glBindTexture(GL_TEXTURE_2D, _glyph_texture);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glyphbuf_ebo);
-    glDrawElements(GL_TRIANGLES, 6 * count, GL_UNSIGNED_INT, 0);
-}
-
-void GraphRendererOpenGL::_draw_glyph(
-    char character, const glm::ivec2 &pos, int height, int width, GlyphData **buf) const
-{
-    GlyphData *data = *buf;
-    data->verts[0].vert = pos;
-    data->verts[1].vert = pos + glm::ivec2(width, 0);
-    data->verts[2].vert = pos + glm::ivec2(0, height);
-    data->verts[3].vert = pos + glm::ivec2(width, height);
-
-    // Look up the texture coordinate for the character
-    const int COLS = 16;
-    const int ROWS = 8;
-    int col = character % COLS;
-    int row = character / COLS;
-    const float COL_STRIDE = 1.0f / COLS;
-    const float GLYPH_WIDTH = (static_cast<float>(width) / static_cast<float>(height)) / COLS;
-    const float ROW_STRIDE = 1.0f / ROWS;
-    const float GLYPH_HEIGHT = 1.0f / ROWS;
-
-    data->verts[0].tex_coords = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row);
-    data->verts[1].tex_coords = glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row);
-    data->verts[2].tex_coords = glm::vec2(COL_STRIDE * col, ROW_STRIDE * row + GLYPH_HEIGHT);
-    data->verts[3].tex_coords =
-        glm::vec2(COL_STRIDE * col + GLYPH_WIDTH, ROW_STRIDE * row + GLYPH_HEIGHT);
-
-    *buf = data + 1;
 }
 
 std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> GraphRendererOpenGL::tick_spacing() const

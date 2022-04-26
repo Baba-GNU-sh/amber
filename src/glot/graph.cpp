@@ -224,29 +224,32 @@ void Graph::draw()
         const auto both_markers_visible = m_markers.first.visible && m_markers.second.visible;
         if (!both_markers_visible)
         {
-            return std::make_pair(MarkerStyle::Center, MarkerStyle::Center);
+            return std::make_pair(MarkerRendererOpenGL::MarkerStyle::Center,
+                                  MarkerRendererOpenGL::MarkerStyle::Center);
         }
 
         if (m_markers.first.position < m_markers.second.position)
         {
-            return std::make_pair(MarkerStyle::Left, MarkerStyle::Right);
+            return std::make_pair(MarkerRendererOpenGL::MarkerStyle::Left,
+                                  MarkerRendererOpenGL::MarkerStyle::Right);
         }
         else
         {
-            return std::make_pair(MarkerStyle::Right, MarkerStyle::Left);
+            return std::make_pair(MarkerRendererOpenGL::MarkerStyle::Right,
+                                  MarkerRendererOpenGL::MarkerStyle::Left);
         }
     }();
 
     if (m_markers.first.visible)
     {
         m_graph.draw_marker(
-            "A", m_markers.first.position, marker_styles.first, glm::vec3(0.0, 1.0, 1.0));
+            m_markers.first.position, marker_styles.first, glm::vec3(0.0, 1.0, 1.0));
     }
 
     if (m_markers.second.visible)
     {
         m_graph.draw_marker(
-            "B", m_markers.second.position, marker_styles.second, glm::vec3(1.0, 1.0, 0.0));
+            m_markers.second.position, marker_styles.second, glm::vec3(1.0, 1.0, 0.0));
     }
 }
 
