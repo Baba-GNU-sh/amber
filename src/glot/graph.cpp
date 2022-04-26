@@ -1,7 +1,7 @@
 #include "graph.hpp"
 #include <imgui.h>
 
-GraphController::GraphController(Database &database, GraphRendererOpenGL &graph, Window &window)
+Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
     : m_database(database), m_graph(graph), m_window(window)
 {
     const auto createGlmColour = [](int code) {
@@ -199,7 +199,7 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
         });
 }
 
-void GraphController::draw()
+void Graph::draw()
 {
     m_graph.set_gutter_size(GUTTER_SIZE_PX);
     m_graph.set_tick_len(TICKLEN_PX);
@@ -250,7 +250,7 @@ void GraphController::draw()
     }
 }
 
-void GraphController::draw_gui()
+void Graph::draw_gui()
 {
     ImGui::Text("View Matrix:");
     for (int i = 0; i < 3; i++)
@@ -296,7 +296,7 @@ void GraphController::draw_gui()
     }
 }
 
-void GraphController::draw_menu()
+void Graph::draw_menu()
 {
     if (ImGui::MenuItem("Go to newst sample", "Space"))
     {
@@ -346,7 +346,7 @@ void GraphController::draw_menu()
     }
 }
 
-glm::dvec2 GraphController::screen2graph(const glm::ivec2 &value) const
+glm::dvec2 Graph::screen2graph(const glm::ivec2 &value) const
 {
     const glm::dvec3 value3(value, 1.0f);
     glm::dvec3 value_cs = m_window.vp_matrix_inv() * value3;
@@ -354,7 +354,7 @@ glm::dvec2 GraphController::screen2graph(const glm::ivec2 &value) const
     return value_gs;
 }
 
-void GraphController::on_zoom(double x, double y)
+void Graph::on_zoom(double x, double y)
 {
     glm::dvec2 zoom_delta_vec(x, y);
 
@@ -371,7 +371,7 @@ void GraphController::on_zoom(double x, double y)
     update_view_matrix(glm::translate(m_view_matrix, cursor_delta));
 }
 
-bool GraphController::hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br)
+bool Graph::hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br)
 {
     if (value.x < tl.x)
         return false;
@@ -384,27 +384,27 @@ bool GraphController::hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br)
     return true;
 }
 
-void GraphController::update_view_matrix(const glm::dmat3 &new_view_matrix)
+void Graph::update_view_matrix(const glm::dmat3 &new_view_matrix)
 {
     m_view_matrix = new_view_matrix;
     m_view_matrix_inv = glm::inverse(new_view_matrix);
 }
 
-void GraphController::goto_newest_sample()
+void Graph::goto_newest_sample()
 {
     m_view_matrix[2][0] = 0;
     auto latest = m_database.get_latest_sample_time();
     m_view_matrix = glm::translate(m_view_matrix, glm::dvec2(-latest, 0));
 }
 
-void GraphController::show_marker_at_cursor(Marker &marker)
+void Graph::show_marker_at_cursor(Marker &marker)
 {
     auto cursor_gs = screen2graph(m_window.cursor());
     marker.position = cursor_gs.x;
     marker.visible = true;
 }
 
-void GraphController::show_marker(Marker &marker)
+void Graph::show_marker(Marker &marker)
 {
     auto start_pos_gs = screen2graph(m_window.size() / 2);
     marker.position = start_pos_gs.x;

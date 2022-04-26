@@ -71,7 +71,7 @@ std::pair<double, const char *> human_readable(std::size_t size,
 
 static void draw_gui(Window &window,
                      PluginManager &plugin_manager,
-                     GraphController &graph_controller,
+                     Graph &graph_controller,
                      Database &database)
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -245,7 +245,7 @@ int main()
         window.set_bg_colour(m_clear_colour);
 
         GraphRendererOpenGL graph_renderer(window);
-        GraphController graph_controller(db, graph_renderer, window);
+        Graph graph_controller(db, graph_renderer, window);
 
         spdlog::info("Initialization OK, starting main loop");
 

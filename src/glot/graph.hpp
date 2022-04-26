@@ -9,17 +9,17 @@
 #include "timeseries.hpp"
 
 /**
- * @brief The GraphController stores the ephemeral state of the graph (such as the view matrix and
+ * @brief The Graph stores the ephemeral state of the graph (such as the view matrix and
  * markers) and listens to mouse and key events from the window, modifying the state and redrawing
  * the graph through a renderer accordingly.
  *
- * The GraphController doesn't depend on any specific rendering backend and thus will need to be
+ * The Graph doesn't depend on any specific rendering backend and thus will need to be
  * passed a renderer capable of actually drawing the graph to the screen. The reason for the
  * seperation is so that we could more easily switch out to a new renderer in the future, but mainly
- * so the GraphController can be unit tested without needing to fire up an OpenGL context in the
+ * so the Graph can be unit tested without needing to fire up an OpenGL context in the
  * test suite.
  */
-class GraphController
+class Graph
 {
     struct TimeSeriesContainer
     {
@@ -38,7 +38,7 @@ class GraphController
     };
 
   public:
-    GraphController(Database &database, GraphRendererOpenGL &graph, Window &window);
+    Graph(Database &database, GraphRendererOpenGL &graph, Window &window);
 
     /**
      * @brief Get immutable access to the viewmatrix.
