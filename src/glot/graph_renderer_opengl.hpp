@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include "text_renderer_opengl.hpp"
 #include "plot_renderer_opengl.hpp"
@@ -76,7 +77,7 @@ class GraphRendererOpenGL
      * @param value The value of the label to plot.
      * @param colour The colour of the label.
      */
-    void draw_value_label(double position, double value, const glm::vec3 &colour) const;
+    void draw_value_label(const glm::dvec2 &position, double value, const glm::vec3 &colour) const;
 
   private:
     void init_line_buffers();

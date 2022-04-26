@@ -170,7 +170,7 @@ Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
                         (m_view_matrix * glm::dvec3(marker.position, 0.0, 1.0));
                     auto cursor = m_window.cursor();
 
-                    return (std::abs(cursor.x - marker_pos_vs.x) < 5);
+                    return (std::abs(cursor.x - marker_pos_vs.x) < 8);
                 };
                 if (marker_clicked(m_markers.first))
                 {
@@ -258,7 +258,9 @@ void Graph::draw()
         for (const auto &time_series : m_ts)
         {
             const auto value = time_series.ts->get_sample(m_markers.first.position, interval_gs);
-            m_graph.draw_value_label(m_markers.first.position, value.average, time_series.colour);
+            m_graph.draw_value_label(glm::dvec2(m_markers.first.position, value.average + time_series.y_offset),
+                                     value.average,
+                                     time_series.colour);
         }
     }
 
@@ -269,7 +271,9 @@ void Graph::draw()
         for (const auto &time_series : m_ts)
         {
             const auto value = time_series.ts->get_sample(m_markers.second.position, interval_gs);
-            m_graph.draw_value_label(m_markers.second.position, value.average, time_series.colour);
+            m_graph.draw_value_label(glm::dvec2(m_markers.second.position, value.average + time_series.y_offset),
+                                     value.average,
+                                     time_series.colour);
         }
     }
 }
@@ -302,21 +306,6 @@ void Graph::draw_gui()
         const auto marker_interval = m_markers.second.position - m_markers.first.position;
         ImGui::Text(
             "Markers Delta: %.3fs, %.1fHz", marker_interval, 1.0 / std::abs(marker_interval));
-    }
-
-    ImGui::SliderInt("Line width", &m_plot_width, 1, 64, "%d", ImGuiSliderFlags_Logarithmic);
-    ImGui::Checkbox("Show line segments", &m_show_line_segments);
-
-    for (auto &plugin : m_ts)
-    {
-        // Im ImGui, widgets need unique label names
-        // Anything after the "##" is counted towards the uniqueness but is not displayed
-        const auto label_name = "##" + plugin.name;
-        ImGui::Checkbox(label_name.c_str(), &(plugin.visible));
-        ImGui::SameLine();
-        ImGui::ColorEdit3(plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
-        const auto slider_name = "Y offset##" + plugin.name;
-        ImGui::DragFloat(slider_name.c_str(), &(plugin.y_offset), 0.01);
     }
 }
 
@@ -367,6 +356,23 @@ void Graph::draw_menu()
             m_markers.first.visible = false;
             m_markers.second.visible = false;
         }
+    }
+
+    ImGui::SliderInt("Line width", &m_plot_width, 1, 64, "%d", ImGuiSliderFlags_Logarithmic);
+    ImGui::Checkbox("Show line segments", &m_show_line_segments);
+
+    ImGui::Separator();
+
+    for (auto &plugin : m_ts)
+    {
+        // Im ImGui, widgets need unique label names
+        // Anything after the "##" is counted towards the uniqueness but is not displayed
+        const auto label_name = "##" + plugin.name;
+        ImGui::Checkbox(label_name.c_str(), &(plugin.visible));
+        ImGui::SameLine();
+        ImGui::ColorEdit3(plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
+        const auto slider_name = "Y offset##" + plugin.name;
+        ImGui::DragFloat(slider_name.c_str(), &(plugin.y_offset), 0.01);
     }
 }
 

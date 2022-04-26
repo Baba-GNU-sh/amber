@@ -125,7 +125,6 @@ static void draw_gui(Window &window,
         if (ImGui::BeginMenu("Graph"))
         {
             graph_controller.draw_menu();
-            graph_controller.draw_gui();
             ImGui::EndMenu();
         }
 
@@ -164,6 +163,7 @@ static void draw_gui(Window &window,
 
     if (ImGui::CollapsingHeader("Graph", ImGuiTreeNodeFlags_DefaultOpen))
     {
+        graph_controller.draw_gui();
     }
 
     if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))

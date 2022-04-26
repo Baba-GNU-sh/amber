@@ -73,6 +73,8 @@ void WaveGenPlugin::draw_menu()
         "Frequency", &_settings.frequency, 0.1, 1000, "%.1f", ImGuiSliderFlags_Logarithmic);
     ImGui::SliderFloat(
         "Amplitude", &_settings.amplitude, 0.1, 10.0, "%.3f", ImGuiSliderFlags_Logarithmic);
+
+    ImGui::End();
 }
 
 void WaveGenPlugin::thread_handler()

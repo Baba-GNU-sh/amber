@@ -88,11 +88,11 @@ void GraphRendererOpenGL::draw_marker(double position,
                               colour);
 }
 
-void GraphRendererOpenGL::draw_value_label(double position,
+void GraphRendererOpenGL::draw_value_label(const glm::dvec2 &position,
                                            double value,
                                            const glm::vec3 &colour) const
 {
-    auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, value, 1.0));
+    auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, 1.0));
     pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
 
     auto [_1, _2, precision] = tick_spacing();
