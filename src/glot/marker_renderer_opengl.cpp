@@ -42,8 +42,21 @@ MarkerRendererOpenGL::MarkerRendererOpenGL(Window &window) : m_window(window)
     std::vector<Shader> shaders{
         Shader(Resources::find_shader("sprite/vertex.glsl"), GL_VERTEX_SHADER),
         Shader(Resources::find_shader("sprite/fragment.glsl"), GL_FRAGMENT_SHADER)};
+    m_sprite_shader = Program(shaders);
 
-    m_shader_program = Program(shaders);
+    glGenBuffers(1, &m_line_vertex_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(glm::ivec2), nullptr, GL_STREAM_DRAW);
+
+    glGenVertexArrays(1, &m_line_vao);
+    glBindVertexArray(m_line_vao);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), 0);
+    glEnableVertexAttribArray(0);
+
+    std::vector<Shader> line_shaders{
+        Shader(Resources::find_shader("block/vertex.glsl"), GL_VERTEX_SHADER),
+        Shader(Resources::find_shader("block/fragment.glsl"), GL_FRAGMENT_SHADER)};
+    m_line_shader = Program(line_shaders);
 }
 
 MarkerRendererOpenGL::~MarkerRendererOpenGL()
@@ -53,6 +66,8 @@ MarkerRendererOpenGL::~MarkerRendererOpenGL()
     glDeleteTextures(1, &m_handle_texture_right);
     glDeleteBuffers(1, &m_handle_vertex_buffer);
     glDeleteVertexArrays(1, &m_handle_vao);
+    glDeleteBuffers(1, &m_line_vertex_buffer);
+    glDeleteVertexArrays(1, &m_line_vao);
 }
 
 void MarkerRendererOpenGL::draw(int position_px,
@@ -60,7 +75,7 @@ void MarkerRendererOpenGL::draw(int position_px,
                                 const glm::vec3 &colour,
                                 MarkerStyle style) const
 {
-    m_shader_program.use();
+    m_sprite_shader.use();
     glBindBuffer(GL_ARRAY_BUFFER, m_handle_vertex_buffer);
     glBindVertexArray(m_handle_vao);
 
@@ -77,14 +92,14 @@ void MarkerRendererOpenGL::draw(int position_px,
         break;
     }
 
-    int uniform_id = m_shader_program.uniform_location("view_matrix");
+    int uniform_id = m_sprite_shader.uniform_location("view_matrix");
     const auto vp_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
-    uniform_id = m_shader_program.uniform_location("tint_colour");
+    uniform_id = m_sprite_shader.uniform_location("tint_colour");
     glUniform3fv(uniform_id, 1, &colour[0]);
 
-    uniform_id = m_shader_program.uniform_location("depth");
+    uniform_id = m_sprite_shader.uniform_location("depth");
     glUniform1f(uniform_id, -0.5);
 
     TextureCoord data[4];
@@ -104,6 +119,24 @@ void MarkerRendererOpenGL::draw(int position_px,
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    // Draw the vertical line
+    m_line_shader.use();
+    uniform_id = m_line_shader.uniform_location("view_matrix");
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
+
+    uniform_id = m_line_shader.uniform_location("colour");
+    glUniform3fv(uniform_id, 1, &colour[0]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
+
+    glm::vec2 line_verticies[2];
+    line_verticies[0] = glm::vec2(position_px, 0.0);
+    line_verticies[1] = glm::vec2(position_px, xlevel);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(line_verticies), line_verticies);
+
+    glBindVertexArray(m_line_vao);
+    glDrawArrays(GL_LINES, 0, 2);
 }
 
 unsigned int MarkerRendererOpenGL::load_texture(const std::string &file_name) const

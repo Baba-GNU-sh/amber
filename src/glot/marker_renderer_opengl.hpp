@@ -35,5 +35,8 @@ class MarkerRendererOpenGL
     unsigned int m_handle_texture_right;
     unsigned int m_handle_vertex_buffer;
     unsigned int m_handle_vao;
-    Program m_shader_program;
+    unsigned int m_line_vertex_buffer;
+    unsigned int m_line_vao;
+    Program m_sprite_shader;
+    Program m_line_shader;
 };

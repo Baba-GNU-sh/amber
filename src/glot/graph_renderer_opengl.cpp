@@ -77,31 +77,7 @@ void GraphRendererOpenGL::draw_marker(double position,
     pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
     m_marker_renderer.draw(pos_pixels.x, m_gutter_size_px, colour, style);
 
-    // Store the marker's info away for later
-    int offset = 0;
-
-    glBindVertexArray(_linebuf_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
-
-    // Get a pointer to the underlying buffer
-    void *raw_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-    auto *ptr = reinterpret_cast<glm::vec2 *>(raw_ptr);
-
-    ptr[offset++] = glm::vec2(pos_pixels.x, 0.0);
-    ptr[offset++] = glm::vec2(pos_pixels.x, m_size.y - m_gutter_size_px);
-
-    // make sure to tell OpenGL we're done with the pointer
-    glUnmapBuffer(GL_ARRAY_BUFFER);
-
-    _lines_shader.use();
-    int uniform_id = _lines_shader.uniform_location("view_matrix");
-    const auto viewport_matrix_inv = m_window.vp_matrix_inv();
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
-
-    uniform_id = _lines_shader.uniform_location("line_colour");
-    glUniform3fv(uniform_id, 1, &colour[0]);
-    glDrawArrays(GL_LINES, 0, offset);
-
+    // Draw the label which shows the x value of the marker
     auto [_1, _2, precision] = tick_spacing();
     std::stringstream ss;
     ss << std::fixed << std::setprecision(precision.x + 2) << position;
@@ -125,8 +101,8 @@ void GraphRendererOpenGL::init_line_buffers()
     glEnableVertexAttribArray(0);
 
     std::vector<Shader> shaders{
-        Shader(Resources::find_shader("line/vertex.glsl"), GL_VERTEX_SHADER),
-        Shader(Resources::find_shader("line/fragment.glsl"), GL_FRAGMENT_SHADER)};
+        Shader(Resources::find_shader("block/vertex.glsl"), GL_VERTEX_SHADER),
+        Shader(Resources::find_shader("block/fragment.glsl"), GL_FRAGMENT_SHADER)};
     _lines_shader = Program(shaders);
 }
 
@@ -225,7 +201,7 @@ void GraphRendererOpenGL::draw_lines() const
     const auto viewport_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
 
-    uniform_id = _lines_shader.uniform_location("line_colour");
+    uniform_id = _lines_shader.uniform_location("colour");
     glm::vec3 white(1.0, 1.0, 1.0);
     glUniform3fv(uniform_id, 1, &white[0]);
 

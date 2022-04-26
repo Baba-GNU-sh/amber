@@ -28,8 +28,8 @@ configure_file(shaders/plot/vertex.glsl shaders/plot/vertex.glsl COPYONLY)
 configure_file(shaders/plot/geometry.glsl shaders/plot/geometry.glsl COPYONLY)
 configure_file(shaders/plot/fragment.glsl shaders/plot/fragment.glsl COPYONLY)
 
-configure_file(shaders/line/vertex.glsl shaders/line/vertex.glsl COPYONLY)
-configure_file(shaders/line/fragment.glsl shaders/line/fragment.glsl COPYONLY)
+configure_file(shaders/block/vertex.glsl shaders/block/vertex.glsl COPYONLY)
+configure_file(shaders/block/fragment.glsl shaders/block/fragment.glsl COPYONLY)
 
 configure_file(shaders/sprite/vertex.glsl shaders/sprite/vertex.glsl COPYONLY)
 configure_file(shaders/sprite/fragment.glsl shaders/sprite/fragment.glsl COPYONLY)
