@@ -96,6 +96,26 @@ static void draw_gui(Window &window,
             {
                 window.set_fullscreen(!window.is_fullscreen());
             }
+
+            ImGui::Separator();
+
+            if (ImGui::Checkbox("Enable VSync", &m_enable_vsync))
+            {
+                update_vsync();
+            }
+
+            if (ImGui::Checkbox("Multisampling", &m_enable_multisampling))
+            {
+                update_multisampling();
+            }
+
+            if (ImGui::ColorEdit3("Clear colour", &(m_clear_colour.x)))
+            {
+                window.set_bg_colour(m_clear_colour);
+            }
+
+            ImGui::Checkbox("Call glFinish", &m_call_glfinish);
+
             ImGui::EndMenu();
         }
 
@@ -127,6 +147,7 @@ static void draw_gui(Window &window,
         ImGui::BulletText("Left mouse + drag to pan");
         ImGui::BulletText("Scroll to zoom");
         ImGui::BulletText("Scroll on gutters to zoom individual axes");
+        ImGui::BulletText("Press A or B to place markers");
     }
 
     if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen))
@@ -139,26 +160,6 @@ static void draw_gui(Window &window,
     if (ImGui::CollapsingHeader("Graph", ImGuiTreeNodeFlags_DefaultOpen))
     {
         graph_controller.draw_gui();
-    }
-
-    if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        if (ImGui::Checkbox("Enable VSync", &m_enable_vsync))
-        {
-            update_vsync();
-        }
-
-        if (ImGui::Checkbox("Multisampling", &m_enable_multisampling))
-        {
-            update_multisampling();
-        }
-
-        if (ImGui::ColorEdit3("Clear colour", &(m_clear_colour.x)))
-        {
-            window.set_bg_colour(m_clear_colour);
-        }
-
-        ImGui::Checkbox("Call glFinish", &m_call_glfinish);
     }
 
     if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))
