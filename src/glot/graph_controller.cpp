@@ -1,6 +1,5 @@
 #include "graph_controller.hpp"
 #include <imgui.h>
-#include <random>
 
 GraphController::GraphController(Database &database, GraphRendererOpenGL &graph, Window &window)
     : m_database(database), m_graph(graph), m_window(window)
@@ -12,8 +11,21 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
         return glm::vec3(r, g, b);
     };
 
+    const auto pick_next_colour = [](auto begin, auto end, auto current) {
+        constexpr int STRIDE = 5;
+        for (auto i = 0; i < STRIDE; ++i)
+        {
+            current++;
+            if (current == end)
+            {
+                current = begin;
+            }
+        }
+        return current;
+    };
+
     // A nice selection of material colours from here (column 400):
-    // https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=F44336
+    // https://material.io/resources/color/
     std::vector<glm::vec3> plot_colours;
     plot_colours.push_back(createGlmColour(0xef5350));
     plot_colours.push_back(createGlmColour(0xec407a));
@@ -32,28 +44,23 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
     plot_colours.push_back(createGlmColour(0xffa726));
     plot_colours.push_back(createGlmColour(0xff7043));
 
-    // Shuffle the colours
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(plot_colours.begin(), plot_colours.end(), g);
-
     const auto &data = m_database.data();
     m_ts.resize(data.size());
     auto colour = plot_colours.begin();
-    std::transform(
-        data.begin(), data.end(), m_ts.begin(), [&colour, &plot_colours](const auto &ts) {
-            TimeSeriesContainer cont;
-            cont.name = ts.first;
-            cont.ts = ts.second;
-            cont.colour = *colour++;
-            cont.visible = true;
-            cont.y_offset = 0.0f;
-            if (colour == plot_colours.end())
-            {
-                colour = plot_colours.begin();
-            }
-            return cont;
-        });
+    std::transform(data.begin(),
+                   data.end(),
+                   m_ts.begin(),
+                   [&colour, &plot_colours, &pick_next_colour](const auto &ts) {
+                       TimeSeriesContainer cont;
+                       cont.name = ts.first;
+                       cont.ts = ts.second;
+
+                       cont.colour = *colour;
+                       colour = pick_next_colour(plot_colours.begin(), plot_colours.end(), colour);
+                       cont.visible = true;
+                       cont.y_offset = 0.0f;
+                       return cont;
+                   });
 
     update_view_matrix(glm::dmat3(1.0));
 
@@ -92,7 +99,8 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
     });
 
     // Register for mouse events from the window
-    m_window_on_scroll_connection = m_window.scroll.connect([this](double /*xoffset*/, double yoffset) {
+    m_window_on_scroll_connection = m_window.scroll.connect([this](double /*xoffset*/,
+                                                                   double yoffset) {
         const double zoom_delta = 1.0f + (yoffset / 10.0f);
         const auto cursor = m_window.cursor();
         const auto size = m_window.size();
@@ -118,74 +126,77 @@ GraphController::GraphController(Database &database, GraphRendererOpenGL &graph,
         }
     });
 
-    m_window_on_cursor_move_connection = m_window.cursor_pos.connect([this](double xpos, double ypos) {
-        glm::dvec2 cursor(xpos, ypos);
+    m_window_on_cursor_move_connection =
+        m_window.cursor_pos.connect([this](double xpos, double ypos) {
+            glm::dvec2 cursor(xpos, ypos);
 
-        // Work out how much the cursor moved since the last time
-        const auto cursor_delta = cursor - m_cursor_old;
+            // Work out how much the cursor moved since the last time
+            const auto cursor_delta = cursor - m_cursor_old;
 
-        // Work out the delta in graph space
-        const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
-        const auto a = txform * glm::dvec3(0.0f);
-        const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
-        const auto delta = b - a;
+            // Work out the delta in graph space
+            const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
+            const auto a = txform * glm::dvec3(0.0f);
+            const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
+            const auto delta = b - a;
 
-        // Convert the delta back to a 2D vector
-        glm::dvec2 cursor_gs_delta(delta.x, delta.y);
+            // Convert the delta back to a 2D vector
+            glm::dvec2 cursor_gs_delta(delta.x, delta.y);
 
-        if (m_is_dragging)
-        {
-            update_view_matrix(glm::translate(m_view_matrix, cursor_gs_delta));
-        }
-
-        if (m_markers.first.is_dragging)
-        {
-            m_markers.first.position = m_markers.first.position + cursor_gs_delta.x;
-        }
-
-        if (m_markers.second.is_dragging)
-        {
-            m_markers.second.position = m_markers.second.position + cursor_gs_delta.x;
-        }
-
-        // Cache the position of the cursor for next time
-        m_cursor_old = cursor;
-    });
-
-    m_window_on_mouse_button_connection = m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-        {
-            // Work out what the user has clicked on
-            auto marker_clicked = [this](Marker &marker) -> bool {
-                if (!marker.visible)
-                    return false;
-
-                glm::vec3 marker_pos_vs =
-                    m_window.vp_matrix() * (m_view_matrix * glm::dvec3(marker.position, 0.0, 1.0));
-                auto cursor = m_window.cursor();
-
-                return (std::abs(cursor.x - marker_pos_vs.x) < 5);
-            };
-            if (marker_clicked(m_markers.first))
+            if (m_is_dragging)
             {
-                m_markers.first.is_dragging = true;
+                update_view_matrix(glm::translate(m_view_matrix, cursor_gs_delta));
             }
-            else if (marker_clicked(m_markers.second))
+
+            if (m_markers.first.is_dragging)
             {
-                m_markers.second.is_dragging = true;
+                m_markers.first.position = m_markers.first.position + cursor_gs_delta.x;
             }
-            else
+
+            if (m_markers.second.is_dragging)
             {
-                m_is_dragging = true;
+                m_markers.second.position = m_markers.second.position + cursor_gs_delta.x;
             }
-        }
-        else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-        {
-            m_is_dragging = false;
-            m_markers.first.is_dragging = false;
-            m_markers.second.is_dragging = false;
-        }
-    });
+
+            // Cache the position of the cursor for next time
+            m_cursor_old = cursor;
+        });
+
+    m_window_on_mouse_button_connection =
+        m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
+            if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+            {
+                // Work out what the user has clicked on
+                auto marker_clicked = [this](Marker &marker) -> bool {
+                    if (!marker.visible)
+                        return false;
+
+                    glm::vec3 marker_pos_vs =
+                        m_window.vp_matrix() *
+                        (m_view_matrix * glm::dvec3(marker.position, 0.0, 1.0));
+                    auto cursor = m_window.cursor();
+
+                    return (std::abs(cursor.x - marker_pos_vs.x) < 5);
+                };
+                if (marker_clicked(m_markers.first))
+                {
+                    m_markers.first.is_dragging = true;
+                }
+                else if (marker_clicked(m_markers.second))
+                {
+                    m_markers.second.is_dragging = true;
+                }
+                else
+                {
+                    m_is_dragging = true;
+                }
+            }
+            else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+            {
+                m_is_dragging = false;
+                m_markers.first.is_dragging = false;
+                m_markers.second.is_dragging = false;
+            }
+        });
 }
 
 void GraphController::draw()
