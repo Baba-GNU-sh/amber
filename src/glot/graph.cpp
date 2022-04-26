@@ -1,5 +1,7 @@
 #include "graph.hpp"
+#include "plot_renderer_opengl.hpp"
 #include <imgui.h>
+#include <utility>
 
 Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
     : m_database(database), m_graph(graph), m_window(window)
@@ -12,14 +14,10 @@ Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
     };
 
     const auto pick_next_colour = [](auto begin, auto end, auto current) {
-        constexpr int STRIDE = 5;
-        for (auto i = 0; i < STRIDE; ++i)
+        current++;
+        if (current == end)
         {
-            current++;
-            if (current == end)
-            {
-                current = begin;
-            }
+            current = begin;
         }
         return current;
     };
@@ -27,21 +25,21 @@ Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
     // A nice selection of material colours from here (column 400):
     // https://material.io/resources/color/
     std::vector<glm::vec3> plot_colours;
+
     plot_colours.push_back(createGlmColour(0xef5350));
-    plot_colours.push_back(createGlmColour(0xec407a));
-    plot_colours.push_back(createGlmColour(0xab47bc));
-    plot_colours.push_back(createGlmColour(0x7e57c2));
-    plot_colours.push_back(createGlmColour(0x5c6bc0));
     plot_colours.push_back(createGlmColour(0x42a5f5));
-    plot_colours.push_back(createGlmColour(0x29b6f6));
-    plot_colours.push_back(createGlmColour(0x26c6da));
-    plot_colours.push_back(createGlmColour(0x26a69a));
-    plot_colours.push_back(createGlmColour(0x66bb6a));
-    plot_colours.push_back(createGlmColour(0x9ccc65));
     plot_colours.push_back(createGlmColour(0xd4e157));
+    plot_colours.push_back(createGlmColour(0xec407a));
+    plot_colours.push_back(createGlmColour(0x26c6da));
     plot_colours.push_back(createGlmColour(0xffee58));
+    plot_colours.push_back(createGlmColour(0xab47bc));
+    plot_colours.push_back(createGlmColour(0x26a69a));
     plot_colours.push_back(createGlmColour(0xffca28));
+    plot_colours.push_back(createGlmColour(0x7e57c2));
+    plot_colours.push_back(createGlmColour(0x66bb6a));
     plot_colours.push_back(createGlmColour(0xffa726));
+    plot_colours.push_back(createGlmColour(0x5c6bc0));
+    plot_colours.push_back(createGlmColour(0x9ccc65));
     plot_colours.push_back(createGlmColour(0xff7043));
 
     const auto &data = m_database.data();
@@ -54,7 +52,6 @@ Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
                        TimeSeriesContainer cont;
                        cont.name = ts.first;
                        cont.ts = ts.second;
-
                        cont.colour = *colour;
                        colour = pick_next_colour(plot_colours.begin(), plot_colours.end(), colour);
                        cont.visible = true;
@@ -64,7 +61,7 @@ Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
 
     update_view_matrix(glm::dmat3(1.0));
 
-    m_window_on_key_connecttion = m_window.key.connect([this](int key, int, int action, int mods) {
+    m_window_on_key_connecttion = m_window.on_key([this](int key, int, int action, int mods) {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
             goto_newest_sample();
@@ -99,8 +96,7 @@ Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
     });
 
     // Register for mouse events from the window
-    m_window_on_scroll_connection = m_window.scroll.connect([this](double /*xoffset*/,
-                                                                   double yoffset) {
+    m_window_on_scroll_connection = m_window.on_scroll([this](double /*xoffset*/, double yoffset) {
         const double zoom_delta = 1.0f + (yoffset / 10.0f);
         const auto cursor = m_window.cursor();
         const auto size = m_window.size();
@@ -126,43 +122,42 @@ Graph::Graph(Database &database, GraphRendererOpenGL &graph, Window &window)
         }
     });
 
-    m_window_on_cursor_move_connection =
-        m_window.cursor_pos.connect([this](double xpos, double ypos) {
-            glm::dvec2 cursor(xpos, ypos);
+    m_window_on_cursor_move_connection = m_window.on_cursor_move([this](double xpos, double ypos) {
+        glm::dvec2 cursor(xpos, ypos);
 
-            // Work out how much the cursor moved since the last time
-            const auto cursor_delta = cursor - m_cursor_old;
+        // Work out how much the cursor moved since the last time
+        const auto cursor_delta = cursor - m_cursor_old;
 
-            // Work out the delta in graph space
-            const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
-            const auto a = txform * glm::dvec3(0.0f);
-            const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
-            const auto delta = b - a;
+        // Work out the delta in graph space
+        const auto txform = m_view_matrix_inv * glm::dmat3(m_window.vp_matrix_inv());
+        const auto a = txform * glm::dvec3(0.0f);
+        const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
+        const auto delta = b - a;
 
-            // Convert the delta back to a 2D vector
-            glm::dvec2 cursor_gs_delta(delta.x, delta.y);
+        // Convert the delta back to a 2D vector
+        glm::dvec2 cursor_gs_delta(delta.x, delta.y);
 
-            if (m_is_dragging)
-            {
-                update_view_matrix(glm::translate(m_view_matrix, cursor_gs_delta));
-            }
+        if (m_is_dragging)
+        {
+            update_view_matrix(glm::translate(m_view_matrix, cursor_gs_delta));
+        }
 
-            if (m_markers.first.is_dragging)
-            {
-                m_markers.first.position = m_markers.first.position + cursor_gs_delta.x;
-            }
+        if (m_markers.first.is_dragging)
+        {
+            m_markers.first.position = m_markers.first.position + cursor_gs_delta.x;
+        }
 
-            if (m_markers.second.is_dragging)
-            {
-                m_markers.second.position = m_markers.second.position + cursor_gs_delta.x;
-            }
+        if (m_markers.second.is_dragging)
+        {
+            m_markers.second.position = m_markers.second.position + cursor_gs_delta.x;
+        }
 
-            // Cache the position of the cursor for next time
-            m_cursor_old = cursor;
-        });
+        // Cache the position of the cursor for next time
+        m_cursor_old = cursor;
+    });
 
     m_window_on_mouse_button_connection =
-        m_window.mouse_button.connect([this](int button, int action, int /*mods*/) {
+        m_window.on_mouse_button([this](int button, int action, int /*mods*/) {
             if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
             {
                 // Work out what the user has clicked on
@@ -208,11 +203,26 @@ void Graph::draw()
 
     m_graph.draw_graph();
 
+    const auto graph_size_px = m_window.size();
+    const auto plot_size_px = graph_size_px - glm::ivec2(GUTTER_SIZE_PX, GUTTER_SIZE_PX);
+    const auto plot_position_px = glm::ivec2(GUTTER_SIZE_PX, 0);
+
+    const int num_samples = plot_size_px.x / PIXELS_PER_COL;
+
+    const auto plot_position_gs = screen2graph(plot_position_px);
+    const auto plot_size_gs = screen2graph_delta(plot_size_px);
+    const auto interval_gs = PIXELS_PER_COL * plot_size_gs.x / num_samples;
+
     for (auto &time_series : m_ts)
     {
         if (time_series.visible)
         {
-            m_graph.draw_plot(*(time_series.ts),
+            std::vector<TSSample> samples(num_samples);
+            auto n_samples = time_series.ts->get_samples(
+                samples.data(), plot_position_gs.x, interval_gs, num_samples);
+            samples.resize(n_samples);
+
+            m_graph.draw_plot(samples,
                               m_plot_width,
                               time_series.colour,
                               time_series.y_offset,
@@ -244,12 +254,23 @@ void Graph::draw()
     {
         m_graph.draw_marker(
             m_markers.first.position, marker_styles.first, glm::vec3(0.0, 1.0, 1.0));
+
+        for (const auto &time_series : m_ts)
+        {
+            const auto value = time_series.ts->get_sample(m_markers.first.position, interval_gs);
+            m_graph.draw_value_label(m_markers.first.position, value.average, time_series.colour);
+        }
     }
 
     if (m_markers.second.visible)
     {
         m_graph.draw_marker(
             m_markers.second.position, marker_styles.second, glm::vec3(1.0, 1.0, 0.0));
+        for (const auto &time_series : m_ts)
+        {
+            const auto value = time_series.ts->get_sample(m_markers.second.position, interval_gs);
+            m_graph.draw_value_label(m_markers.second.position, value.average, time_series.colour);
+        }
     }
 }
 
@@ -357,19 +378,29 @@ glm::dvec2 Graph::screen2graph(const glm::ivec2 &value) const
     return value_gs;
 }
 
+glm::dvec2 Graph::screen2graph_delta(const glm::ivec2 &delta) const
+{
+    auto begin_gs = screen2graph(glm::ivec2(0, 0));
+    auto end_gs = screen2graph(glm::ivec2(0, 0) + delta);
+    return end_gs - begin_gs;
+}
+
 void Graph::on_zoom(double x, double y)
 {
+    // Make a vector from the zoom delta
     glm::dvec2 zoom_delta_vec(x, y);
 
-    // Work out where the pointer is in graph space
-    auto cursor_in_gs_old = screen2graph(m_window.cursor());
-    update_view_matrix(glm::scale(m_view_matrix, zoom_delta_vec));
+    // Store where the pointer is in graph space before scaling
+    const auto cursor_in_gs_old = screen2graph(m_window.cursor());
 
-    // Limit zoom
+    // Scale the view matrix by the zoom amount, clamping to some max value
+    update_view_matrix(glm::scale(m_view_matrix, zoom_delta_vec));
     m_view_matrix[0][0] = std::min(m_view_matrix[0][0], ZOOM_MIN_X);
     m_view_matrix[1][1] = std::min(m_view_matrix[1][1], ZOOM_MIN_Y);
 
-    auto cursor_in_gs_new = screen2graph(m_window.cursor());
+    // Work out where the cursor would be under this new zoom level and recenter the view on the
+    // cursor
+    const auto cursor_in_gs_new = screen2graph(m_window.cursor());
     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
     update_view_matrix(glm::translate(m_view_matrix, cursor_delta));
 }

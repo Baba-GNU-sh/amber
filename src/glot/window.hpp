@@ -29,11 +29,22 @@ class Window
     void set_fullscreen(bool enable);
     bool is_fullscreen();
 
-    boost::signals2::signal<void(int, int)> framebuffer_size;
-    boost::signals2::signal<void(double, double)> cursor_pos;
-    boost::signals2::signal<void(double, double)> scroll;
-    boost::signals2::signal<void(int, int, int)> mouse_button;
-    boost::signals2::signal<void(int, int, int, int)> key;
+    typedef boost::signals2::signal<void(int, int)> resize_signal_t;
+    typedef boost::signals2::signal<void(double, double)> cursor_move_signal_t;
+    typedef boost::signals2::signal<void(double, double)> scroll_signal_t;
+    typedef boost::signals2::signal<void(int, int, int)> mouse_button_signal_t;
+    typedef boost::signals2::signal<void(int, int, int, int)> key_signal_t;
+
+    boost::signals2::connection on_resize(
+        const resize_signal_t::slot_type &subscriber);
+    boost::signals2::connection on_cursor_move(
+        const cursor_move_signal_t::slot_type &subscriber);
+    boost::signals2::connection on_scroll(
+        const scroll_signal_t::slot_type &subscriber);
+    boost::signals2::connection on_mouse_button(
+        const mouse_button_signal_t::slot_type &subscriber);
+    boost::signals2::connection on_key(
+        const key_signal_t::slot_type &subscriber);
 
   protected:
     GLFWwindow *m_window;
@@ -42,6 +53,12 @@ class Window
     virtual void handle_scroll_callback(double xoffset, double yoffset);
     virtual void handle_mouse_button_callback(int button, int action, int mods);
     virtual void handle_key_callback(int key, int scancode, int action, int mods);
+
+    resize_signal_t resize;
+    cursor_move_signal_t cursor_move;
+    scroll_signal_t scroll;
+    mouse_button_signal_t mouse_button;
+    key_signal_t key;
 
   private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);

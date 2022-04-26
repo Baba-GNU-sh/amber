@@ -26,8 +26,8 @@ class Graph
         std::shared_ptr<TimeSeries> ts;
         glm::vec3 colour;
         std::string name;
-        bool visible;
-        float y_offset;
+        bool visible = true;
+        float y_offset = 0.0;
     };
 
     struct Marker
@@ -38,11 +38,9 @@ class Graph
     };
 
   public:
-    Graph(Database &database, GraphRendererOpenGL &graph, Window &window);
-
-    /**
-     * @brief Get immutable access to the viewmatrix.
-     */
+    Graph(Database &database,
+          GraphRendererOpenGL &graph,
+          Window &window);
     const glm::dvec3 &view_matrix() const;
     void draw();
     void draw_gui();
@@ -50,6 +48,7 @@ class Graph
 
   private:
     glm::dvec2 screen2graph(const glm::ivec2 &value) const;
+    glm::dvec2 screen2graph_delta(const glm::ivec2 &value) const;
 
     void on_zoom(double x, double y);
     static bool hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br);
@@ -62,6 +61,7 @@ class Graph
     static constexpr int TICKLEN_PX = 5;
     static constexpr double ZOOM_MIN_X = 10e6;
     static constexpr double ZOOM_MIN_Y = 10e6;
+    static constexpr int PIXELS_PER_COL = 1;
 
     Database &m_database;
     GraphRendererOpenGL &m_graph;

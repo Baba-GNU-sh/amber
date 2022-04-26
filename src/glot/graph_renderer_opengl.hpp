@@ -52,7 +52,7 @@ class GraphRendererOpenGL
     /**
      * @brief Draws a timeseries onto the graph.
      */
-    void draw_plot(const TimeSeries &ts,
+    void draw_plot(const std::vector<TSSample> &data,
                    int plot_width,
                    glm::vec3 plot_colour,
                    float y_offset,
@@ -68,6 +68,15 @@ class GraphRendererOpenGL
     void draw_marker(double position,
                      MarkerRendererOpenGL::MarkerStyle style,
                      const glm::vec3 &colour) const;
+
+    /**
+     * @brief Draw a value label on the graph describing the value. 
+     * 
+     * @param position The time value where this marker should be placed. 
+     * @param value The value of the label to plot.
+     * @param colour The colour of the label.
+     */
+    void draw_value_label(double position, double value, const glm::vec3 &colour) const;
 
   private:
     void init_line_buffers();

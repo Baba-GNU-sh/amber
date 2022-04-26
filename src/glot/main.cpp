@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 #include "graph_renderer_opengl.hpp"
 #include "database.hpp"
+#include "plot_renderer_opengl.hpp"
 #include "plugin_context.hpp"
 #include "plugin_manager.hpp"
 #include "window.hpp"
@@ -116,18 +117,30 @@ static void draw_gui(Window &window,
 
             ImGui::Checkbox("Call glFinish", &m_call_glfinish);
 
+            ImGui::Separator();
+
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Graph"))
         {
             graph_controller.draw_menu();
+            graph_controller.draw_gui();
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Plugins"))
         {
             plugin_manager.draw_menu();
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Help"))
+        {
+            ImGui::BulletText("Left mouse + drag to pan");
+            ImGui::BulletText("Scroll to zoom");
+            ImGui::BulletText("Scroll on gutters to zoom individual axes");
+            ImGui::BulletText("Press A or B to place markers");
             ImGui::EndMenu();
         }
 
@@ -142,14 +155,6 @@ static void draw_gui(Window &window,
     ImGui::SetWindowPos(ImVec2(window.size().x - ImGui::GetWindowWidth() - 10, menubar_size.y),
                         true);
 
-    if (ImGui::CollapsingHeader("Help", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        ImGui::BulletText("Left mouse + drag to pan");
-        ImGui::BulletText("Scroll to zoom");
-        ImGui::BulletText("Scroll on gutters to zoom individual axes");
-        ImGui::BulletText("Press A or B to place markers");
-    }
-
     if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::Text("%.1f ms/frame (%.1f FPS)",
@@ -159,7 +164,6 @@ static void draw_gui(Window &window,
 
     if (ImGui::CollapsingHeader("Graph", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        graph_controller.draw_gui();
     }
 
     if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))
@@ -216,7 +220,7 @@ int main()
 
         // Listen to the keyboard events for hotkeys
         boost::signals2::scoped_connection _(
-            window.key.connect([&window](int key, int, int action, int) {
+            window.on_key([&window](int key, int, int action, int) {
                 if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
                 {
                     window.set_fullscreen(!window.is_fullscreen());
@@ -227,15 +231,15 @@ int main()
                 }
             }));
 
-        // We need to do this after creating our GL context which is done when the first GLFW window
-        // is created
+        // We need to do this after creating our GL context which is done when the first GLFW
+        // window is created
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
             throw std::runtime_error("Failed to initialize GLAD");
         }
 
-        // Our graph renderer requires depth testing, and blending to be enabled in order to render
-        // correcly
+        // Our graph renderer requires depth testing, and blending to be enabled in order to
+        // render correcly
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -245,7 +249,7 @@ int main()
         window.set_bg_colour(m_clear_colour);
 
         GraphRendererOpenGL graph_renderer(window);
-        Graph graph_controller(db, graph_renderer, window);
+        Graph graph(db, graph_renderer, window);
 
         spdlog::info("Initialization OK, starting main loop");
 
@@ -256,9 +260,9 @@ int main()
 
             window.use();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            graph_controller.draw();
+            graph.draw();
 
-            draw_gui(window, plugin_manager, graph_controller, db);
+            draw_gui(window, plugin_manager, graph, db);
 
             window.finish();
 

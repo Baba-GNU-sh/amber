@@ -20,7 +20,7 @@ ImGuiContextWindow::~ImGuiContextWindow()
 void ImGuiContextWindow::handle_cursor_pos_callback(double xpos, double ypos)
 {
     if (!ImGui::GetIO().WantCaptureMouse)
-        cursor_pos(xpos, ypos);
+        cursor_move(xpos, ypos);
 }
 
 void ImGuiContextWindow::handle_scroll_callback(double xoffset, double yoffset)

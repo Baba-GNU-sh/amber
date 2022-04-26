@@ -52,14 +52,14 @@ void GraphRendererOpenGL::draw_graph() const
     draw_labels();
 }
 
-void GraphRendererOpenGL::draw_plot(const TimeSeries &ts,
+void GraphRendererOpenGL::draw_plot(const std::vector<TSSample> &data,
                                     int plot_width,
                                     glm::vec3 plot_colour,
                                     float y_offset,
                                     bool show_line_segments) const
 {
     m_plot.draw(m_view_matrix,
-                ts,
+                data,
                 plot_width,
                 plot_colour,
                 y_offset,
@@ -84,6 +84,24 @@ void GraphRendererOpenGL::draw_marker(double position,
     m_text_renderer.draw_text(ss.str(),
                               glm::ivec2(pos_pixels.x, m_size.y - m_gutter_size_px / 2),
                               TextRendererOpenGL::LabelAlignmentHorizontal::Center,
+                              TextRendererOpenGL::LabelAlignmentVertical::Top,
+                              colour);
+}
+
+void GraphRendererOpenGL::draw_value_label(double position,
+                                           double value,
+                                           const glm::vec3 &colour) const
+{
+    auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, value, 1.0));
+    pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
+
+    auto [_1, _2, precision] = tick_spacing();
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(precision.y + 2) << value;
+    const auto label_text = ss.str();
+    m_text_renderer.draw_text(label_text,
+                              pos_pixels,
+                              TextRendererOpenGL::LabelAlignmentHorizontal::Left,
                               TextRendererOpenGL::LabelAlignmentVertical::Top,
                               colour);
 }

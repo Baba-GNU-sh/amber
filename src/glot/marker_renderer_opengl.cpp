@@ -75,6 +75,9 @@ void MarkerRendererOpenGL::draw(int position_px,
                                 const glm::vec3 &colour,
                                 MarkerStyle style) const
 {
+    // Align to the nearest half-pixel
+    const auto position_px_float = round(static_cast<double>(position_px) + 0.5) - 0.5;
+
     m_sprite_shader.use();
     glBindBuffer(GL_ARRAY_BUFFER, m_handle_vertex_buffer);
     glBindVertexArray(m_handle_vao);
@@ -108,13 +111,13 @@ void MarkerRendererOpenGL::draw(int position_px,
     const auto xlevel = window_size.y - gutter_size_px;
 
     int dims = 16;
-    data[0].vertex_pos = glm::vec2(position_px - dims / 2, xlevel);
+    data[0].vertex_pos = glm::vec2(position_px_float - dims / 2, xlevel);
     data[0].texture_pos = glm::vec2(0.0, 0.0);
-    data[1].vertex_pos = glm::vec2(position_px - dims / 2, xlevel + dims);
+    data[1].vertex_pos = glm::vec2(position_px_float - dims / 2, xlevel + dims);
     data[1].texture_pos = glm::vec2(0.0, 1.0);
-    data[2].vertex_pos = glm::vec2(position_px + dims / 2, xlevel);
+    data[2].vertex_pos = glm::vec2(position_px_float + dims / 2, xlevel);
     data[2].texture_pos = glm::vec2(1.0, 0.0);
-    data[3].vertex_pos = glm::vec2(position_px + dims / 2, xlevel + dims);
+    data[3].vertex_pos = glm::vec2(position_px_float + dims / 2, xlevel + dims);
     data[3].texture_pos = glm::vec2(1.0, 1.0);
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
@@ -131,8 +134,8 @@ void MarkerRendererOpenGL::draw(int position_px,
     glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
 
     glm::vec2 line_verticies[2];
-    line_verticies[0] = glm::vec2(position_px, 0.0);
-    line_verticies[1] = glm::vec2(position_px, xlevel);
+    line_verticies[0] = glm::vec2(position_px_float, 0.0);
+    line_verticies[1] = glm::vec2(position_px_float, xlevel);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(line_verticies), line_verticies);
 
     glBindVertexArray(m_line_vao);

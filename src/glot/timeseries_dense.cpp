@@ -101,7 +101,8 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
         }
     }
 
-    return current_sample - samples;
+    const auto count = current_sample - samples;
+    return count;
 }
 
 TSSample TimeSeriesDense::get_sample(double timestamp, double bin_width) const

@@ -126,18 +126,48 @@ bool Window::is_fullscreen()
     return m_fullscreen_mode;
 }
 
+boost::signals2::connection Window::on_resize(
+    const resize_signal_t::slot_type &subscriber)
+{
+    return resize.connect(subscriber);
+}
+
+boost::signals2::connection Window::on_cursor_move(
+    const cursor_move_signal_t::slot_type &subscriber)
+{
+    return cursor_move.connect(subscriber);
+}
+
+boost::signals2::connection Window::on_scroll(
+    const scroll_signal_t::slot_type &subscriber)
+{
+    return scroll.connect(subscriber);
+}
+
+boost::signals2::connection Window::on_mouse_button(
+    const mouse_button_signal_t::slot_type &subscriber)
+{
+    return mouse_button.connect(subscriber);
+}
+
+boost::signals2::connection Window::on_key(
+    const key_signal_t::slot_type &subscriber)
+{
+    return key.connect(subscriber);
+}
+
 void Window::handle_framebuffer_size_callback(int width, int height)
 {
     update_vp_matrix(width, height);
     glfwMakeContextCurrent(m_window);
     glViewport(0, 0, width, height);
-    framebuffer_size(width, height);
+    resize(width, height);
     m_logger->info("Window resized: {}x{}px", width, height);
 }
 
 void Window::handle_cursor_pos_callback(double xpos, double ypos)
 {
-    cursor_pos(xpos, ypos);
+    cursor_move(xpos, ypos);
 }
 
 void Window::handle_scroll_callback(double xoffset, double yoffset)
