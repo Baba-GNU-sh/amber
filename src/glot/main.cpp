@@ -124,6 +124,7 @@ static void draw_gui(Window &window,
                 graph_state.goto_newest_sample();
             }
 
+            ImGui::Checkbox("Sync with latest data", &graph_state.sync_latest_data);
             ImGui::SliderInt("Line width", &graph_state.plot_width, 1, 4);
             ImGui::Checkbox("Show line segments", &graph_state.show_line_segments);
 

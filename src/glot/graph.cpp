@@ -25,6 +25,11 @@ glm::dvec2 Graph::cursor_gs() const
 
 void Graph::draw()
 {
+    if (m_state.sync_latest_data)
+    {
+        m_state.goto_newest_sample();
+    }
+
     m_renderer.set_gutter_size(GUTTER_SIZE_PX);
     m_renderer.set_tick_len(TICKLEN_PX);
     m_renderer.set_view_matrix(m_state.view_matrix);
@@ -287,7 +292,7 @@ void Graph::fit_graph(const glm::dvec2 &start, const glm::dvec2 &end)
     const auto delta = glm::abs(end - start);
     const auto scaling_factor = 2.0 / delta;
     view_matrix = glm::scale(view_matrix, scaling_factor);
-    
+
     const auto translation = (start + end) / 2.0;
     view_matrix = glm::translate(view_matrix, -translation);
 

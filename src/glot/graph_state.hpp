@@ -29,6 +29,7 @@ struct GraphState
     bool show_line_segments = false;
     std::pair<MarkerState, MarkerState> markers;
     std::vector<TimeSeriesState> timeseries;
+    bool sync_latest_data = false;
 
     void update_view_matrix(const glm::dmat3 &value)
     {
@@ -50,8 +51,11 @@ struct GraphState
             }
         }
 
-        const auto view_matrix_new = glm::translate(view_matrix_copy, glm::dvec2(-latest_sample_time, 0)); 
-        update_view_matrix(view_matrix_new);
+        const auto offset_a = view_matrix_inv * glm::dvec3(0.0, 0.0, 1.0);
+        const auto offset_b = view_matrix_inv * glm::dvec3(1.0, 0.0, 1.0);
+        const auto offset = offset_b - offset_a;
+        view_matrix_copy = glm::translate(view_matrix_copy, glm::dvec2(offset) + glm::dvec2(-latest_sample_time, 0));
+        update_view_matrix(view_matrix_copy);
     }
 
     GraphState()
