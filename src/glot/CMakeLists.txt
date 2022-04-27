@@ -7,6 +7,7 @@ find_package(audiofile REQUIRED)
 find_package(Boost REQUIRED)
 
 add_subdirectory(bindings)
+add_subdirectory(stb_image)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -27,7 +28,6 @@ add_library(
 		wavegen_plugin.cpp
 		imgui_window.cpp
 		graph.cpp
-		stb_impl.cpp
 		text_renderer_opengl.cpp
 		line_renderer_opengl.cpp
 )
@@ -36,6 +36,7 @@ target_link_libraries(
 	glot
 	PUBLIC
 		bindings
+		stb_image
 		glfw::glfw
 		glad::glad
 		glm::glm

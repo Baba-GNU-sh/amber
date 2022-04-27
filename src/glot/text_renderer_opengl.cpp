@@ -1,10 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <stb_image/stb_image.h>
 
 #include "text_renderer_opengl.hpp"
 #include "resources.hpp"
-#include "stb_image.h"
 
 TextRendererOpenGL::TextRendererOpenGL(Window &window, const std::string &font_atlas_filename)
     : m_window(window)

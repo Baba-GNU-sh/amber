@@ -5,10 +5,10 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <sstream>
 #include <iomanip>
+#include <stb_image/stb_image.h>
 
 #include "graph_renderer_opengl.hpp"
 #include "resources.hpp"
-#include "stb_image.h"
 #include "text_renderer_opengl.hpp"
 
 GraphRendererOpenGL::GraphRendererOpenGL(Window &window)
