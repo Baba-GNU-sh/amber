@@ -77,16 +77,6 @@ std::size_t TimeSeriesDense::get_samples(TSSample *samples,
             if (index_first == index_last)
             {
                 const auto value = _data[0][index_first].sum;
-                if (current_sample - samples)
-                {
-                    if ((current_sample - 1)->average == value)
-                    {
-                        continue;
-                    }
-                }
-
-                // TODO always return something for the final bin
-
                 current_sample->average = current_sample->min = current_sample->max = value;
                 ++current_sample;
             }
