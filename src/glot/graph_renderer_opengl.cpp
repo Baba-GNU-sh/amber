@@ -13,8 +13,8 @@
 
 GraphRendererOpenGL::GraphRendererOpenGL(Window &window)
     : m_window(window), m_plot(window), m_text_renderer(m_window, "proggy_clean.png"),
-      m_marker_renderer(window), m_view_matrix(1.0), m_view_matrix_inv(1.0), m_gutter_size_px(60),
-      m_tick_len_px(5)
+      m_marker_renderer(window), m_line_renderer(m_window), m_view_matrix(1.0),
+      m_view_matrix_inv(1.0), m_gutter_size_px(60), m_tick_len_px(5)
 {
     init_line_buffers();
 }
@@ -104,6 +104,14 @@ void GraphRendererOpenGL::draw_value_label(const glm::dvec2 &position,
                               TextRendererOpenGL::LabelAlignmentHorizontal::Left,
                               TextRendererOpenGL::LabelAlignmentVertical::Top,
                               colour);
+}
+
+void GraphRendererOpenGL::draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const
+{
+    m_line_renderer.draw_line(start, glm::dvec2(start.x, end.y), glm::vec3(1.0, 1.0, 1.0));
+    m_line_renderer.draw_line(glm::dvec2(start.x, end.y), end, glm::vec3(1.0, 1.0, 1.0));
+    m_line_renderer.draw_line(end, glm::dvec2(end.x, start.y), glm::vec3(1.0, 1.0, 1.0));
+    m_line_renderer.draw_line(glm::dvec2(end.x, start.y), start, glm::vec3(1.0, 1.0, 1.0));
 }
 
 void GraphRendererOpenGL::init_line_buffers()

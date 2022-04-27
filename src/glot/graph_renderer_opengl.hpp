@@ -2,6 +2,7 @@
 
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include "line_renderer_opengl.hpp"
 #include "text_renderer_opengl.hpp"
 #include "plot_renderer_opengl.hpp"
 #include "marker_renderer_opengl.hpp"
@@ -79,6 +80,8 @@ class GraphRendererOpenGL
      */
     void draw_value_label(const glm::dvec2 &position, double value, const glm::vec3 &colour) const;
 
+    void draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const;
+
   private:
     void init_line_buffers();
     void init_glyph_buffers();
@@ -100,6 +103,7 @@ class GraphRendererOpenGL
     PlotRendererOpenGL m_plot;
     TextRendererOpenGL m_text_renderer;
     MarkerRendererOpenGL m_marker_renderer;
+    LineRendererOpenGL m_line_renderer;
 
     // Line buffers
     GLuint _linebuf_vao;
