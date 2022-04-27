@@ -31,8 +31,8 @@ void RandomDataPlugin::start()
 {
     if (!_running)
     {
-        _thread = std::thread(&RandomDataPlugin::thread_handler, this);
         _running = true;
+        _thread = std::thread(&RandomDataPlugin::thread_handler, this);
         _logger->info("Started");
     }
 }
