@@ -96,8 +96,11 @@ class TimeSeriesDense : public TimeSeries
     void push_sample(double value);
 
   private:
-    static constexpr std::size_t CHUNK_SIZE = 16 * 1024;
+    static int count_trailing_zeros(unsigned long long value);
+    static int count_leading_zeros(unsigned long long value);
     std::tuple<double, double, double> _reduce(std::size_t, std::size_t) const;
+    
+    static constexpr std::size_t CHUNK_SIZE = 16 * 1024;
     mutable std::recursive_mutex _mut;
     std::vector<ChunkedVector<DataStore, CHUNK_SIZE>> _data;
     double _interval;

@@ -163,6 +163,34 @@ void TimeSeriesDense::push_sample(double value)
     }
 }
 
+#if defined(__GNUC__) || defined(__GNUG__)
+int TimeSeriesDense::count_trailing_zeros(unsigned long long value)
+{
+    return __builtin_ctzll(value | (1ULL << 63));
+};
+
+int TimeSeriesDense::count_leading_zeros(unsigned long long value)
+{
+    return __builtin_clzll(value | 1ULL);
+};
+
+#elif defined _MSC_VER
+int TimeSeriesDense::count_trailing_zeros(unsigned long long value)
+{
+    unsigned long leading;
+    _BitScanForward64(&leading, value | (1ULL << 63));
+    return leading;
+};
+
+int TimeSeriesDense::count_leading_zeros(unsigned long long value)
+{
+    unsigned long leading;
+    _BitScanReverse64(&leading, value | 1ULL);
+    return 63 ^ leading;
+};
+
+#endif
+
 /**
  * @brief Fin
  *
@@ -191,26 +219,6 @@ std::tuple<double, double, double> TimeSeriesDense::_reduce(std::size_t begin,
     // Each element contains the sum of 2^R raw samples, where R is the index of the row in
     // which it lives. The job of this algorithm is to return the sum, min & max for each element in
     // this list, by visiting the smallest numver of elements possible.
-
-#if defined(__GNUC__) || defined(__GNUG__)
-    auto count_trailing_zeros = [](unsigned long long value) {
-        return __builtin_ctzll(value | (1ULL << 63));
-    };
-    auto count_leading_zeros = [](unsigned long long value) {
-        return __builtin_clzll(value | 1ULL);
-    };
-#elif defined _MSC_VER
-    auto count_trailing_zeros = [](unsigned long long value) {
-        unsigned long leading;
-        _BitScanForward64(&leading, value | (1ULL << 63));
-        return leading;
-    };
-    auto count_leading_zeros = [](unsigned long long value) {
-        unsigned long leading;
-        _BitScanReverse64(&leading, value | 1ULL);
-        return 63 ^ leading;
-    };
-#endif
 
     // Find the average, min and max for samples between begin and end
     const auto distance = end - begin;
