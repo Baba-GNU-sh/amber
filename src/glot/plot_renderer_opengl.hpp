@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
-#include "timeseries.hpp"
+#include <database/timeseries.hpp>
 #include "window.hpp"
 
 /**

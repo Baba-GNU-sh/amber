@@ -4,7 +4,7 @@
 #include <glm/fwd.hpp>
 #include <spdlog/spdlog.h>
 #include "graph_renderer_opengl.hpp"
-#include "database.hpp"
+#include <database/database.hpp>
 #include "plot_renderer_opengl.hpp"
 #include "plugin_context.hpp"
 #include "plugin_manager.hpp"
@@ -73,7 +73,7 @@ std::pair<double, const char *> human_readable(std::size_t size,
 
 static void draw_gui(Window &window,
                      PluginManager &plugin_manager,
-                     Graph &graph_controller,
+                     Graph &graph,
                      Database &database,
                      GraphState &graph_state)
 {
@@ -236,7 +236,7 @@ static void draw_gui(Window &window,
             ImGui::Text(" %f %f %f", view_matrix[0][i], view_matrix[1][i], view_matrix[2][i]);
         }
 
-        const auto cursor_gs = graph_controller.cursor_gs();
+        const auto cursor_gs = graph.cursor_gs();
         ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
 
         const auto &marker_a = graph_state.markers.first;
@@ -387,7 +387,7 @@ int main()
 
         GraphRendererOpenGL graph_renderer(window);
         Graph graph(graph_renderer, window, state);
-        
+
         // Listen to the keyboard events for hotkeys
         boost::signals2::scoped_connection _(
             window.on_key([&window, &state, &graph](int key, int, int action, int mods) {

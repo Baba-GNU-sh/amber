@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <timeseries_dense.hpp>
+#include <database/timeseries_dense.hpp>
 
 TEST(TimeSeriesDense, addAndRetrieveTwoSamples)
 {

@@ -1,4 +1,4 @@
-#include <chunked_vector.hpp>
+#include <database/chunked_vector.hpp>
 #include <gtest/gtest.h>
 
 TEST(ChunkedVector, nullTest)

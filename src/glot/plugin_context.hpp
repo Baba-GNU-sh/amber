@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database.hpp"
+#include <database/database.hpp>
 
 class PluginContext
 {

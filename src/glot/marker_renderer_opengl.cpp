@@ -6,7 +6,7 @@
 
 #include "marker_renderer_opengl.hpp"
 #include "text_renderer_opengl.hpp"
-#include "timeseries.hpp"
+#include <database/timeseries.hpp>
 #include "resources.hpp"
 
 struct TextureCoord

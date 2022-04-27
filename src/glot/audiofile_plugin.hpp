@@ -2,8 +2,8 @@
 
 #include "plugin.hpp"
 #include "plugin_context.hpp"
-#include "timeseries.hpp"
-#include "timeseries_dense.hpp"
+#include <database/timeseries.hpp>
+#include <database/timeseries_dense.hpp>
 #include <AudioFile.h>
 #include <spdlog/logger.h>
 #include <thread>

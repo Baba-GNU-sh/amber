@@ -1,5 +1,5 @@
 #include <numeric>
-#include "database.hpp"
+#include <database/database.hpp>
 
 void Database::register_timeseries(std::string name, std::shared_ptr<TimeSeries> timeseries)
 {

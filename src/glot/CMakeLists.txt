@@ -8,6 +8,7 @@ find_package(Boost REQUIRED)
 
 add_subdirectory(bindings)
 add_subdirectory(stb_image)
+add_subdirectory(database)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -19,10 +20,8 @@ add_library(
 		graph_renderer_opengl.cpp
 		plot_renderer_opengl.cpp
 		marker_renderer_opengl.cpp
-		database.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
-		timeseries_dense.cpp
 		window.cpp
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
@@ -37,6 +36,7 @@ target_link_libraries(
 	PUBLIC
 		bindings
 		stb_image
+		database
 		glfw::glfw
 		glad::glad
 		glm::glm
@@ -60,23 +60,9 @@ if (BUILD_COVERAGE)
 	target_link_options(glot PUBLIC -fprofile-arcs -ftest-coverage)
 endif()
 
-if (BUILD_BENCHMARKS)
-	find_package(benchmark REQUIRED)
-	add_executable(bench benchmark/bench_timeseries_dense.cpp)
-	target_link_libraries(
-		bench
-		PRIVATE
-			glot
-			benchmark::benchmark
-	)
-	add_test(NAME Benchmarks COMMAND bench)
-endif()
-
 if (BUILD_TESTS)
 	find_package(GTest REQUIRED)
 	add_executable(tests
-		test/test_timeseries_dense.cpp
-		test/test_chunked_vector.cpp
 		test/test_graph_controller.cpp
 	)
 	target_link_libraries(

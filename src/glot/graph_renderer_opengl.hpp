@@ -7,8 +7,8 @@
 #include "plot_renderer_opengl.hpp"
 #include "marker_renderer_opengl.hpp"
 #include "shader_utils.hpp"
-#include "database.hpp"
-#include "timeseries.hpp"
+#include <database/database.hpp>
+#include <database/timeseries.hpp>
 #include "window.hpp"
 
 /**

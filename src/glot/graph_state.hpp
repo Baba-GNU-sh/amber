@@ -4,7 +4,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
-#include "timeseries.hpp"
+#include <database/timeseries.hpp>
 
 struct GraphState
 {

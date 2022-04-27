@@ -5,7 +5,7 @@
 
 #include "plugin.hpp"
 #include "plugin_context.hpp"
-#include "timeseries_dense.hpp"
+#include <database/timeseries_dense.hpp>
 
 enum WaveType
 {

@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include "plot_renderer_opengl.hpp"
-#include "timeseries.hpp"
+#include <database/timeseries.hpp>
 #include "resources.hpp"
 
 PlotRendererOpenGL::PlotRendererOpenGL(Window &window) : m_window(window)
