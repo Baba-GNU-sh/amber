@@ -68,15 +68,16 @@ TEST(TimeSeriesDense, Oversampled)
     std::vector<double> initial_values = {0, 1, 2, 3};
     TimeSeriesDense db(0.0, 1.0, initial_values);
 
-    TSSample samples[5];
-    auto n_samples = db.get_samples(samples, 1.0, 0.2, 5);
+    TSSample samples[6];
+    auto n_samples = db.get_samples(samples, 1.0, 0.5, 6);
 
-    EXPECT_EQ(n_samples, 5);
+    EXPECT_EQ(n_samples, 6);
     EXPECT_FLOAT_EQ(samples[0].average, 1.0);
     EXPECT_FLOAT_EQ(samples[1].average, 1.0);
-    EXPECT_FLOAT_EQ(samples[2].average, 1.0);
-    EXPECT_FLOAT_EQ(samples[3].average, 1.0);
-    EXPECT_FLOAT_EQ(samples[4].average, 1.0);
+    EXPECT_FLOAT_EQ(samples[2].average, 2.0);
+    EXPECT_FLOAT_EQ(samples[3].average, 2.0);
+    EXPECT_FLOAT_EQ(samples[4].average, 3.0);
+    EXPECT_FLOAT_EQ(samples[5].average, 3.0);
 }
 
 TEST(TimeSeriesDense, OffFrontEnd)
@@ -97,4 +98,28 @@ TEST(TimeSeriesDense, OffBackEnd)
     TSSample samples[5];
     auto n_samples = db.get_samples(samples, 100.0, 1.0, 5);
     EXPECT_EQ(n_samples, 0);
+}
+
+TEST(TimeSeriesDense, EmptySet)
+{
+    TimeSeriesDense db(0.0, 1.0);
+
+    TSSample samples[5];
+    auto n_samples = db.get_samples(samples, 100.0, 1.0, 5);
+    EXPECT_EQ(n_samples, 0);
+}
+
+TEST(TimeSeriesDense, MemoryUsage)
+{
+    // We don't really care how much memory the thing is using, as long as it looks sane
+    std::vector<double> initial_values = {0, 1, 2, 3};
+    TimeSeriesDense db(0.0, 1.0, initial_values);
+    ASSERT_GT(db.memory_usage(), initial_values.size() * sizeof(double));
+}
+
+TEST(TimeSeriesDense, CheckSize)
+{
+    std::vector<double> initial_values = {0, 1, 2, 3};
+    TimeSeriesDense db(0.0, 1.0, initial_values);
+    ASSERT_EQ(db.size(), initial_values.size());
 }

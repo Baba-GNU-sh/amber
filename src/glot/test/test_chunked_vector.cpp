@@ -47,3 +47,15 @@ TEST(ChunkedVector, outOfBoundsAccess)
     ChunkedVector<int, 1024> data;
     ASSERT_THROW(data.at(100), std::out_of_range);
 }
+
+TEST(ChunkedVector, checkCapacity)
+{
+    ChunkedVector<int, 1024> data;
+    data.push(1);
+    ASSERT_EQ(data.capacity(), 1024);
+    for (int i = 0; i < 1024; i++)
+    {
+        data.push(i);
+    }
+    ASSERT_EQ(data.capacity(), 2048);
+}
