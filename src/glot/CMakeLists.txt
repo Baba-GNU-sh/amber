@@ -15,8 +15,9 @@ add_library(
 	STATIC
 		shader.cpp
 		shader_program.cpp
-		graph.cpp
-		plot.cpp
+		graph_renderer_opengl.cpp
+		plot_renderer_opengl.cpp
+		marker_renderer_opengl.cpp
 		database.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
@@ -25,9 +26,12 @@ add_library(
 		wavegen_plugin.cpp
 		random_data_plugin.cpp
 		imgui_window.cpp
-		app_context.cpp
-		timeseries_dense.cpp
 		timeseries_sparse.cpp
+		timeseries_dense.cpp
+		graph.cpp
+		stb_impl.cpp
+		text_renderer_opengl.cpp
+		line_renderer_opengl.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(
@@ -75,6 +79,7 @@ if (BUILD_TESTS)
 		test/test_timeseries_dense.cpp
 		test/test_timeseries_sparse.cpp
 		test/test_chunked_vector.cpp
+		test/test_graph_controller.cpp
 	)
 	target_link_libraries(
 		tests

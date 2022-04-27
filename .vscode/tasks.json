@@ -1,0 +1,82 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "configure",
+            "type": "shell",
+            "command": ".vscode/configure.sh ${input:build_type}",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "cmake --build . -j`nproc`",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/build/current"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "cmake --build  --target clean",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/build/current"
+            },
+            "group": {
+                "kind": "build",
+            }
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "ctest --verbose",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/build/current",
+                "env": {
+                    "CTEST_OUTPUT_ON_FAILURE": "1",
+                    "GTEST_COLOR": "1"
+                }
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "wipe",
+            "type": "shell",
+            "command": "rm -rf build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "build_type",
+            "description": "The type of build",
+            "default": "Debug",
+            "type": "promptString"
+        },
+    ]
+}

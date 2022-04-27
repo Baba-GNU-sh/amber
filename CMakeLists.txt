@@ -23,16 +23,20 @@ endif()
 set_target_properties(main PROPERTIES OUTPUT_NAME glot)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
 
-# Copy the shaders over to the build dir
-configure_file(shaders/plot/vertex.glsl plot/vertex.glsl COPYONLY)
-configure_file(shaders/plot/geometry.glsl plot/geometry.glsl COPYONLY)
-configure_file(shaders/plot/fragment.glsl plot/fragment.glsl COPYONLY)
+# Copy assets and shaders to the build dir
+configure_file(shaders/plot/vertex.glsl shaders/plot/vertex.glsl COPYONLY)
+configure_file(shaders/plot/geometry.glsl shaders/plot/geometry.glsl COPYONLY)
+configure_file(shaders/plot/fragment.glsl shaders/plot/fragment.glsl COPYONLY)
 
-configure_file(shaders/line/vertex.glsl line/vertex.glsl COPYONLY)
-configure_file(shaders/line/fragment.glsl line/fragment.glsl COPYONLY)
+configure_file(shaders/block/vertex.glsl shaders/block/vertex.glsl COPYONLY)
+configure_file(shaders/block/fragment.glsl shaders/block/fragment.glsl COPYONLY)
 
-configure_file(shaders/glyph/vertex.glsl glyph/vertex.glsl COPYONLY)
-configure_file(shaders/glyph/fragment.glsl glyph/fragment.glsl COPYONLY)
-configure_file(fonts/proggy_clean.png fonts/proggy_clean.png COPYONLY)
+configure_file(shaders/sprite/vertex.glsl shaders/sprite/vertex.glsl COPYONLY)
+configure_file(shaders/sprite/fragment.glsl shaders/sprite/fragment.glsl COPYONLY)
+
+configure_file(assets/fonts/proggy_clean.png assets/fonts/proggy_clean.png COPYONLY)
+configure_file(assets/sprites/marker_center.png assets/sprites/marker_center.png COPYONLY)
+configure_file(assets/sprites/marker_left.png assets/sprites/marker_left.png COPYONLY)
+configure_file(assets/sprites/marker_right.png assets/sprites/marker_right.png COPYONLY)
 
 configure_file(audio/Lurking_Threat_3.wav audio/Lurking_Threat_3.wav COPYONLY)

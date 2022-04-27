@@ -110,4 +110,5 @@ void AudioFilePlugin::draw_menu()
     ImGui::Begin("AudioFile");
     ImGui::Text("File: %s", _filename.c_str());
     ImGui::Text("Sample Rate: %u", _audioFile.getSampleRate());
+    ImGui::End();
 }

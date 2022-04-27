@@ -9,7 +9,7 @@ Window::Window(int width, int height, const std::string &title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
+
     m_window = glfwCreateWindow(width, height, m_title.c_str(), NULL, NULL);
     if (!m_window)
     {
@@ -26,7 +26,7 @@ Window::Window(int width, int height, const std::string &title)
 
     update_vp_matrix(width, height);
 
-    m_logger = spdlog::stdout_color_mt("Window::" + m_title);
+    m_logger = spdlog::stdout_color_mt("Window(" + m_title + ")");
     m_logger->info("Initialized");
 }
 
@@ -56,9 +56,11 @@ const glm::mat3 &Window::vp_matrix_inv() const
     return m_vp_matrix_inv;
 }
 
-const glm::ivec2 &Window::size() const
+glm::ivec2 Window::size() const
 {
-    return m_size;
+    glm::ivec2 size(0.0);
+    glfwGetWindowSize(m_window, &size.x, &size.y);
+    return size;
 }
 
 GLFWwindow *Window::handle()
@@ -124,18 +126,48 @@ bool Window::is_fullscreen()
     return m_fullscreen_mode;
 }
 
+boost::signals2::connection Window::on_resize(
+    const resize_signal_t::slot_type &subscriber)
+{
+    return resize.connect(subscriber);
+}
+
+boost::signals2::connection Window::on_cursor_move(
+    const cursor_move_signal_t::slot_type &subscriber)
+{
+    return cursor_move.connect(subscriber);
+}
+
+boost::signals2::connection Window::on_scroll(
+    const scroll_signal_t::slot_type &subscriber)
+{
+    return scroll.connect(subscriber);
+}
+
+boost::signals2::connection Window::on_mouse_button(
+    const mouse_button_signal_t::slot_type &subscriber)
+{
+    return mouse_button.connect(subscriber);
+}
+
+boost::signals2::connection Window::on_key(
+    const key_signal_t::slot_type &subscriber)
+{
+    return key.connect(subscriber);
+}
+
 void Window::handle_framebuffer_size_callback(int width, int height)
 {
     update_vp_matrix(width, height);
     glfwMakeContextCurrent(m_window);
     glViewport(0, 0, width, height);
-    framebuffer_size(width, height);
+    resize(width, height);
     m_logger->info("Window resized: {}x{}px", width, height);
 }
 
 void Window::handle_cursor_pos_callback(double xpos, double ypos)
 {
-    cursor_pos(xpos, ypos);
+    cursor_move(xpos, ypos);
 }
 
 void Window::handle_scroll_callback(double xoffset, double yoffset)
@@ -179,11 +211,6 @@ void Window::mouse_button_callback(GLFWwindow *window, int button, int action, i
 
 void Window::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-
     auto *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
     win->handle_key_callback(key, scancode, action, mods);
 }
@@ -194,5 +221,4 @@ void Window::update_vp_matrix(int width, int height)
     auto vp_matrix = glm::scale(identity, glm::vec2(width / 2, -height / 2));
     m_vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
     m_vp_matrix_inv = glm::inverse(m_vp_matrix);
-    m_size = glm::ivec2(width, height);
 }
