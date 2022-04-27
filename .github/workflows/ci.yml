@@ -29,7 +29,7 @@ jobs:
 
     - name: Coverage
       working-directory: ${{github.workspace}}/build
-      run: gcovr --root .. --xml --output coverage.xml --exclude '.*/stb_image.h'
+      run: gcovr --root .. --xml --output coverage.xml --exclude-throw-branches 
 
     - uses: codecov/codecov-action@v2
       with:
