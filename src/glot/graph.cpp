@@ -92,12 +92,15 @@ void Graph::draw()
 
         for (const auto &time_series : m_state.timeseries)
         {
-            const auto value =
-                time_series.ts->get_sample(m_state.markers.first.position, interval_gs);
-            m_renderer.draw_value_label(
-                glm::dvec2(m_state.markers.first.position, value.average + time_series.y_offset),
-                value.average,
-                time_series.colour);
+            if (time_series.visible)
+            {
+                const auto value =
+                    time_series.ts->get_sample(m_state.markers.first.position, interval_gs);
+                m_renderer.draw_value_label(glm::dvec2(m_state.markers.first.position,
+                                                       value.average + time_series.y_offset),
+                                            value.average,
+                                            time_series.colour);
+            }
         }
     }
 
@@ -107,12 +110,15 @@ void Graph::draw()
             m_state.markers.second.position, marker_styles.second, glm::vec3(1.0, 1.0, 0.0));
         for (const auto &time_series : m_state.timeseries)
         {
-            const auto value =
-                time_series.ts->get_sample(m_state.markers.second.position, interval_gs);
-            m_renderer.draw_value_label(
-                glm::dvec2(m_state.markers.second.position, value.average + time_series.y_offset),
-                value.average,
-                time_series.colour);
+            if (time_series.visible)
+            {
+                const auto value =
+                    time_series.ts->get_sample(m_state.markers.second.position, interval_gs);
+                m_renderer.draw_value_label(glm::dvec2(m_state.markers.second.position,
+                                                       value.average + time_series.y_offset),
+                                            value.average,
+                                            time_series.colour);
+            }
         }
     }
 
