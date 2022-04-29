@@ -17,9 +17,7 @@ add_library(
 	STATIC
 		shader.cpp
 		shader_program.cpp
-		graph_renderer_opengl.cpp
 		plot_renderer_opengl.cpp
-		marker_renderer_opengl.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
 		window.cpp
@@ -27,10 +25,11 @@ add_library(
 		wavegen_plugin.cpp
 		imgui_window.cpp
 		graph.cpp
-		text_renderer_opengl.cpp
+		label.cpp
 		line_renderer_opengl.cpp
 		sprite.cpp
 		font_material.cpp
+		marker.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

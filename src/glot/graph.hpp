@@ -2,29 +2,27 @@
 
 #include <glm/glm.hpp>
 #include "graph_renderer_opengl.hpp"
-#include "marker_renderer_opengl.hpp"
+#include "line_renderer_opengl.hpp"
+#include "marker.hpp"
+#include "plot_renderer_opengl.hpp"
 #include "window.hpp"
 #include "graph_state.hpp"
 
-/**
- * @brief The Graph stores the ephemeral state of the graph (such as the view matrix and
- * markers) and listens to mouse and key events from the window, modifying the state and redrawing
- * the graph through a renderer accordingly.
- *
- * The Graph doesn't depend on any specific rendering backend and thus will need to be
- * passed a renderer capable of actually drawing the graph to the screen. The reason for the
- * seperation is so that we could more easily switch out to a new renderer in the future, but mainly
- * so the Graph can be unit tested without needing to fire up an OpenGL context in the
- * test suite.
- */
 class Graph
 {
   public:
-    Graph(GraphRendererOpenGL &renderer, Window &window, GraphState &state);
+    Graph(Window &window, GraphState &state);
     glm::dvec2 cursor_gs() const;
     void draw();
 
   private:
+    void draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const;
+    void init_line_buffers();
+    void draw_lines();
+    void draw_labels();
+    void draw_plots();
+    void draw_markers();
+    std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
     void handle_scroll(double xoffset, double yoffset);
     void handle_cursor_move(double xpos, double ypos);
     void handle_mouse_button(int button, int action, int mods);
@@ -40,22 +38,26 @@ class Graph
     static constexpr double ZOOM_MIN_Y = 10e6;
     static constexpr int PIXELS_PER_COL = 1;
 
-    GraphRendererOpenGL &m_renderer;
     Window &m_window;
     GraphState &m_state;
+    FontMaterial m_font;
+    std::vector<Label> m_axis_labels;
+    Marker m_marker_a;
+    Marker m_marker_b;
+    LineRendererOpenGL m_line_renderer; // TODO rename me to something less "renderey"
+    PlotRendererOpenGL m_plot_renderer; // TODO rename this to something more object-ey
+
+    // Line buffers - TODO move these to some other primitive class thing
+    GLuint _linebuf_vao;
+    GLuint _linebuf_vbo;
+    Program _lines_shader;
+
+    glm::ivec2 m_size;
 
     boost::signals2::scoped_connection m_window_on_scroll_connection;
     boost::signals2::scoped_connection m_window_on_cursor_move_connection;
     boost::signals2::scoped_connection m_window_on_mouse_button_connection;
 
-    struct MarkerContainer
-    {
-        bool is_dragging;
-    };
-
-    std::pair<MarkerContainer, MarkerContainer> m_markers;
-
-    // State used for recording screen events
     glm::dvec2 m_cursor_old;
     bool m_is_dragging = false;
     bool m_is_selecting = false;

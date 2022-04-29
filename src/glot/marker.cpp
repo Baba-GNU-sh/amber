@@ -4,8 +4,8 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <stb_image/stb_image.h>
 
-#include "marker_renderer_opengl.hpp"
-#include "text_renderer_opengl.hpp"
+#include "marker.hpp"
+#include "label.hpp"
 #include <database/timeseries.hpp>
 #include "resources.hpp"
 

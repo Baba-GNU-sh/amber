@@ -4,7 +4,7 @@
 #include <stb_image/stb_image.h>
 #include <stdexcept>
 
-#include "text_renderer_opengl.hpp"
+#include "label.hpp"
 #include "resources.hpp"
 #include "font_material.hpp"
 

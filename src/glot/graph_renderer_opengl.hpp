@@ -3,9 +3,9 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include "line_renderer_opengl.hpp"
-#include "text_renderer_opengl.hpp"
+#include "label.hpp"
 #include "plot_renderer_opengl.hpp"
-#include "marker_renderer_opengl.hpp"
+#include "marker.hpp"
 #include "shader_utils.hpp"
 #include <database/database.hpp>
 #include <database/timeseries.hpp>
@@ -84,7 +84,6 @@ class GraphRendererOpenGL
 
   private:
     void init_line_buffers();
-    void init_glyph_buffers();
     void draw_lines() const;
     void draw_labels();
 

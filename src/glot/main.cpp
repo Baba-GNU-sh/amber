@@ -3,7 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <glm/fwd.hpp>
 #include <spdlog/spdlog.h>
-#include "graph_renderer_opengl.hpp"
 #include <database/database.hpp>
 #include "plot_renderer_opengl.hpp"
 #include "plugin_context.hpp"
@@ -385,8 +384,7 @@ int main()
         update_vsync();
         window.set_bg_colour(m_clear_colour);
 
-        GraphRendererOpenGL graph_renderer(window);
-        Graph graph(graph_renderer, window, state);
+        Graph graph(window, state);
 
         // Listen to the keyboard events for hotkeys
         boost::signals2::scoped_connection _(
