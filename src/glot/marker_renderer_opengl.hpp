@@ -5,12 +5,13 @@
 #include "text_renderer_opengl.hpp"
 #include <database/timeseries.hpp>
 #include "window.hpp"
+#include "sprite.hpp"
 
 /**
  * @brief Routines and buffers for drawing makers - which are vertical lines and a little handle for
  * dragging.
  */
-class MarkerRendererOpenGL
+class Marker
 {
   public:
     enum class MarkerStyle
@@ -19,24 +20,23 @@ class MarkerRendererOpenGL
         Left,
         Right
     };
-    MarkerRendererOpenGL(Window &window);
-    ~MarkerRendererOpenGL();
-    void draw(int position_px,
-              int gutter_size_px,
-              const glm::vec3 &colour,
-              MarkerStyle style) const;
+
+    Marker(Window &window);
+    ~Marker();
+    void set_position(const glm::ivec2 &position);
+    void set_colour(const glm::vec3 &colour);
+    void set_height(int height);
+    void draw() const;
 
   private:
     unsigned int load_texture(const std::string &filename) const;
 
     Window &m_window;
-    unsigned int m_handle_texture_center;
-    unsigned int m_handle_texture_left;
-    unsigned int m_handle_texture_right;
-    unsigned int m_handle_vertex_buffer;
-    unsigned int m_handle_vao;
+    Sprite m_handle;
     unsigned int m_line_vertex_buffer;
     unsigned int m_line_vao;
-    Program m_sprite_shader;
     Program m_line_shader;
+    glm::ivec2 m_position;
+    glm::vec3 m_colour;
+    int m_height;
 };

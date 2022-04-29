@@ -29,6 +29,8 @@ add_library(
 		graph.cpp
 		text_renderer_opengl.cpp
 		line_renderer_opengl.cpp
+		sprite.cpp
+		font_material.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

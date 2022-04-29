@@ -2,37 +2,15 @@
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <stb_image/stb_image.h>
+#include <stdexcept>
 
 #include "text_renderer_opengl.hpp"
 #include "resources.hpp"
+#include "font_material.hpp"
 
-TextRendererOpenGL::TextRendererOpenGL(Window &window, const std::string &font_atlas_filename)
-    : m_window(window)
+Label::Label(Window &window, FontMaterial &material, int capacity)
+    : m_window(window), m_material(material), m_capacity(capacity)
 {
-    // Load the font atlas into a texture
-    int width, height, nrChannels;
-    const auto font_atlas_filepath = Resources::find_font(font_atlas_filename);
-    unsigned char *tex_data =
-        stbi_load(font_atlas_filepath.c_str(), &width, &height, &nrChannels, 0);
-    if (!tex_data)
-    {
-        throw std::runtime_error("Unable to load font map: " + std::string(stbi_failure_reason()));
-    }
-
-    spdlog::info("font atlas: {}", nrChannels);
-
-    glGenTextures(1, &m_font_atlas_tex);
-    glBindTexture(GL_TEXTURE_2D, m_font_atlas_tex);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
-
-    stbi_image_free(tex_data);
-
     // Initialize the buffers
     glGenVertexArrays(1, &m_glyphbuf_vao);
     glBindVertexArray(m_glyphbuf_vao);
@@ -43,7 +21,7 @@ TextRendererOpenGL::TextRendererOpenGL(Window &window, const std::string &font_a
     glGenBuffers(1, &m_glyphbuf_ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_glyphbuf_ebo);
 
-    const int sz = 6 * 128 / 4;
+    const int sz = 6 * capacity / 4;
     unsigned int indices[sz];
     for (int i = 0, j = 0; j < sz; i += 4, j += 6)
     {
@@ -59,7 +37,7 @@ TextRendererOpenGL::TextRendererOpenGL(Window &window, const std::string &font_a
 
     // A glyph is rendered as a quad so we only need 4 verts and 4 texture
     // lookups
-    glBufferData(GL_ARRAY_BUFFER, 128 * sizeof(GlyphData), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, capacity * sizeof(GlyphData), nullptr, GL_STREAM_DRAW);
 
     // Define an attribute for the glyph verticies
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void *)0);
@@ -70,43 +48,69 @@ TextRendererOpenGL::TextRendererOpenGL(Window &window, const std::string &font_a
         1, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void *)offsetof(GlyphVertex, tex_coords));
     glEnableVertexAttribArray(1);
 
-    std::vector<Shader> shaders{
-        Shader(Resources::find_shader("sprite/vertex.glsl"), GL_VERTEX_SHADER),
-        Shader(Resources::find_shader("sprite/fragment.glsl"), GL_FRAGMENT_SHADER)};
-    m_glyph_shader = Program(shaders);
+    spdlog::info("{}", m_glyphbuf_ebo);
 }
 
-TextRendererOpenGL::~TextRendererOpenGL()
+Label::Label(Label &&other)
+    : m_window(other.m_window), m_material(other.m_material), m_capacity(other.m_capacity),
+      m_colour(other.m_colour)
 {
-    glDeleteTextures(1, &m_font_atlas_tex);
-    glDeleteVertexArrays(1, &m_glyphbuf_vao);
-    glDeleteBuffers(1, &m_glyphbuf_vbo);
-    glDeleteBuffers(1, &m_glyphbuf_ebo);
+    m_glyphbuf_vao = other.m_glyphbuf_vao;
+    other.m_glyphbuf_vao = 0;
+    m_glyphbuf_vbo = other.m_glyphbuf_vbo;
+    other.m_glyphbuf_vbo = 0;
+    m_glyphbuf_ebo = other.m_glyphbuf_ebo;
+    other.m_glyphbuf_ebo = 0;
 }
 
-void TextRendererOpenGL::draw_text(const std::string &text,
-                                   const glm::ivec2 &pos,
-                                   LabelAlignmentHorizontal halign,
-                                   LabelAlignmentVertical valign,
-                                   const glm::vec3 &colour) const
+Label::~Label()
 {
-    glm::ivec2 offset = pos;
+    if (m_glyphbuf_vao)
+        glDeleteVertexArrays(1, &m_glyphbuf_vao);
+    if (m_glyphbuf_vbo)
+        glDeleteBuffers(1, &m_glyphbuf_vbo);
+    if (m_glyphbuf_ebo)
+        glDeleteBuffers(1, &m_glyphbuf_ebo);
+}
+
+void Label::set_text(const std::string &text)
+{
+    if (text.length() > m_capacity)
+    {
+        throw std::runtime_error("String is longer than capacity!");
+    }
+    m_text = text;
+}
+
+void Label::set_colour(const glm::vec3 &colour)
+{
+    m_colour = colour;
+}
+
+void Label::set_position(const glm::ivec2 &position)
+{
+    m_position = position;
+}
+
+void Label::draw_text(LabelAlignmentHorizontal halign, LabelAlignmentVertical valign) const
+{
+    glm::ivec2 offset = m_position;
     glm::ivec2 char_stride = glm::ivec2(GLYPH_WIDTH, 0);
 
-    if (halign == TextRendererOpenGL::LabelAlignmentHorizontal::Right)
+    if (halign == Label::LabelAlignmentHorizontal::Right)
     {
-        offset -= char_stride * static_cast<int>(text.size());
+        offset -= char_stride * static_cast<int>(m_text.size());
     }
-    else if (halign == TextRendererOpenGL::LabelAlignmentHorizontal::Center)
+    else if (halign == Label::LabelAlignmentHorizontal::Center)
     {
-        offset -= char_stride * static_cast<int>(text.size()) / 2;
+        offset -= char_stride * static_cast<int>(m_text.size()) / 2;
     }
 
-    if (valign == TextRendererOpenGL::LabelAlignmentVertical::Center)
+    if (valign == Label::LabelAlignmentVertical::Center)
     {
         offset -= glm::ivec2(0, GLYPH_HEIGHT / 2);
     }
-    else if (valign == TextRendererOpenGL::LabelAlignmentVertical::Bottom)
+    else if (valign == Label::LabelAlignmentVertical::Bottom)
     {
         offset -= glm::ivec2(0, GLYPH_HEIGHT);
     }
@@ -114,7 +118,7 @@ void TextRendererOpenGL::draw_text(const std::string &text,
     GlyphData buffer[128];
     GlyphData *bufptr = &buffer[0];
 
-    for (auto character : text)
+    for (auto character : m_text)
     {
         draw_glyph(character, offset, &bufptr);
         offset += char_stride;
@@ -126,23 +130,14 @@ void TextRendererOpenGL::draw_text(const std::string &text,
     glBindBuffer(GL_ARRAY_BUFFER, m_glyphbuf_vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphData) * count, buffer);
 
-    m_glyph_shader.use();
-    int uniform_id = m_glyph_shader.uniform_location("view_matrix");
     const auto vp_matrix_inv = m_window.vp_matrix_inv();
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
+    m_material.use(m_colour, vp_matrix_inv);
 
-    uniform_id = m_glyph_shader.uniform_location("tint_colour");
-    glUniform3fv(uniform_id, 1, &colour[0]);
-
-    uniform_id = m_glyph_shader.uniform_location("depth");
-    glUniform1f(uniform_id, -0.2);
-
-    glBindTexture(GL_TEXTURE_2D, m_font_atlas_tex);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_glyphbuf_ebo);
     glDrawElements(GL_TRIANGLES, 6 * count, GL_UNSIGNED_INT, 0);
 }
 
-void TextRendererOpenGL::draw_glyph(char character, const glm::ivec2 &pos, GlyphData **buf) const
+void Label::draw_glyph(char character, const glm::ivec2 &pos, GlyphData **buf) const
 {
     GlyphData *data = *buf;
     data->verts[0].vert = pos;

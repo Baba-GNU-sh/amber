@@ -49,7 +49,7 @@ class GraphRendererOpenGL
     /**
      * @brief Draws the graph axes, ticks and labels. Doesn't actually draw any plots.
      */
-    void draw_graph() const;
+    void draw_graph();
 
     /**
      * @brief Draws a timeseries onto the graph.
@@ -68,8 +68,8 @@ class GraphRendererOpenGL
      * @param colour The colour of the marker.
      */
     void draw_marker(double position,
-                     MarkerRendererOpenGL::MarkerStyle style,
-                     const glm::vec3 &colour) const;
+                     Marker::MarkerStyle style,
+                     const glm::vec3 &colour);
 
     /**
      * @brief Draw a value label on the graph describing the value. 
@@ -78,7 +78,7 @@ class GraphRendererOpenGL
      * @param value The value of the label to plot.
      * @param colour The colour of the label.
      */
-    void draw_value_label(const glm::dvec2 &position, double value, const glm::vec3 &colour) const;
+    void draw_value_label(const glm::dvec2 &position, double value, const glm::vec3 &colour);
 
     void draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const;
 
@@ -86,7 +86,7 @@ class GraphRendererOpenGL
     void init_line_buffers();
     void init_glyph_buffers();
     void draw_lines() const;
-    void draw_labels() const;
+    void draw_labels();
 
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
 
@@ -101,8 +101,10 @@ class GraphRendererOpenGL
 
     Window &m_window;
     PlotRendererOpenGL m_plot;
-    TextRendererOpenGL m_text_renderer;
-    MarkerRendererOpenGL m_marker_renderer;
+    FontMaterial m_font_material;
+    Label m_text_renderer;
+    Marker m_marker_a;
+    Marker m_marker_b;
     LineRendererOpenGL m_line_renderer;
 
     // Line buffers
@@ -116,4 +118,6 @@ class GraphRendererOpenGL
     glm::ivec2 m_size;
     int m_gutter_size_px;
     int m_tick_len_px;
+
+    std::vector<Label> m_axis_labels;
 };

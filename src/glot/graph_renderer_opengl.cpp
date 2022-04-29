@@ -12,11 +12,18 @@
 #include "text_renderer_opengl.hpp"
 
 GraphRendererOpenGL::GraphRendererOpenGL(Window &window)
-    : m_window(window), m_plot(window), m_text_renderer(m_window, "proggy_clean.png"),
-      m_marker_renderer(window), m_line_renderer(m_window), m_view_matrix(1.0),
-      m_view_matrix_inv(1.0), m_gutter_size_px(60), m_tick_len_px(5)
+    : m_window(window), m_plot(window), m_font_material("proggy_clean.png"),
+      m_text_renderer(m_window, m_font_material), m_marker_a(window), m_marker_b(window),
+      m_line_renderer(m_window), m_view_matrix(1.0), m_view_matrix_inv(1.0), m_gutter_size_px(60),
+      m_tick_len_px(5)
 {
     init_line_buffers();
+
+    for (int i = 0; i < 128; ++i)
+    {
+        m_axis_labels.emplace_back(m_window, m_font_material);
+        m_axis_labels.back().set_colour(glm::vec3(1.0, 1.0, 1.0));
+    }
 }
 
 GraphRendererOpenGL::~GraphRendererOpenGL()
@@ -46,7 +53,7 @@ void GraphRendererOpenGL::set_tick_len(int tick_len_px)
     m_tick_len_px = tick_len_px;
 }
 
-void GraphRendererOpenGL::draw_graph() const
+void GraphRendererOpenGL::draw_graph()
 {
     draw_lines();
     draw_labels();
@@ -69,28 +76,32 @@ void GraphRendererOpenGL::draw_plot(const std::vector<TSSample> &data,
 }
 
 void GraphRendererOpenGL::draw_marker(double position,
-                                      MarkerRendererOpenGL::MarkerStyle style,
-                                      const glm::vec3 &colour) const
+                                      Marker::MarkerStyle style,
+                                      const glm::vec3 &colour)
 {
-
+    (void)style;
     auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, 0.0, 1.0));
     pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
-    m_marker_renderer.draw(pos_pixels.x, m_gutter_size_px, colour, style);
+    m_marker_renderer.set_position(glm::ivec2(pos_pixels.x, 0.0));
+    m_marker_renderer.set_colour(colour);
+    m_marker_renderer.set_height(m_window.size().y - m_gutter_size_px);
+    m_marker_renderer.draw();
 
     // Draw the label which shows the x value of the marker
     auto [_1, _2, precision] = tick_spacing();
     std::stringstream ss;
     ss << std::fixed << std::setprecision(precision.x + 2) << position;
-    m_text_renderer.draw_text(ss.str(),
-                              glm::ivec2(pos_pixels.x, m_size.y - m_gutter_size_px / 2),
-                              TextRendererOpenGL::LabelAlignmentHorizontal::Center,
-                              TextRendererOpenGL::LabelAlignmentVertical::Top,
-                              colour);
+
+    m_text_renderer.set_text(ss.str());
+    m_text_renderer.set_colour(colour);
+    m_text_renderer.set_position(glm::ivec2(pos_pixels.x, m_size.y - m_gutter_size_px / 2));
+    m_text_renderer.draw_text(Label::LabelAlignmentHorizontal::Center,
+                              Label::LabelAlignmentVertical::Top);
 }
 
 void GraphRendererOpenGL::draw_value_label(const glm::dvec2 &position,
                                            double value,
-                                           const glm::vec3 &colour) const
+                                           const glm::vec3 &colour)
 {
     auto pos_pixels = m_window.vp_matrix() * (m_view_matrix * glm::dvec3(position, 1.0));
     pos_pixels = round(pos_pixels - 0.5f) + 0.5f;
@@ -99,11 +110,11 @@ void GraphRendererOpenGL::draw_value_label(const glm::dvec2 &position,
     std::stringstream ss;
     ss << std::fixed << std::setprecision(precision.y + 2) << value;
     const auto label_text = ss.str();
-    m_text_renderer.draw_text(label_text,
-                              pos_pixels,
-                              TextRendererOpenGL::LabelAlignmentHorizontal::Left,
-                              TextRendererOpenGL::LabelAlignmentVertical::Top,
-                              colour);
+    m_text_renderer.set_text(label_text);
+    m_text_renderer.set_colour(colour);
+    m_text_renderer.set_position(pos_pixels);
+    m_text_renderer.draw_text(Label::LabelAlignmentHorizontal::Left,
+                              Label::LabelAlignmentVertical::Top);
 }
 
 void GraphRendererOpenGL::draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const
@@ -234,7 +245,7 @@ void GraphRendererOpenGL::draw_lines() const
     glDrawArrays(GL_LINES, 0, offset);
 }
 
-void GraphRendererOpenGL::draw_labels() const
+void GraphRendererOpenGL::draw_labels()
 {
     glm::ivec2 tl(m_gutter_size_px, 0);
     glm::ivec2 bl(m_gutter_size_px, m_size.y - m_gutter_size_px);
@@ -248,6 +259,8 @@ void GraphRendererOpenGL::draw_labels() const
     double start = ceil(bottom_gs.y / tick_spacing_major.y) * tick_spacing_major.y;
     double end = ceil(top_gs.y / tick_spacing_major.y) * tick_spacing_major.y;
 
+    std::size_t label_offset = 0;
+
     // Place a tick at every unit up the y axis
     for (double i = start; i < end; i += tick_spacing_major.y)
     {
@@ -256,11 +269,12 @@ void GraphRendererOpenGL::draw_labels() const
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision.y) << i;
-        m_text_renderer.draw_text(ss.str(),
-                                  point,
-                                  TextRendererOpenGL::LabelAlignmentHorizontal::Right,
-                                  TextRendererOpenGL::LabelAlignmentVertical::Center,
-                                  glm::vec3(1.0, 1.0, 1.0));
+
+        auto &label = m_axis_labels[label_offset++];
+        label.set_text(ss.str());
+        label.set_position(point);
+        label.draw_text(Label::LabelAlignmentHorizontal::Right,
+                        Label::LabelAlignmentVertical::Center);
     }
 
     // Draw the y axis ticks
@@ -277,11 +291,12 @@ void GraphRendererOpenGL::draw_labels() const
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision.x) << i;
-        m_text_renderer.draw_text(ss.str(),
-                                  point,
-                                  TextRendererOpenGL::LabelAlignmentHorizontal::Center,
-                                  TextRendererOpenGL::LabelAlignmentVertical::Top,
-                                  glm::vec3(1.0, 1.0, 1.0));
+
+        auto &label = m_axis_labels[label_offset++];
+        label.set_text(ss.str());
+        label.set_position(point);
+        label.draw_text(Label::LabelAlignmentHorizontal::Center,
+                        Label::LabelAlignmentVertical::Top);
     }
 
     // if (hit_test(m_window.cursor(),

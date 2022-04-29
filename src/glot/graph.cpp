@@ -1,5 +1,6 @@
 #include "graph.hpp"
 #include "plot_renderer_opengl.hpp"
+#include "marker_renderer_opengl.hpp"
 #include <imgui.h>
 #include <utility>
 
@@ -69,19 +70,19 @@ void Graph::draw()
             m_state.markers.first.visible && m_state.markers.second.visible;
         if (!both_markers_visible)
         {
-            return std::make_pair(MarkerRendererOpenGL::MarkerStyle::Center,
-                                  MarkerRendererOpenGL::MarkerStyle::Center);
+            return std::make_pair(Marker::MarkerStyle::Center,
+                                  Marker::MarkerStyle::Center);
         }
 
         if (m_state.markers.first.position < m_state.markers.second.position)
         {
-            return std::make_pair(MarkerRendererOpenGL::MarkerStyle::Left,
-                                  MarkerRendererOpenGL::MarkerStyle::Right);
+            return std::make_pair(Marker::MarkerStyle::Left,
+                                  Marker::MarkerStyle::Right);
         }
         else
         {
-            return std::make_pair(MarkerRendererOpenGL::MarkerStyle::Right,
-                                  MarkerRendererOpenGL::MarkerStyle::Left);
+            return std::make_pair(Marker::MarkerStyle::Right,
+                                  Marker::MarkerStyle::Left);
         }
     }();
 

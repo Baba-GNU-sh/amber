@@ -48,12 +48,12 @@ class Graph
     boost::signals2::scoped_connection m_window_on_cursor_move_connection;
     boost::signals2::scoped_connection m_window_on_mouse_button_connection;
 
-    struct Marker
+    struct MarkerContainer
     {
         bool is_dragging;
     };
 
-    std::pair<Marker, Marker> m_markers;
+    std::pair<MarkerContainer, MarkerContainer> m_markers;
 
     // State used for recording screen events
     glm::dvec2 m_cursor_old;
