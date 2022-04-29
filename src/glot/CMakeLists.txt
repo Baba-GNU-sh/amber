@@ -30,6 +30,7 @@ add_library(
 		sprite.cpp
 		font_material.cpp
 		marker.cpp
+		selection_box.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

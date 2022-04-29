@@ -4,6 +4,7 @@
 #include "line_renderer_opengl.hpp"
 #include "marker.hpp"
 #include "plot.hpp"
+#include "selection_box.hpp"
 #include "window.hpp"
 #include "graph_state.hpp"
 
@@ -20,7 +21,6 @@ class Graph
     void draw_labels();
     void draw_plots();
     void draw_markers();
-    void draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const;
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
     void handle_scroll(double xoffset, double yoffset);
     void handle_cursor_move(double xpos, double ypos);
@@ -45,7 +45,7 @@ class Graph
     std::vector<Plot> m_plots;
     Marker m_marker_a;
     Marker m_marker_b;
-    LineRendererOpenGL m_line_renderer; // TODO rename me to something less "renderey"
+    SelectionBox m_selection_box;
 
     // Line buffers - TODO move these to some other primitive class thing
     GLuint _linebuf_vao;

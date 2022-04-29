@@ -10,7 +10,7 @@
 
 Graph::Graph(Window &window, GraphState &state)
     : m_window(window), m_state(state), m_font("proggy_clean.png"), m_marker_a(m_window),
-      m_marker_b(m_window), m_line_renderer(m_window)
+      m_marker_b(m_window), m_selection_box(m_window)
 {
     using namespace std::placeholders;
 
@@ -65,16 +65,10 @@ void Graph::draw()
 
     if (m_is_selecting)
     {
-        draw_selection_box(m_selection_start, m_window.cursor());
+        m_selection_box.set_position(m_selection_start);
+        m_selection_box.set_size(m_window.cursor() - m_selection_start);
+        m_selection_box.draw();
     }
-}
-
-void Graph::draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const
-{
-    m_line_renderer.draw_line(start, glm::dvec2(start.x, end.y), glm::vec3(1.0, 1.0, 1.0));
-    m_line_renderer.draw_line(glm::dvec2(start.x, end.y), end, glm::vec3(1.0, 1.0, 1.0));
-    m_line_renderer.draw_line(end, glm::dvec2(end.x, start.y), glm::vec3(1.0, 1.0, 1.0));
-    m_line_renderer.draw_line(glm::dvec2(end.x, start.y), start, glm::vec3(1.0, 1.0, 1.0));
 }
 
 void Graph::init_line_buffers()
