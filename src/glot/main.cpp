@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 #include <database/database.hpp>
 #include "plot.hpp"
+#include "imgui_database_panel.hpp"
 #include "plugin_context.hpp"
 #include "plugin_manager.hpp"
 #include "window.hpp"
@@ -79,6 +80,8 @@ static void draw_gui(Window &window,
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    ImGuiDatabasePanel panel(graph_state);
 
     ImVec2 menubar_size;
     if (ImGui::BeginMainMenuBar())
@@ -177,18 +180,7 @@ static void draw_gui(Window &window,
 
             ImGui::Separator();
 
-            for (auto &plugin : graph_state.timeseries)
-            {
-                // Im ImGui, widgets need unique label names
-                // Anything after the "##" is counted towards the uniqueness but is not displayed
-                const auto label_name = "##" + plugin.name;
-                ImGui::Checkbox(label_name.c_str(), &(plugin.visible));
-                ImGui::SameLine();
-                ImGui::ColorEdit3(
-                    plugin.name.c_str(), &(plugin.colour.x), ImGuiColorEditFlags_NoInputs);
-                const auto slider_name = "Y offset##" + plugin.name;
-                ImGui::DragFloat(slider_name.c_str(), &(plugin.y_offset), 0.01);
-            }
+            panel.draw_imgui_panel();
 
             ImGui::EndMenu();
         }
@@ -228,12 +220,13 @@ static void draw_gui(Window &window,
 
     if (ImGui::CollapsingHeader("Graph", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        const auto &view_matrix = graph_state.view_matrix;
-        ImGui::Text("View Matrix:");
-        for (int i = 0; i < 3; i++)
-        {
-            ImGui::Text(" %f %f %f", view_matrix[0][i], view_matrix[1][i], view_matrix[2][i]);
-        }
+        // const auto &view_matrix = graph_state.view_matrix;
+        // ImGui::Text("View Matrix:");
+        // for (int i = 0; i < 3; i++)
+        // {
+        //     ImGui::Text(" %f %f %f", view_matrix[0][i], view_matrix[1][i],
+        //     view_matrix[2][i]);
+        // }
 
         const auto cursor_gs = graph.cursor_gs();
         ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
