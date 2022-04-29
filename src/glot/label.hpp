@@ -5,7 +5,7 @@
 #include "window.hpp"
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
-#include "font_material.hpp"
+#include "font.hpp"
 
 class Label
 {
@@ -35,7 +35,7 @@ class Label
         GlyphVertex verts[4]; // Order: [TL, TR, BL, BR]
     };
 
-    Label(Window &window, FontMaterial &material, int capacity = 128);
+    Label(Window &window, Font &material, int capacity = 128);
     ~Label();
 
     Label(const Label &) = delete;
@@ -54,7 +54,7 @@ class Label
     void draw_glyph(char character, const glm::ivec2 &pos, GlyphData **buf) const;
 
     Window &m_window;
-    FontMaterial &m_material;
+    Font &m_material;
     std::size_t m_capacity;
     std::string m_text;
     glm::vec3 m_colour;

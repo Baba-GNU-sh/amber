@@ -1,4 +1,4 @@
-#include "font_material.hpp"
+#include "font.hpp"
 #include "resources.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -6,7 +6,7 @@
 #include <stb_image/stb_image.h>
 #include <glm/gtc/type_ptr.hpp>
 
-FontMaterial::FontMaterial(const std::string &font_atlas_filename)
+Font::Font(const std::string &font_atlas_filename)
 {
     // Load the font atlas into a texture
     int width, height, nrChannels;
@@ -36,12 +36,12 @@ FontMaterial::FontMaterial(const std::string &font_atlas_filename)
     m_shader = Program(shaders);
 }
 
-FontMaterial::~FontMaterial()
+Font::~Font()
 {
     glDeleteTextures(1, &m_font_atlas_tex);
 }
 
-void FontMaterial::use(const glm::vec3 &colour, const glm::mat3 &transform) const
+void Font::use(const glm::vec3 &colour, const glm::mat3 &transform) const
 {
     m_shader.use();
 

@@ -4,11 +4,11 @@
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
 
-class FontMaterial
+class Font
 {
   public:
-    FontMaterial(const std::string &font_altas_filename);
-    ~FontMaterial();
+    Font(const std::string &font_altas_filename);
+    ~Font();
 
     void use(const glm::vec3 &colour, const glm::mat3 &transform) const;
 

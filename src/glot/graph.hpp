@@ -38,7 +38,7 @@ class Graph
 
     Window &m_window;
     GraphState &m_state;
-    FontMaterial m_font;
+    Font m_font;
     std::vector<Label> m_axis_labels;
     std::vector<Label> m_marker_ts_labels;
     std::vector<Plot> m_plots;

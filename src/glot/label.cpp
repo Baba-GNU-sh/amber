@@ -6,9 +6,9 @@
 
 #include "label.hpp"
 #include "resources.hpp"
-#include "font_material.hpp"
+#include "font.hpp"
 
-Label::Label(Window &window, FontMaterial &material, int capacity)
+Label::Label(Window &window, Font &material, int capacity)
     : m_window(window), m_material(material), m_capacity(capacity)
 {
     // Initialize the buffers

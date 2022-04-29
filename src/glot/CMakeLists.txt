@@ -27,7 +27,7 @@ add_library(
 		label.cpp
 		plot.cpp
 		sprite.cpp
-		font_material.cpp
+		font.cpp
 		marker.cpp
 		selection_box.cpp
 )

@@ -33,7 +33,7 @@ class Marker
 
     Window &m_window;
     Sprite m_handle;
-    FontMaterial m_font;
+    Font m_font;
     Label m_label;
     unsigned int m_line_vertex_buffer;
     unsigned int m_line_vao;
