@@ -33,6 +33,13 @@ Graph::Graph(Window &window, GraphState &state)
         m_axis_labels.back().set_colour(glm::vec3(1.0, 1.0, 1.0));
     }
 
+    for (auto &ts : m_state.timeseries)
+    {
+        (void)ts;
+        m_marker_ts_labels.emplace_back(m_window, m_font);
+        m_marker_ts_labels.emplace_back(m_window, m_font);
+    }
+
     m_size = m_window.size();
     m_marker_a.set_colour(glm::vec3(0.0, 1.0, 1.0));
     m_marker_b.set_colour(glm::vec3(1.0, 1.0, 0.0));
@@ -340,6 +347,16 @@ void Graph::draw_markers()
     //     }
     // }();
 
+    const auto graph_size_px = m_window.size();
+    const auto plot_size_px = graph_size_px - glm::ivec2(GUTTER_SIZE_PX, GUTTER_SIZE_PX);
+
+    const int num_samples = plot_size_px.x / PIXELS_PER_COL;
+
+    const auto plot_size_gs = screen2graph_delta(plot_size_px);
+    const auto interval_gs = PIXELS_PER_COL * plot_size_gs.x / num_samples;
+
+    std::size_t marker_ts_label_index = 0;
+
     if (m_state.markers.first.visible)
     {
         glm::ivec2 marker_pos = glm::dmat3(m_window.vp_matrix()) * m_state.view_matrix *
@@ -355,18 +372,28 @@ void Graph::draw_markers()
         m_marker_a.set_position(marker_pos);
         m_marker_a.draw();
 
-        // for (const auto &time_series : m_state.timeseries)
-        // {
-        //     if (time_series.visible)
-        //     {
-        //         const auto value =
-        //             time_series.ts->get_sample(m_state.markers.first.position, interval_gs);
-        //         m_renderer.draw_value_label(glm::dvec2(m_state.markers.first.position,
-        //                                                value.average + time_series.y_offset),
-        //                                     value.average,
-        //                                     time_series.colour);
-        //     }
-        // }
+        for (const auto &time_series : m_state.timeseries)
+        {
+            if (time_series.visible)
+            {
+                const auto value =
+                    time_series.ts->get_sample(m_state.markers.first.position, interval_gs);
+
+                std::stringstream ss;
+                ss << std::fixed << std::setprecision(precision.y + 2) << value.average;
+
+                auto &label = m_marker_ts_labels[marker_ts_label_index++];
+                label.set_colour(time_series.colour);
+                label.set_alignment(Label::AlignmentHorizontal::Left);
+                label.set_alignment(Label::AlignmentVertical::Top);
+                label.set_position(glm::dmat3(m_window.vp_matrix()) * m_state.view_matrix *
+                                   glm::dvec3(m_state.markers.first.position,
+                                              value.average + time_series.y_offset,
+                                              1.0));
+                label.set_text(ss.str());
+                label.draw();
+            }
+        }
     }
 
     if (m_state.markers.second.visible)
@@ -384,18 +411,28 @@ void Graph::draw_markers()
         m_marker_b.set_position(marker_pos);
         m_marker_b.draw();
 
-        // for (const auto &time_series : m_state.timeseries)
-        // {
-        //     if (time_series.visible)
-        //     {
-        //         const auto value =
-        //             time_series.ts->get_sample(m_state.markers.second.position, interval_gs);
-        //         m_renderer.draw_value_label(glm::dvec2(m_state.markers.second.position,
-        //                                                value.average + time_series.y_offset),
-        //                                     value.average,
-        //                                     time_series.colour);
-        //     }
-        // }
+        for (const auto &time_series : m_state.timeseries)
+        {
+            if (time_series.visible)
+            {
+                const auto value =
+                    time_series.ts->get_sample(m_state.markers.second.position, interval_gs);
+
+                std::stringstream ss;
+                ss << std::fixed << std::setprecision(precision.y + 2) << value.average;
+
+                auto &label = m_marker_ts_labels[marker_ts_label_index++];
+                label.set_colour(time_series.colour);
+                label.set_alignment(Label::AlignmentHorizontal::Left);
+                label.set_alignment(Label::AlignmentVertical::Top);
+                label.set_position(glm::dmat3(m_window.vp_matrix()) * m_state.view_matrix *
+                                   glm::dvec3(m_state.markers.second.position,
+                                              value.average + time_series.y_offset,
+                                              1.0));
+                label.set_text(ss.str());
+                label.draw();
+            }
+        }
     }
 }
 

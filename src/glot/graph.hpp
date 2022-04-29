@@ -41,6 +41,7 @@ class Graph
     GraphState &m_state;
     FontMaterial m_font;
     std::vector<Label> m_axis_labels;
+    std::vector<Label> m_marker_ts_labels;
     Marker m_marker_a;
     Marker m_marker_b;
     LineRendererOpenGL m_line_renderer; // TODO rename me to something less "renderey"
