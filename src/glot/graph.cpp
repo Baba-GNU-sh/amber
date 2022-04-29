@@ -4,7 +4,7 @@
 #include <utility>
 #include <imgui.h>
 #include "graph.hpp"
-#include "plot_renderer_opengl.hpp"
+#include "plot.hpp"
 #include "marker.hpp"
 #include "resources.hpp"
 

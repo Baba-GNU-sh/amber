@@ -17,7 +17,6 @@ add_library(
 	STATIC
 		shader.cpp
 		shader_program.cpp
-		plot_renderer_opengl.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
 		window.cpp
@@ -26,6 +25,7 @@ add_library(
 		imgui_window.cpp
 		graph.cpp
 		label.cpp
+		plot.cpp
 		line_renderer_opengl.cpp
 		sprite.cpp
 		font_material.cpp

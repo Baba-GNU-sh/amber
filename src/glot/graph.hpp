@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include "line_renderer_opengl.hpp"
 #include "marker.hpp"
-#include "plot_renderer_opengl.hpp"
+#include "plot.hpp"
 #include "window.hpp"
 #include "graph_state.hpp"
 

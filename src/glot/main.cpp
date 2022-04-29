@@ -4,7 +4,7 @@
 #include <glm/fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <database/database.hpp>
-#include "plot_renderer_opengl.hpp"
+#include "plot.hpp"
 #include "plugin_context.hpp"
 #include "plugin_manager.hpp"
 #include "window.hpp"
