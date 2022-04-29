@@ -47,8 +47,6 @@ Label::Label(Window &window, FontMaterial &material, int capacity)
     glVertexAttribPointer(
         1, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void *)offsetof(GlyphVertex, tex_coords));
     glEnableVertexAttribArray(1);
-
-    spdlog::info("{}", m_glyphbuf_ebo);
 }
 
 Label::Label(Label &&other)
@@ -92,25 +90,35 @@ void Label::set_position(const glm::ivec2 &position)
     m_position = position;
 }
 
-void Label::draw_text(LabelAlignmentHorizontal halign, LabelAlignmentVertical valign) const
+void Label::set_alignment(AlignmentHorizontal halign)
+{
+    m_halign = halign;
+}
+
+void Label::set_alignment(AlignmentVertical valign)
+{
+    m_valign = valign;
+}
+
+void Label::draw() const
 {
     glm::ivec2 offset = m_position;
     glm::ivec2 char_stride = glm::ivec2(GLYPH_WIDTH, 0);
 
-    if (halign == Label::LabelAlignmentHorizontal::Right)
+    if (m_halign == Label::AlignmentHorizontal::Right)
     {
         offset -= char_stride * static_cast<int>(m_text.size());
     }
-    else if (halign == Label::LabelAlignmentHorizontal::Center)
+    else if (m_halign == Label::AlignmentHorizontal::Center)
     {
         offset -= char_stride * static_cast<int>(m_text.size()) / 2;
     }
 
-    if (valign == Label::LabelAlignmentVertical::Center)
+    if (m_valign == Label::AlignmentVertical::Center)
     {
         offset -= glm::ivec2(0, GLYPH_HEIGHT / 2);
     }
-    else if (valign == Label::LabelAlignmentVertical::Bottom)
+    else if (m_valign == Label::AlignmentVertical::Bottom)
     {
         offset -= glm::ivec2(0, GLYPH_HEIGHT);
     }

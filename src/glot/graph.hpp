@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "graph_renderer_opengl.hpp"
 #include "line_renderer_opengl.hpp"
 #include "marker.hpp"
 #include "plot_renderer_opengl.hpp"

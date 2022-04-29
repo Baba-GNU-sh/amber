@@ -16,7 +16,8 @@ struct TextureCoord
 };
 
 Marker::Marker(Window &window)
-    : m_window(window), m_handle(window, "marker_center.png")
+    : m_window(window), m_handle(window, "marker_center.png"), m_font("proggy_clean.png"),
+      m_label(m_window, m_font)
 {
     glGenBuffers(1, &m_line_vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
@@ -34,6 +35,8 @@ Marker::Marker(Window &window)
 
     m_handle.set_alignment(Sprite::HorizontalAlignment::Center);
     m_handle.set_alignment(Sprite::VerticalAlignment::Top);
+    m_label.set_alignment(Label::AlignmentHorizontal::Center);
+    m_label.set_alignment(Label::AlignmentVertical::Top);
 }
 
 Marker::~Marker()
@@ -46,23 +49,32 @@ void Marker::set_position(const glm::ivec2 &position)
 {
     m_position = position;
     m_handle.set_position(m_position + glm::ivec2(0, m_height));
+    m_label.set_position(m_position + glm::ivec2(0, m_height + 16));
 }
 
 void Marker::set_colour(const glm::vec3 &colour)
 {
     m_colour = colour;
     m_handle.set_tint(colour);
+    m_label.set_colour(colour);
 }
 
 void Marker::set_height(int height)
 {
     m_height = height;
     m_handle.set_position(m_position + glm::ivec2(0, m_height));
+    m_label.set_position(m_position + glm::ivec2(0, m_height + 16));
+}
+
+void Marker::set_label_text(const std::string &text)
+{
+    m_label.set_text(text);
 }
 
 void Marker::draw() const
 {
     m_handle.draw();
+    m_label.draw();
 
     // Align to the nearest half-pixel
     glm::vec2 position_float = m_position;

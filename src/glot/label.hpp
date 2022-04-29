@@ -10,14 +10,14 @@
 class Label
 {
   public:
-    enum class LabelAlignmentHorizontal
+    enum class AlignmentHorizontal
     {
         Left,
         Right,
         Center
     };
 
-    enum class LabelAlignmentVertical
+    enum class AlignmentVertical
     {
         Top,
         Center,
@@ -46,10 +46,9 @@ class Label
     void set_text(const std::string &string);
     void set_colour(const glm::vec3 &colour);
     void set_position(const glm::ivec2 &position);
-    void set_alignment(LabelAlignmentHorizontal halign);
-    void set_alignment(LabelAlignmentVertical valign);
-
-    void draw_text(LabelAlignmentHorizontal halign, LabelAlignmentVertical valign) const;
+    void set_alignment(AlignmentHorizontal halign);
+    void set_alignment(AlignmentVertical valign);
+    void draw() const;
 
   private:
     void draw_glyph(char character, const glm::ivec2 &pos, GlyphData **buf) const;
@@ -60,6 +59,8 @@ class Label
     std::string m_text;
     glm::vec3 m_colour;
     glm::ivec2 m_position;
+    AlignmentHorizontal m_halign;
+    AlignmentVertical m_valign;
 
     static constexpr int GLYPH_HEIGHT = 18;
     static constexpr int GLYPH_WIDTH = 7;

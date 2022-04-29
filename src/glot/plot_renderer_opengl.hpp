@@ -5,9 +5,6 @@
 #include <database/timeseries.hpp>
 #include "window.hpp"
 
-/**
- * @brief Draws plots in OpenGL.
- */
 class PlotRendererOpenGL
 {
   public:

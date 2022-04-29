@@ -34,6 +34,8 @@ Graph::Graph(Window &window, GraphState &state)
     }
 
     m_size = m_window.size();
+    m_marker_a.set_colour(glm::vec3(0.0, 1.0, 1.0));
+    m_marker_b.set_colour(glm::vec3(1.0, 1.0, 0.0));
 }
 
 glm::dvec2 Graph::cursor_gs() const
@@ -215,8 +217,9 @@ void Graph::draw_labels()
         auto &label = m_axis_labels[label_offset++];
         label.set_text(ss.str());
         label.set_position(point);
-        label.draw_text(Label::LabelAlignmentHorizontal::Right,
-                        Label::LabelAlignmentVertical::Center);
+        label.set_alignment(Label::AlignmentHorizontal::Right);
+        label.set_alignment(Label::AlignmentVertical::Center);
+        label.draw();
     }
 
     // Draw the y axis ticks
@@ -238,8 +241,9 @@ void Graph::draw_labels()
         auto &label = m_axis_labels[label_offset++];
         label.set_text(ss.str());
         label.set_position(point);
-        label.draw_text(Label::LabelAlignmentHorizontal::Center,
-                        Label::LabelAlignmentVertical::Top);
+        label.set_alignment(Label::AlignmentHorizontal::Center);
+        label.set_alignment(Label::AlignmentVertical::Top);
+        label.draw();
     }
 
     // if (hit_test(m_window.cursor(),
@@ -271,8 +275,8 @@ void Graph::draw_labels()
     //                             point,
     //                             18,
     //                             7,
-    //                             LabelAlignment::Right,
-    //                             LabelAlignmentVertical::Center);
+    //                             Alignment::Right,
+    //                             AlignmentVertical::Center);
     //             };
 
     //             draw_label(sample.average);
@@ -342,7 +346,11 @@ void Graph::draw_markers()
                                 glm::dvec3(m_state.markers.first.position, 0.0, 1.0);
         marker_pos.y = 0;
 
-        m_marker_a.set_colour(glm::vec3(0.0, 1.0, 1.0));
+        auto [_1, _2, precision] = tick_spacing();
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision.x + 2) << m_state.markers.first.position;
+
+        m_marker_a.set_label_text(ss.str());
         m_marker_a.set_height(m_size.y - GUTTER_SIZE_PX);
         m_marker_a.set_position(marker_pos);
         m_marker_a.draw();
@@ -367,7 +375,11 @@ void Graph::draw_markers()
                                 glm::dvec3(m_state.markers.second.position, 0.0, 1.0);
         marker_pos.y = 0;
 
-        m_marker_b.set_colour(glm::vec3(1.0, 1.0, 0.0));
+        auto [_1, _2, precision] = tick_spacing();
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision.x + 2) << m_state.markers.second.position;
+
+        m_marker_b.set_label_text(ss.str());
         m_marker_b.set_height(m_size.y - GUTTER_SIZE_PX);
         m_marker_b.set_position(marker_pos);
         m_marker_b.draw();

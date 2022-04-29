@@ -23,6 +23,7 @@ class Marker
     void set_colour(const glm::vec3 &colour);
     void set_height(int height);
     void set_style(MarkerStyle style);
+    void set_label_text(const std::string &text);
     void draw() const;
 
     bool is_dragging = false; // TODO make this better
@@ -32,6 +33,8 @@ class Marker
 
     Window &m_window;
     Sprite m_handle;
+    FontMaterial m_font;
+    Label m_label;
     unsigned int m_line_vertex_buffer;
     unsigned int m_line_vao;
     Program m_line_shader;
