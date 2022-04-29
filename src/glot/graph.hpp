@@ -15,15 +15,15 @@ class Graph
     void draw();
 
   private:
+    void handle_scroll(double xoffset, double yoffset);
+    void handle_cursor_move(double xpos, double ypos);
+    void handle_mouse_button(int button, int action, int mods);
     void init_line_buffers();
     void draw_lines();
     void draw_labels();
     void draw_plots();
     void draw_markers();
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
-    void handle_scroll(double xoffset, double yoffset);
-    void handle_cursor_move(double xpos, double ypos);
-    void handle_mouse_button(int button, int action, int mods);
     glm::dvec2 screen2graph(const glm::ivec2 &value) const;
     glm::dvec2 screen2graph_delta(const glm::ivec2 &value) const;
     void on_zoom(double x, double y);
@@ -45,13 +45,12 @@ class Graph
     Marker m_marker_a;
     Marker m_marker_b;
     SelectionBox m_selection_box;
+    glm::ivec2 m_size;
 
     // Line buffers - TODO move these to some other primitive class thing
-    GLuint _linebuf_vao;
-    GLuint _linebuf_vbo;
-    Program _lines_shader;
-
-    glm::ivec2 m_size;
+    GLuint m_linebuf_vao;
+    GLuint m_linebuf_vbo;
+    Program m_lines_shader;
 
     boost::signals2::scoped_connection m_window_on_scroll_connection;
     boost::signals2::scoped_connection m_window_on_cursor_move_connection;

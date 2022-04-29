@@ -48,12 +48,12 @@ void Sprite::set_position(const glm::ivec2 &position)
     m_position = position;
 }
 
-void Sprite::set_alignment(VerticalAlignment align)
+void Sprite::set_alignment(AlignmentVertical align)
 {
     m_vertical_alignment = align;
 }
 
-void Sprite::set_alignment(HorizontalAlignment align)
+void Sprite::set_alignment(AlignmentHorizontal align)
 {
     m_horizontal_alignment = align;
 }
@@ -80,10 +80,10 @@ void Sprite::draw() const
     auto position = m_position;
     switch (m_horizontal_alignment)
     {
-    case HorizontalAlignment::Center:
+    case AlignmentHorizontal::Center:
         position.x -= m_size.x / 2;
         break;
-    case HorizontalAlignment::Right:
+    case AlignmentHorizontal::Right:
         position.x -= m_size.x;
         break;
     default:

@@ -23,17 +23,6 @@ class Label
         Bottom
     };
 
-    struct GlyphVertex
-    {
-        glm::vec2 vert;
-        glm::vec2 tex_coords;
-    };
-
-    struct GlyphData
-    {
-        GlyphVertex verts[4]; // Order: [TL, TR, BL, BR]
-    };
-
     Label(Window &window, Font &material, int capacity = 128);
     ~Label();
 
@@ -50,7 +39,18 @@ class Label
     void draw() const;
 
   private:
-    void draw_glyph(char character, const glm::ivec2 &pos, GlyphData **buf) const;
+    struct GlyphVertex
+    {
+        glm::vec2 vert;
+        glm::vec2 tex_coords;
+    };
+
+    struct GlyphVerticies
+    {
+        GlyphVertex verts[4];
+    };
+
+    void draw_glyph(char character, const glm::ivec2 &pos, GlyphVerticies **buf) const;
 
     Window &m_window;
     Font &m_material;

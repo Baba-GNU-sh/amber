@@ -27,8 +27,8 @@ Marker::Marker(Window &window)
         Shader(Resources::find_shader("block/fragment.glsl"), GL_FRAGMENT_SHADER)};
     m_line_shader = Program(line_shaders);
 
-    m_handle.set_alignment(Sprite::HorizontalAlignment::Center);
-    m_handle.set_alignment(Sprite::VerticalAlignment::Top);
+    m_handle.set_alignment(Sprite::AlignmentHorizontal::Center);
+    m_handle.set_alignment(Sprite::AlignmentVertical::Top);
     m_label.set_alignment(Label::AlignmentHorizontal::Center);
     m_label.set_alignment(Label::AlignmentVertical::Top);
 }

@@ -8,14 +8,14 @@
 class Sprite
 {
   public:
-    enum class VerticalAlignment
+    enum class AlignmentVertical
     {
         Top,
         Middle,
         Bottom
     };
 
-    enum class HorizontalAlignment
+    enum class AlignmentHorizontal
     {
         Left,
         Center,
@@ -25,8 +25,8 @@ class Sprite
     Sprite(const Window &window, const std::string &filename);
     ~Sprite();
     void set_position(const glm::ivec2 &pos);
-    void set_alignment(VerticalAlignment align);
-    void set_alignment(HorizontalAlignment align);
+    void set_alignment(AlignmentVertical align);
+    void set_alignment(AlignmentHorizontal align);
     void set_tint(const glm::vec3 &colour);
     void draw() const;
 
@@ -46,7 +46,7 @@ class Sprite
     Program m_shader;
     glm::ivec2 m_position;
     glm::ivec2 m_size;
-    VerticalAlignment m_vertical_alignment;
-    HorizontalAlignment m_horizontal_alignment;
+    AlignmentVertical m_vertical_alignment;
+    AlignmentHorizontal m_horizontal_alignment;
     glm::vec3 m_tint_colour;
 };

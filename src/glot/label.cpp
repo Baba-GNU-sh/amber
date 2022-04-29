@@ -22,22 +22,25 @@ Label::Label(Window &window, Font &material, int capacity)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_glyphbuf_ebo);
 
     const int sz = 6 * capacity / 4;
-    unsigned int indices[sz];
+    std::vector<unsigned int> indicies(sz);
     for (int i = 0, j = 0; j < sz; i += 4, j += 6)
     {
-        indices[j] = i;
-        indices[j + 1] = i + 1;
-        indices[j + 2] = i + 2;
-        indices[j + 3] = i + 1;
-        indices[j + 4] = i + 2;
-        indices[j + 5] = i + 3;
+        indicies[j] = i;
+        indicies[j + 1] = i + 1;
+        indicies[j + 2] = i + 2;
+        indicies[j + 3] = i + 1;
+        indicies[j + 4] = i + 2;
+        indicies[j + 5] = i + 3;
     }
 
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 sizeof(unsigned int) * indicies.size(),
+                 indicies.data(),
+                 GL_STATIC_DRAW);
 
     // A glyph is rendered as a quad so we only need 4 verts and 4 texture
     // lookups
-    glBufferData(GL_ARRAY_BUFFER, capacity * sizeof(GlyphData), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, capacity * sizeof(GlyphVerticies), nullptr, GL_STREAM_DRAW);
 
     // Define an attribute for the glyph verticies
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphVertex), (void *)0);
@@ -123,8 +126,8 @@ void Label::draw() const
         offset -= glm::ivec2(0, GLYPH_HEIGHT);
     }
 
-    GlyphData buffer[128];
-    GlyphData *bufptr = &buffer[0];
+    GlyphVerticies buffer[128];
+    GlyphVerticies *bufptr = &buffer[0];
 
     for (auto character : m_text)
     {
@@ -136,7 +139,7 @@ void Label::draw() const
 
     glBindVertexArray(m_glyphbuf_vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_glyphbuf_vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphData) * count, buffer);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphVerticies) * count, buffer);
 
     const auto vp_matrix_inv = m_window.vp_matrix_inv();
     m_material.use(m_colour, vp_matrix_inv);
@@ -145,9 +148,9 @@ void Label::draw() const
     glDrawElements(GL_TRIANGLES, 6 * count, GL_UNSIGNED_INT, 0);
 }
 
-void Label::draw_glyph(char character, const glm::ivec2 &pos, GlyphData **buf) const
+void Label::draw_glyph(char character, const glm::ivec2 &pos, GlyphVerticies **buf) const
 {
-    GlyphData *data = *buf;
+    GlyphVerticies *data = *buf;
     data->verts[0].vert = pos;
     data->verts[1].vert = pos + glm::ivec2(GLYPH_WIDTH, 0);
     data->verts[2].vert = pos + glm::ivec2(0, GLYPH_HEIGHT);

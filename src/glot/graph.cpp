@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
 #include <imgui.h>
+#include <sstream>
 #include "graph.hpp"
 #include "plot.hpp"
 #include "marker.hpp"
@@ -73,11 +74,11 @@ void Graph::draw()
 
 void Graph::init_line_buffers()
 {
-    glGenVertexArrays(1, &_linebuf_vao);
-    glBindVertexArray(_linebuf_vao);
+    glGenVertexArrays(1, &m_linebuf_vao);
+    glBindVertexArray(m_linebuf_vao);
 
-    glGenBuffers(1, &_linebuf_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
+    glGenBuffers(1, &m_linebuf_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_linebuf_vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 1024, nullptr, GL_STREAM_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void *)0);
@@ -86,7 +87,7 @@ void Graph::init_line_buffers()
     std::vector<Shader> shaders{
         Shader(Resources::find_shader("block/vertex.glsl"), GL_VERTEX_SHADER),
         Shader(Resources::find_shader("block/fragment.glsl"), GL_FRAGMENT_SHADER)};
-    _lines_shader = Program(shaders);
+    m_lines_shader = Program(shaders);
 }
 
 void Graph::draw_lines()
@@ -95,8 +96,8 @@ void Graph::draw_lines()
 
     const auto [tick_spacing_major, tick_spacing_minor, _] = tick_spacing();
 
-    glBindVertexArray(_linebuf_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _linebuf_vbo);
+    glBindVertexArray(m_linebuf_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_linebuf_vbo);
 
     // Get a pointer to the underlying buffer
     void *raw_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -178,12 +179,12 @@ void Graph::draw_lines()
     // make sure to tell OpenGL we're done with the pointer
     glUnmapBuffer(GL_ARRAY_BUFFER);
 
-    _lines_shader.use();
-    int uniform_id = _lines_shader.uniform_location("view_matrix");
+    m_lines_shader.use();
+    int uniform_id = m_lines_shader.uniform_location("view_matrix");
     const auto viewport_matrix_inv = m_window.vp_matrix_inv();
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
 
-    uniform_id = _lines_shader.uniform_location("colour");
+    uniform_id = m_lines_shader.uniform_location("colour");
     glm::vec3 white(1.0, 1.0, 1.0);
     glUniform3fv(uniform_id, 1, &white[0]);
 

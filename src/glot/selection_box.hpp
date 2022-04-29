@@ -21,10 +21,7 @@ class SelectionBox
   private:
     struct BoxVerticies
     {
-        glm::vec2 tl;
-        glm::vec2 tr;
-        glm::vec2 br;
-        glm::vec2 bl;
+        glm::vec2 vert[4];
     };
 
     Window &m_window;
