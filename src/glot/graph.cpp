@@ -10,7 +10,7 @@
 
 Graph::Graph(Window &window, GraphState &state)
     : m_window(window), m_state(state), m_font("proggy_clean.png"), m_marker_a(m_window),
-      m_marker_b(m_window), m_line_renderer(m_window), m_plot_renderer(m_window)
+      m_marker_b(m_window), m_line_renderer(m_window)
 {
     using namespace std::placeholders;
 
@@ -38,6 +38,7 @@ Graph::Graph(Window &window, GraphState &state)
         (void)ts;
         m_marker_ts_labels.emplace_back(m_window, m_font);
         m_marker_ts_labels.emplace_back(m_window, m_font);
+        m_plots.emplace_back(m_window);
     }
 
     m_size = m_window.size();
@@ -306,6 +307,8 @@ void Graph::draw_plots()
     const auto plot_size_gs = screen2graph_delta(plot_size_px);
     const auto interval_gs = PIXELS_PER_COL * plot_size_gs.x / num_samples;
 
+    std::size_t plot_index = 0;
+
     for (auto &time_series : m_state.timeseries)
     {
         if (time_series.visible)
@@ -315,14 +318,15 @@ void Graph::draw_plots()
                 samples.data(), plot_position_gs.x, interval_gs, num_samples);
             samples.resize(n_samples);
 
-            m_plot_renderer.draw(m_state.view_matrix,
-                                 samples,
-                                 m_state.plot_width,
-                                 time_series.colour,
-                                 time_series.y_offset,
-                                 m_state.show_line_segments,
-                                 glm::ivec2(GUTTER_SIZE_PX, 0),
-                                 m_size - glm::ivec2(GUTTER_SIZE_PX, GUTTER_SIZE_PX));
+            auto &plot = m_plots[plot_index++];
+            plot.set_position(glm::ivec2(GUTTER_SIZE_PX, 0));
+            plot.set_size(m_size - glm::ivec2(GUTTER_SIZE_PX, GUTTER_SIZE_PX));
+            plot.draw(m_state.view_matrix,
+                      samples,
+                      m_state.plot_width,
+                      time_series.colour,
+                      time_series.y_offset,
+                      m_state.show_line_segments);
         }
     }
 }

@@ -15,12 +15,12 @@ class Graph
     void draw();
 
   private:
-    void draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const;
     void init_line_buffers();
     void draw_lines();
     void draw_labels();
     void draw_plots();
     void draw_markers();
+    void draw_selection_box(const glm::dvec2 &start, const glm::dvec2 &end) const;
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
     void handle_scroll(double xoffset, double yoffset);
     void handle_cursor_move(double xpos, double ypos);
@@ -42,10 +42,10 @@ class Graph
     FontMaterial m_font;
     std::vector<Label> m_axis_labels;
     std::vector<Label> m_marker_ts_labels;
+    std::vector<Plot> m_plots;
     Marker m_marker_a;
     Marker m_marker_b;
     LineRendererOpenGL m_line_renderer; // TODO rename me to something less "renderey"
-    PlotRendererOpenGL m_plot_renderer; // TODO rename this to something more object-ey
 
     // Line buffers - TODO move these to some other primitive class thing
     GLuint _linebuf_vao;
