@@ -26,7 +26,6 @@ add_library(
 		graph.cpp
 		label.cpp
 		plot.cpp
-		line_renderer_opengl.cpp
 		sprite.cpp
 		font_material.cpp
 		marker.cpp

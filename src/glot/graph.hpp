@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "line_renderer_opengl.hpp"
 #include "marker.hpp"
 #include "plot.hpp"
 #include "selection_box.hpp"
