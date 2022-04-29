@@ -47,6 +47,12 @@ Graph::Graph(Window &window, GraphState &state)
     m_marker_b.set_colour(glm::vec3(1.0, 1.0, 0.0));
 }
 
+Graph::~Graph()
+{
+    glDeleteBuffers(1, &m_linebuf_vbo);
+    glDeleteVertexArrays(1, &m_linebuf_vbo);
+}
+
 glm::dvec2 Graph::cursor_gs() const
 {
     return screen2graph(m_cursor_old);

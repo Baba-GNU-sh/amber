@@ -11,6 +11,12 @@ class Graph
 {
   public:
     Graph(Window &window, GraphState &state);
+    ~Graph();
+    Graph(const Graph &) = delete;
+    Graph(Graph &&) = delete;
+    Graph &operator=(const Graph &) = delete;
+    Graph &operator=(Graph &&) = delete;
+
     glm::dvec2 cursor_gs() const;
     void draw();
 

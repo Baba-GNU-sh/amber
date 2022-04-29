@@ -24,6 +24,11 @@ class Sprite
 
     Sprite(const Window &window, const std::string &filename);
     ~Sprite();
+    Sprite(const Sprite &) = delete;
+    Sprite &operator=(const Sprite &) = delete;
+    Sprite(Sprite &&) = delete;
+    Sprite &operator=(Sprite &&) = delete;
+
     void set_position(const glm::ivec2 &pos);
     void set_alignment(AlignmentVertical align);
     void set_alignment(AlignmentHorizontal align);
@@ -39,7 +44,7 @@ class Sprite
 
     static std::pair<unsigned int, glm::ivec2> load_texture(const std::string &file_name);
 
-    const Window& m_window;
+    const Window &m_window;
     unsigned int m_vertex_buffer;
     unsigned int m_vao;
     unsigned int m_texture;

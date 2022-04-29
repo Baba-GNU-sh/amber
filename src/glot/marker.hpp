@@ -10,19 +10,16 @@
 class Marker
 {
   public:
-    enum class MarkerStyle
-    {
-        Center,
-        Left,
-        Right
-    };
-
     Marker(Window &window);
     ~Marker();
+    Marker(const Marker &) = delete;
+    Marker &operator=(const Marker &) = delete;
+    Marker(Marker &&) = delete;
+    Marker &operator=(Marker &&) = delete;
+
     void set_position(const glm::ivec2 &position);
     void set_colour(const glm::vec3 &colour);
     void set_height(int height);
-    void set_style(MarkerStyle style);
     void set_label_text(const std::string &text);
     void draw() const;
 
