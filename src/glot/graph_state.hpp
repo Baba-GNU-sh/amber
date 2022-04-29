@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 #include <glm/glm.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <database/timeseries.hpp>
@@ -54,7 +55,8 @@ struct GraphState
         const auto offset_a = view_matrix_inv * glm::dvec3(0.0, 0.0, 1.0);
         const auto offset_b = view_matrix_inv * glm::dvec3(1.0, 0.0, 1.0);
         const auto offset = offset_b - offset_a;
-        view_matrix_copy = glm::translate(view_matrix_copy, glm::dvec2(offset) + glm::dvec2(-latest_sample_time, 0));
+        view_matrix_copy = glm::translate(view_matrix_copy,
+                                          glm::dvec2(offset) + glm::dvec2(-latest_sample_time, 0));
         update_view_matrix(view_matrix_copy);
     }
 
