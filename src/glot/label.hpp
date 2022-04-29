@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bits/c++config.h>
 #include <string>
 #include "window.hpp"
 #include <glm/glm.hpp>
