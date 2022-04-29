@@ -29,6 +29,12 @@ class Marker
     bool is_dragging = false; // TODO make this better
 
   private:
+    struct TextureCoord
+    {
+        glm::vec2 vertex_pos;
+        glm::vec2 texture_pos;
+    };
+
     unsigned int load_texture(const std::string &filename) const;
 
     Window &m_window;

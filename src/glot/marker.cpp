@@ -9,12 +9,6 @@
 #include <database/timeseries.hpp>
 #include "resources.hpp"
 
-struct TextureCoord
-{
-    glm::vec2 vertex_pos;
-    glm::vec2 texture_pos;
-};
-
 Marker::Marker(Window &window)
     : m_window(window), m_handle(window, "marker_center.png"), m_font("proggy_clean.png"),
       m_label(m_window, m_font)
