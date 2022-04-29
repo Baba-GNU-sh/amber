@@ -40,6 +40,7 @@ if (BUILD_TESTS)
 	add_executable(database_tests
 		test/test_timeseries_dense.cpp
 		test/test_chunked_vector.cpp
+		test/test_database.cpp
 	)
 	target_link_libraries(
 		database_tests
