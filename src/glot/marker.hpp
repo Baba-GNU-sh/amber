@@ -26,7 +26,8 @@ class Marker
     void set_label_text(const std::string &text);
     void draw() const;
 
-    bool is_dragging = false; // TODO make this better
+    bool is_dragging = false; // TODO The marker object should listen to mouse events from the
+                              // window and decide when it is clicked and when to start dragging
 
   private:
     struct TextureCoord
