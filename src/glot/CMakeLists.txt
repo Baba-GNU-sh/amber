@@ -30,6 +30,7 @@ add_library(
 		font.cpp
 		marker.cpp
 		selection_box.cpp
+		axis.cpp
 		imgui_database_panel.cpp
 )
 target_include_directories(glot PUBLIC .)
