@@ -42,7 +42,6 @@ class WaveGenPlugin : public Plugin
     std::atomic<bool> _running = false;
     std::thread _thread;
     std::shared_ptr<TimeSeriesDense> _ts;
-    std::size_t _ticks = 0;
     mutable std::mutex _mutex;
     WaveSettings _settings;
 };
