@@ -336,10 +336,6 @@ int main()
 
     glfwInit();
 
-    // #ifdef __APPLE__
-    //     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    // #endif
-
     try
     {
         // Create the timeseries database - this is where all the data goes!
