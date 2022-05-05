@@ -35,7 +35,7 @@ ShaderImpl::ShaderImpl(const std::string &filename, int shader_type) : m_filenam
         glGetShaderInfoLog(m_shader_handle, 512, NULL, infoLog);
 
         std::stringstream error_msg;
-        error_msg << "Shader compilation failed: " << infoLog;
+        error_msg << "Shader compilation failed (" << m_filename << "): " << infoLog;
 
         glDeleteShader(m_shader_handle);
 
