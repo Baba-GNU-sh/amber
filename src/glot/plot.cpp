@@ -94,7 +94,7 @@ void Plot::draw(const glm::mat3 &view_matrix,
     // glScissor coordinates start in the bottom left
     glEnable(GL_SCISSOR_TEST);
     const auto window_size = m_window.size();
-    glScissor(m_position.x, window_size.y - (m_position.y + m_size.y), m_size.x, m_size.y);
+    m_window.scissor(m_position.x, window_size.y - (m_position.y + m_size.y), m_size.x, m_size.y);
 
     // Limit the number of samples we copy to the vertex buffer
     const auto num_samples = std::min(data.size(), COLS_MAX);

@@ -28,7 +28,7 @@ Window::Window(int width, int height, const std::string &title)
     glfwSetMouseButtonCallback(m_window, Window::mouse_button_callback);
     glfwSetKeyCallback(m_window, Window::key_callback);
 
-    update_vp_matrix(width, height);
+    update_vp_matrix();
 
     m_logger = spdlog::stdout_color_mt("Window(" + m_title + ")");
     m_logger->info("Initialized");
@@ -130,6 +130,20 @@ bool Window::is_fullscreen()
     return m_fullscreen_mode;
 }
 
+glm::vec2 Window::scaling() const
+{
+    float xscale, yscale;
+    glfwGetWindowContentScale(m_window, &xscale, &yscale);
+    return glm::vec2(xscale, yscale);
+}
+
+void Window::scissor(int x, int y, int width, int height) const
+{
+    const auto pos = glm::vec2(x, y) * scaling();
+    const auto size = glm::vec2(width, height) * scaling();
+    glScissor(pos.x, pos.y, size.x, size.y);
+}
+
 boost::signals2::connection Window::on_resize(
     const resize_signal_t::slot_type &subscriber)
 {
@@ -162,10 +176,13 @@ boost::signals2::connection Window::on_key(
 
 void Window::handle_framebuffer_size_callback(int width, int height)
 {
-    update_vp_matrix(width, height);
+    const auto size_px = glm::vec2(width, height);
+
+    update_vp_matrix();
     glfwMakeContextCurrent(m_window);
-    glViewport(0, 0, width, height);
-    resize(width, height);
+    glViewport(0, 0, size_px.x, size_px.y);
+    resize(size_px.x, size_px.y);
+    
     m_logger->info("Window resized: {}x{}px", width, height);
 }
 
@@ -219,10 +236,11 @@ void Window::key_callback(GLFWwindow *window, int key, int scancode, int action,
     win->handle_key_callback(key, scancode, action, mods);
 }
 
-void Window::update_vp_matrix(int width, int height)
+void Window::update_vp_matrix()
 {
+    const auto fb_size = size();
     const glm::mat3 identity(1.0f);
-    auto vp_matrix = glm::scale(identity, glm::vec2(width / 2, -height / 2));
+    auto vp_matrix = glm::scale(identity, glm::vec2(fb_size.x / 2, -fb_size.y / 2));
     m_vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
     m_vp_matrix_inv = glm::inverse(m_vp_matrix);
 }

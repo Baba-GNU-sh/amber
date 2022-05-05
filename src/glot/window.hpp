@@ -32,6 +32,8 @@ class Window
     glm::vec3 bg_colour();
     void set_fullscreen(bool enable);
     bool is_fullscreen();
+    glm::vec2 scaling() const;
+    void scissor(int x, int y, int width, int height) const;
 
     typedef boost::signals2::signal<void(int, int)> resize_signal_t;
     typedef boost::signals2::signal<void(double, double)> cursor_move_signal_t;
@@ -65,7 +67,7 @@ class Window
     static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
     static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-    void update_vp_matrix(int width, int height);
+    void update_vp_matrix();
 
     std::string m_title;
     glm::vec3 m_bg_colour;
