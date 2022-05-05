@@ -7,7 +7,7 @@ ImGuiContextWindow::ImGuiContextWindow(int width, int height, const std::string 
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(m_window, true);
-    ImGui_ImplOpenGL3_Init("#version 130");
+    ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 ImGuiContextWindow::~ImGuiContextWindow()
