@@ -6,4 +6,4 @@ flat in vec4 fColor;
 void main()
 {
     FragColor = fColor;
-};
+}

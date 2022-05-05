@@ -7,4 +7,4 @@ uniform float alpha = 1.0;
 void main()
 {
     FragColor = vec4(colour, alpha);
-};
+}
