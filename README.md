@@ -1,11 +1,9 @@
-# GLot
-
 [![Actions Status](https://github.com/baba-GNU-sh/glot/workflows/ci/badge.svg?branch=main)](https://github.com/baba-GNU-sh/glot/actions)
 [![codecov](https://codecov.io/gh/baba-GNU-sh/glot/branch/main/graph/badge.svg?token=TYEKEONCCL)](https://codecov.io/gh/baba-GNU-sh/glot)
 
 > :warning: **This project is under heavy development, and thus is unlikely to be very useful to anyone in its current state!**
 
-## Introduction
+# Introduction
 
 GLot is (going to be) an OpenGL oscilloscope-like desktop graphing application for Windows, Linux and Mac, used for exploring high-frequency time-series data signals from arbitrary sources such as robots, servers, data loggers, sound cards, USB oscillioscopes, USB logic analyzers, and custom microcontrollers.
 
@@ -17,7 +15,7 @@ GLot is designed to fill a hole that I have personally encountered many times wh
 
 So far, GLot is far from complete. It's just an example project which I am using to test the graph renderer using OpenGL, and the best way to draw other UI elements such as menus and buttons, for which I am currently using ImGui.
 
-## Design Philosophy
+# Design Philosophy
 
 GLot will feature the following features:
 
@@ -26,16 +24,18 @@ GLot will feature the following features:
 - Builds and runs on Windows and Linux - see [actions](/actions).
 - Always show the most useful information possible, regardless of the zoom level.
 
-## Screenshots
+# Screenshots
 
-![screenshot1](screenshot1.png)
-![screenshot2](screenshot2.png)
+![screenshot_ubuntu](screenshot_ubuntu.png)
+![screenshot_maxos](screenshot_macos.png)
+![screenshot_macos](screenshot_windows.png)
 
-## Building
+
+# How to build
 
 Glot uses [Conan](http://conan.io/) to manage its dependencies, which makes it easier to build on Windows (and hopefully MacOS). So far, GLot has been tested on Ubuntu 20.04 and Windows 10, but it may well work on other distros and Windowses thanks to Conan.
 
-### Ubuntu 20.04
+## Ubuntu
 
 Install python, then install conan:
 
@@ -60,7 +60,26 @@ Run GLot with:
 ./glot
 ```
 
-## Windows 10
+## OSX
+
+First, install the developer tools for mac, which should install things like clang and make. Then install homebrew, and with it install conan and cmake.
+
+Clone this repo, and from within the root of the cloned workspace, run:
+
+```zsh
+mkdir build && cd build
+conan install .. -s build_type=Debug --install missing
+cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build .
+```
+
+Run GLot with:
+
+```zsh
+./glot
+```
+
+## Windows
 
 ### Install Required Tools
 
