@@ -68,6 +68,7 @@ class Window
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
     static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
     void update_vp_matrix();
+    GLFWmonitor *get_current_monitor() const;
 
     std::string m_title;
     glm::vec3 m_bg_colour;

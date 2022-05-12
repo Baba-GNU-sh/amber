@@ -109,7 +109,7 @@ void Window::set_fullscreen(bool enable)
         glfwGetWindowSize(m_window, &m_windowed_size.x, &m_windowed_size.y);
         glfwGetWindowPos(m_window, &m_windowed_pos.x, &m_windowed_pos.y);
 
-        auto *monitor = glfwGetPrimaryMonitor();
+        auto *monitor = get_current_monitor();
         const GLFWvidmode *mode = glfwGetVideoMode(monitor);
         glfwSetWindowMonitor(m_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     }
@@ -243,4 +243,47 @@ void Window::update_vp_matrix()
     auto vp_matrix = glm::scale(identity, glm::vec2(fb_size.x / 2, -fb_size.y / 2));
     m_vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
     m_vp_matrix_inv = glm::inverse(m_vp_matrix);
+}
+
+/**
+ * @brief Get the monitor that the window is currently most "on".
+ * See this stackoverflow answer:
+ * https://stackoverflow.com/questions/21421074/how-to-create-a-full-screen-window-on-the-current-monitor-with-glfw
+ */
+GLFWmonitor *Window::get_current_monitor() const
+{
+    int nmonitors, i;
+    
+    int mx, my, mw, mh;
+
+    GLFWmonitor **monitors;
+    const GLFWvidmode *mode;
+
+    int bestoverlap = 0;
+    GLFWmonitor *bestmonitor;
+
+    int wx, wy, ww, wh;
+    glfwGetWindowPos(m_window, &wx, &wy);
+    glfwGetWindowSize(m_window, &ww, &wh);
+    monitors = glfwGetMonitors(&nmonitors);
+
+    for (i = 0; i < nmonitors; i++)
+    {
+        mode = glfwGetVideoMode(monitors[i]);
+        glfwGetMonitorPos(monitors[i], &mx, &my);
+        mw = mode->width;
+        mh = mode->height;
+
+        int overlap =
+            std::max(0, std::min(wx + ww, mx + mw) - std::max(wx, mx)) *
+            std::max(0, std::min(wy + wh, my + mh) - std::max(wy, my));
+
+        if (bestoverlap < overlap) 
+        {
+            bestoverlap = overlap;
+            bestmonitor = monitors[i];
+        }
+    }
+
+    return bestmonitor;
 }
