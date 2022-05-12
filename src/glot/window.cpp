@@ -260,7 +260,7 @@ GLFWmonitor *Window::get_current_monitor() const
     const GLFWvidmode *mode;
 
     int bestoverlap = 0;
-    GLFWmonitor *bestmonitor;
+    GLFWmonitor *bestmonitor = nullptr;
 
     int wx, wy, ww, wh;
     glfwGetWindowPos(m_window, &wx, &wy);
