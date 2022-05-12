@@ -1,10 +1,6 @@
-#include "timeseries.hpp"
 #include <benchmark/benchmark.h>
 #include <iostream>
-#include <timeseries_dense.hpp>
-
-#include <glm/matrix.hpp>
-#include <glm/gtx/matrix_transform_2d.hpp>
+#include <database/timeseries_dense.hpp>
 
 static void TimeseriesDense_Push(benchmark::State &state)
 {
@@ -74,18 +70,5 @@ BENCHMARK(TimeseriesDense_Reduce)
     ->Args({1'000'000, 1'000})
     ->Args({10'000'000, 1'000})
     ->Args({100'000'000, 1'000});
-
-static void GLMInverse(benchmark::State &state)
-{
-    const glm::mat3 identity(1.0f);
-    auto vp_matrix = glm::scale(identity, glm::vec2(800 / 2, -600 / 2));
-    vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
-
-    for (auto _ : state)
-    {
-        benchmark::DoNotOptimize(glm::inverse(vp_matrix));
-    }
-}
-BENCHMARK(GLMInverse);
 
 BENCHMARK_MAIN();
