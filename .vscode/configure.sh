@@ -5,6 +5,7 @@ BUILD_TYPE="$1"
 COVERAGE=""
 SANITIZERS=""
 TESTS=""
+BENCHMARKS=""
 
 case "$BUILD_TYPE" in
   "Debug")
@@ -16,13 +17,14 @@ case "$BUILD_TYPE" in
     COVERAGE="-DBUILD_COVERAGE=OFF"
     SANITIZERS="-DUSE_SANITIZERS=OFF"
     TESTS="-DBUILD_TESTS=OFF"
+    BENCHMARKS="-DBUILD_BENCHMARKS=ON"
     ;;
 esac
 
-echo "Build settings: ${BUILD_TYPE} ${COVERAGE} ${SANITIZERS} ${TESTS}"
+echo "Build settings: ${BUILD_TYPE} ${COVERAGE} ${SANITIZERS} ${TESTS} ${BENCHMARKS}"
 
 mkdir -p "build/${BUILD_TYPE}"
 ln -sfn "${BUILD_TYPE}" "build/current"
 CONAN_SYSREQUIRES_MODE=enabled conan install -if "build/${BUILD_TYPE}" -s build_type="${BUILD_TYPE}" .
-cmake -B build/${BUILD_TYPE} -DCMAKE_MODULE_PATH=${PWD}/build/${BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" "${TESTS}" "${COVERAGE}" "${SANITIZERS}" .
+cmake -B build/${BUILD_TYPE} -DCMAKE_MODULE_PATH=${PWD}/build/${BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" "${TESTS}" "${COVERAGE}" "${SANITIZERS}" "${BENCHMARKS}" .
 ln -sfn build/current/compile_commands.json compile_commands.json
