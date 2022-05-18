@@ -68,7 +68,7 @@ Clone this repo, and from within the root of the cloned workspace, run:
 
 ```zsh
 mkdir build && cd build
-conan install .. -s build_type=Debug --install missing
+conan install .. -s build_type=Debug --build missing
 cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build .
 ```
