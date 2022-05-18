@@ -65,7 +65,8 @@ endif()
 if (BUILD_TESTS)
 	find_package(GTest REQUIRED)
 	add_executable(tests
-		test/test_graph_controller.cpp
+		test/test_transform.cpp
+		test/test_graph_utils.cpp
 	)
 	target_link_libraries(
 		tests

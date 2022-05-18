@@ -8,6 +8,7 @@
 #include <spdlog/logger.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <boost/signals2.hpp>
+#include <utils/transform.hpp>
 
 class Window
 {
@@ -21,8 +22,7 @@ class Window
 
     void use() const;
     void finish() const;
-    const glm::mat3 &vp_matrix() const;
-    const glm::mat3 &vp_matrix_inv() const;
+    const Transform<double> &viewport_transform() const;
     glm::ivec2 size() const;
     GLFWwindow *handle();
     bool should_close() const;
@@ -73,8 +73,7 @@ class Window
     std::string m_title;
     glm::vec3 m_bg_colour;
     bool m_fullscreen_mode;
-    glm::mat3 m_vp_matrix;
-    glm::mat3 m_vp_matrix_inv;
+    Transform<double> m_viewport_transform;
     std::shared_ptr<spdlog::logger> m_logger;
     glm::ivec2 m_windowed_size;
     glm::ivec2 m_windowed_pos;

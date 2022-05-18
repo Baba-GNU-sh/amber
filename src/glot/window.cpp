@@ -50,14 +50,9 @@ void Window::finish() const
     glfwSwapBuffers(m_window);
 }
 
-const glm::mat3 &Window::vp_matrix() const
+const Transform<double> &Window::viewport_transform() const
 {
-    return m_vp_matrix;
-}
-
-const glm::mat3 &Window::vp_matrix_inv() const
-{
-    return m_vp_matrix_inv;
+    return m_viewport_transform;
 }
 
 glm::ivec2 Window::size() const
@@ -241,8 +236,8 @@ void Window::update_vp_matrix()
     const auto fb_size = size();
     const glm::mat3 identity(1.0f);
     auto vp_matrix = glm::scale(identity, glm::vec2(fb_size.x / 2, -fb_size.y / 2));
-    m_vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
-    m_vp_matrix_inv = glm::inverse(m_vp_matrix);
+    vp_matrix = glm::translate(vp_matrix, glm::vec2(1, -1));
+    m_viewport_transform.update(vp_matrix);
 }
 
 /**

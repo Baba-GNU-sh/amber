@@ -74,10 +74,12 @@ void Plot::draw(const glm::mat3 &view_matrix,
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(view_matrix_offset[0]));
 
     uniform_id = m_shader.uniform_location("viewport_matrix");
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(m_window.vp_matrix()[0]));
+    const auto viewport_matrix = glm::mat3(m_window.viewport_transform().matrix());
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix[0]));
 
     uniform_id = m_shader.uniform_location("viewport_matrix_inv");
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(m_window.vp_matrix_inv()[0]));
+    const auto viewport_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
 
     uniform_id = m_shader.uniform_location("line_thickness_px");
     glUniform1i(uniform_id, line_width);

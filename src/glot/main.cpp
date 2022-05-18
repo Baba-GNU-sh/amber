@@ -44,6 +44,14 @@ static void update_vsync()
     glfwSwapInterval(m_enable_vsync ? 1 : 0);
 }
 
+template <class T> static void imgui_print_matrix(const T &m)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        ImGui::Text(" %f %f %f", m[0][i], m[1][i], m[2][i]);
+    }
+}
+
 /**
  * @brief Turns an unsigned "size" value into a human readable value with a suffix. Useful for
  * displaying things like number of bytes.
@@ -136,8 +144,7 @@ static void draw_gui(Window &window,
             {
                 if (ImGui::MenuItem("Show Marker A", "A"))
                 {
-                    const auto marker_pos_gs =
-                        graph_state.view_matrix_inv * glm::vec3(0.0, 0.0, 1.0);
+                    const auto marker_pos_gs = graph_state.view.apply(glm::vec2(0.0, 0.0));
                     graph_state.markers.first.position = marker_pos_gs.x;
                     graph_state.markers.first.visible = true;
                 }
@@ -154,8 +161,7 @@ static void draw_gui(Window &window,
             {
                 if (ImGui::MenuItem("Show Marker B", "B"))
                 {
-                    const auto marker_pos_gs =
-                        graph_state.view_matrix_inv * glm::vec3(0.0, 0.0, 1.0);
+                    const auto marker_pos_gs = graph_state.view.apply(glm::vec2(0.0, 0.0));
                     graph_state.markers.second.position = marker_pos_gs.x;
                     graph_state.markers.second.visible = true;
                 }
@@ -220,13 +226,18 @@ static void draw_gui(Window &window,
 
     if (ImGui::CollapsingHeader("Graph", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        // const auto &view_matrix = graph_state.view_matrix;
-        // ImGui::Text("View Matrix:");
-        // for (int i = 0; i < 3; i++)
-        // {
-        //     ImGui::Text(" %f %f %f", view_matrix[0][i], view_matrix[1][i],
-        //     view_matrix[2][i]);
-        // }
+        ImGui::Text("View Matrix:");
+        imgui_print_matrix(graph_state.view.matrix());
+
+        ImGui::Text("Viewport Matrix:");
+        imgui_print_matrix(window.viewport_transform().matrix());
+
+        const auto &view_matrix = graph_state.view.matrix();
+        ImGui::Text("View Matrix:");
+        for (int i = 0; i < 3; i++)
+        {
+            ImGui::Text(" %f %f %f", view_matrix[0][i], view_matrix[1][i], view_matrix[2][i]);
+        }
 
         const auto cursor_gs = graph.cursor_gs();
         ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);

@@ -32,14 +32,12 @@ class Graph
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
     glm::dvec2 screen2graph(const glm::ivec2 &value) const;
     glm::dvec2 screen2graph_delta(const glm::ivec2 &value) const;
+    glm::dvec2 graph2screen(const glm::dvec2 &value) const;
     void on_zoom(double x, double y);
-    static bool hit_test(glm::ivec2 value, glm::ivec2 tl, glm::ivec2 br);
-    void fit_graph(const glm::dvec2 &start, const glm::dvec2 &end);
 
     static constexpr int GUTTER_SIZE_PX = 60;
     static constexpr int TICKLEN_PX = 5;
-    static constexpr double ZOOM_MIN_X = 10e6;
-    static constexpr double ZOOM_MIN_Y = 10e6;
+    static constexpr double ZOOM_MAX = 10e6;
     static constexpr int PIXELS_PER_COL = 1;
 
     Window &m_window;

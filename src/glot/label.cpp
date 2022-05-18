@@ -141,7 +141,7 @@ void Label::draw() const
     glBindBuffer(GL_ARRAY_BUFFER, m_glyphbuf_vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphVerticies) * count, buffer);
 
-    const auto vp_matrix_inv = m_window.vp_matrix_inv();
+    const auto vp_matrix_inv = m_window.viewport_transform().matrix_inverse();
     m_material.use(m_colour, vp_matrix_inv);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_glyphbuf_ebo);

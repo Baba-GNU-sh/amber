@@ -71,7 +71,7 @@ void Sprite::draw() const
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
     int uniform_id = m_shader.uniform_location("view_matrix");
-    const auto vp_matrix_inv = m_window.vp_matrix_inv();
+    const auto vp_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
     uniform_id = m_shader.uniform_location("tint_colour");

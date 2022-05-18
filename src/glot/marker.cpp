@@ -75,7 +75,7 @@ void Marker::draw() const
     position_float.x = round(position_float.x + 0.5) - 0.5;
 
     // Draw the vertical line
-    const auto vp_matrix_inv = m_window.vp_matrix_inv();
+    const auto vp_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
     m_line_shader.use();
     int uniform_id = m_line_shader.uniform_location("view_matrix");
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
