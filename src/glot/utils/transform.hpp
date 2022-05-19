@@ -12,11 +12,12 @@
 template <class T> class Transform
 {
     typedef glm::mat<3, 3, T> MatType;
+    typedef glm::vec<2, T> VecType;
 
   public:
     Transform()
     {
-        //
+        update(MatType(1.0));
     }
 
     Transform(const MatType &value)
@@ -47,14 +48,24 @@ template <class T> class Transform
         return m_inverse;
     }
 
-    glm::vec<2, T> apply(const glm::vec<2, T> &vec) const
+    VecType apply(const VecType &vec) const
     {
         return m_transform * glm::vec<3, T>(vec, 1.0);
     }
 
-    glm::vec<2, T> apply_inverse(const glm::vec<2, T> &vec) const
+    VecType apply_inverse(const VecType &vec) const
     {
-        return glm::vec<2, T>(m_inverse * glm::vec<3, T>(vec, 1.0));
+        return VecType(m_inverse * glm::vec<3, T>(vec, 1.0));
+    }
+
+    VecType apply_relative(const VecType &vec) const
+    {
+        return apply(vec) - apply(VecType(0.0));
+    }
+
+    VecType apply_inverse_relative(const VecType &vec) const
+    {
+        return apply_inverse(vec) - apply_inverse(VecType(0.0));
     }
 
     void translate(const glm::dvec2 &delta)
