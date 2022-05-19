@@ -30,44 +30,58 @@ struct GraphState
         view.update(glm::dmat3(1.0));
     }
 
+    /**
+     * @brief Align the newest sample with the left side of the view.
+     */
     void goto_newest_sample()
     {
+        // Zero out the x translation element of the view transform - centers the view on time=0
         auto view_matrix_copy = view.matrix();
         view_matrix_copy[2][0] = 0;
-
-        std::vector<TimeSeriesState> visible_timeseries;
-        std::copy_if(timeseries.begin(),
-                     timeseries.end(),
-                     std::back_inserter(visible_timeseries),
-                     [](const auto &ts) { return ts.visible; });
-
-        const auto max_element = std::max_element(
-            visible_timeseries.begin(), visible_timeseries.end(), [](const auto &a, const auto &b) {
-                return a.ts->get_span().second > b.ts->get_span().second;
-            });
-
-        auto latest_sample_time = max_element->ts->get_span().second;
-
-        const auto offset_a = view.apply_inverse(glm::dvec2(0.0, 0.0));
-        const auto offset_b = view.apply_inverse(glm::dvec2(1.0, 0.0));
-        const auto offset = offset_b - offset_a;
-        view_matrix_copy = glm::translate(view_matrix_copy,
-                                          glm::dvec2(offset) + glm::dvec2(-latest_sample_time, 0));
         view.update(view_matrix_copy);
+
+        // Center the view on the latest sample
+        view.translate(glm::dvec2(-latest_visibile_sample_time(), 0));
+
+        // Translate the view to the left by half a screen, to align the latest sample with the right edge of the view
+        const auto center_offset = view.apply_inverse_relative(glm::dvec2(1.0, 0.0));
+        view.translate(center_offset);
     }
 
-    void fit_graph(const glm::dvec2 &start, const glm::dvec2 &end)
+    /**
+     * @brief Evalulate the time latest (newest) visible sample.
+     */
+    double latest_visibile_sample_time() const
     {
-        glm::dmat3 view_matrix(1.0);
+        double latest_sample_time = 0.0;
+        for (std::size_t i = 0; i < timeseries.size(); ++i)
+        {
+            const auto &ts = timeseries[i];
+            if (ts.visible)
+            {
+                const auto span = ts.ts->get_span();
+                latest_sample_time = std::max(latest_sample_time, span.second);
+            }
+        }
+        return latest_sample_time;
+    }
 
-        const auto delta = glm::abs(end - start);
+    /**
+     * @brief Fit the view into a rectangle defined by two points on the graph.
+     * 
+     * @param tl Top-left corner of the rectangle.
+     * @param end Bottom-right corner of the rectangle.
+     */
+    void fit_graph(const glm::dvec2 &tl, const glm::dvec2 &br)
+    {
+        view.update(glm::dmat3(1.0));
+
+        const auto delta = glm::abs(br - tl);
         const auto scaling_factor = 2.0 / delta;
-        view_matrix = glm::scale(view_matrix, scaling_factor);
+        view.scale(scaling_factor);
 
-        const auto translation = (start + end) / 2.0;
-        view_matrix = glm::translate(view_matrix, -translation);
-
-        view.update(view_matrix);
+        const auto translation = (tl + br) / 2.0;
+        view.translate(-translation);
     }
 
     int plot_width = 2;
