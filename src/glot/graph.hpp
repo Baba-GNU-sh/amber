@@ -21,6 +21,12 @@ class Graph
     void draw();
 
   private:
+    // void on_scroll(double, double) override;
+    // void on_zoom(double, double) override;
+    // void on_mouse_button(int, int, int) override;
+    // void on_cursor_move(double, double) override;
+    // void on_key(int, int, int, int) override;
+
     void handle_scroll(double xoffset, double yoffset);
     void handle_cursor_move(double xpos, double ypos);
     void handle_mouse_button(int button, int action, int mods);
@@ -55,10 +61,6 @@ class Graph
     GLuint m_linebuf_vao;
     GLuint m_linebuf_vbo;
     Program m_lines_shader;
-
-    boost::signals2::scoped_connection m_window_on_scroll_connection;
-    boost::signals2::scoped_connection m_window_on_cursor_move_connection;
-    boost::signals2::scoped_connection m_window_on_mouse_button_connection;
 
     glm::dvec2 m_cursor_old;
     bool m_is_dragging = false;

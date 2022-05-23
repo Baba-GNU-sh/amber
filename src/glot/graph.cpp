@@ -18,30 +18,30 @@ Graph::Graph(Window &window, GraphState &state)
 
     state.view.set_zoom_limit(ZOOM_MAX);
 
-    m_window.on_resize([this](int, int) { m_size = m_window.size(); });
+    // m_window.on_resize([this](int, int) { m_size = m_window.size(); });
 
-    m_window_on_scroll_connection =
-        m_window.on_scroll(std::bind(&Graph::handle_scroll, this, _1, _2));
+    // m_window_on_scroll_connection =
+    //     m_window.on_scroll(std::bind(&Graph::handle_scroll, this, _1, _2));
 
-    m_window_on_cursor_move_connection =
-        m_window.on_cursor_move(std::bind(&Graph::handle_cursor_move, this, _1, _2));
+    // m_window_on_cursor_move_connection =
+    //     m_window.on_cursor_move(std::bind(&Graph::handle_cursor_move, this, _1, _2));
 
-    m_window_on_mouse_button_connection =
-        m_window.on_mouse_button(std::bind(&Graph::handle_mouse_button, this, _1, _2, _3));
+    // m_window_on_mouse_button_connection =
+    //     m_window.on_mouse_button(std::bind(&Graph::handle_mouse_button, this, _1, _2, _3));
 
     init_line_buffers();
 
     for (int i = 0; i < 128; ++i)
     {
-        m_axis_labels.emplace_back(m_window, m_font);
+        m_axis_labels.emplace_back(m_font);
         m_axis_labels.back().set_colour(glm::vec3(1.0, 1.0, 1.0));
     }
 
     for (auto &ts : m_state.timeseries)
     {
         (void)ts;
-        m_marker_ts_labels.emplace_back(m_window, m_font);
-        m_marker_ts_labels.emplace_back(m_window, m_font);
+        m_marker_ts_labels.emplace_back(m_font);
+        m_marker_ts_labels.emplace_back(m_font);
         m_plots.emplace_back(m_window);
     }
 
@@ -152,7 +152,8 @@ void Graph::draw_lines()
         for (double i = start; i < end; i += tick_spacing.x)
         {
             auto tick_x_vpspace = graph2screen(glm::dvec2(i, 0.0));
-            ptr[offset++] = glm::vec2(tick_x_vpspace.x, m_size.y - GUTTER_SIZE_PX) + glm::vec2(tick_size_x);
+            ptr[offset++] =
+                glm::vec2(tick_x_vpspace.x, m_size.y - GUTTER_SIZE_PX) + glm::vec2(tick_size_x);
             ptr[offset++] = glm::vec2(tick_x_vpspace.x, m_size.y - GUTTER_SIZE_PX);
         }
     };
@@ -216,7 +217,8 @@ void Graph::draw_labels()
     // Place a tick at every unit up the y axis
     for (double i = start; i < end; i += tick_spacing_major.y)
     {
-        auto tick_y_vpspace = m_window.viewport_transform().apply(m_state.view.apply(glm::dvec2(0.0f, i)));
+        auto tick_y_vpspace =
+            m_window.viewport_transform().apply(m_state.view.apply(glm::dvec2(0.0f, i)));
         glm::ivec2 point(GUTTER_SIZE_PX - TICKLEN_PX, tick_y_vpspace.y);
 
         std::stringstream ss;
@@ -227,7 +229,7 @@ void Graph::draw_labels()
         label.set_position(point);
         label.set_alignment(Label::AlignmentHorizontal::Right);
         label.set_alignment(Label::AlignmentVertical::Center);
-        label.draw();
+        label.draw(m_window);
     }
 
     // Draw the y axis ticks
@@ -239,7 +241,8 @@ void Graph::draw_labels()
     // Place a tick at every unit along the x axis
     for (double i = start; i < end; i += tick_spacing_major.x)
     {
-        auto tick_x_vpspace = m_window.viewport_transform().apply(m_state.view.apply(glm::dvec2(i, 0.0f)));
+        auto tick_x_vpspace =
+            m_window.viewport_transform().apply(m_state.view.apply(glm::dvec2(i, 0.0f)));
         glm::ivec2 point(tick_x_vpspace.x, m_size.y - GUTTER_SIZE_PX + TICKLEN_PX);
 
         std::stringstream ss;
@@ -250,7 +253,7 @@ void Graph::draw_labels()
         label.set_position(point);
         label.set_alignment(Label::AlignmentHorizontal::Center);
         label.set_alignment(Label::AlignmentVertical::Top);
-        label.draw();
+        label.draw(m_window);
     }
 
     // if (hit_test(m_window.cursor(),
@@ -388,9 +391,10 @@ void Graph::draw_markers()
                 label.set_colour(time_series.colour);
                 label.set_alignment(Label::AlignmentHorizontal::Left);
                 label.set_alignment(Label::AlignmentVertical::Top);
-                label.set_position(graph2screen(glm::dvec2(m_state.markers.first.position, value.average + time_series.y_offset)));
+                label.set_position(graph2screen(glm::dvec2(m_state.markers.first.position,
+                                                           value.average + time_series.y_offset)));
                 label.set_text(ss.str());
-                label.draw();
+                label.draw(m_window);
             }
         }
     }
@@ -423,9 +427,10 @@ void Graph::draw_markers()
                 label.set_colour(time_series.colour);
                 label.set_alignment(Label::AlignmentHorizontal::Left);
                 label.set_alignment(Label::AlignmentVertical::Top);
-                label.set_position(graph2screen(glm::dvec2(m_state.markers.second.position, value.average + time_series.y_offset)));
+                label.set_position(graph2screen(glm::dvec2(m_state.markers.second.position,
+                                                           value.average + time_series.y_offset)));
                 label.set_text(ss.str());
-                label.draw();
+                label.draw(m_window);
             }
         }
     }
@@ -478,21 +483,22 @@ void Graph::handle_scroll(double /*xoffset*/, double yoffset)
     const auto cursor = m_window.cursor();
     const auto size = m_window.size();
 
-    if (GraphUtils::hit_test(cursor, glm::ivec2(0, 0), glm::ivec2(GUTTER_SIZE_PX, size.y - GUTTER_SIZE_PX)))
+    if (GraphUtils::hit_test(
+            cursor, glm::ivec2(0, 0), glm::ivec2(GUTTER_SIZE_PX, size.y - GUTTER_SIZE_PX)))
     {
         // Cursor is in the vertical gutter, only zoom the y axis
         on_zoom(1.0, zoom_delta);
     }
     else if (GraphUtils::hit_test(cursor,
-                      glm::ivec2(GUTTER_SIZE_PX, size.y - GUTTER_SIZE_PX),
-                      glm::ivec2(size.x, size.y)))
+                                  glm::ivec2(GUTTER_SIZE_PX, size.y - GUTTER_SIZE_PX),
+                                  glm::ivec2(size.x, size.y)))
     {
         // Cursor is in the horizontal gutter, only zoom the x axis
         on_zoom(zoom_delta, 1.0);
     }
     else if (GraphUtils::hit_test(cursor,
-                      glm::ivec2(GUTTER_SIZE_PX, 0),
-                      glm::ivec2(size.x, size.y - GUTTER_SIZE_PX)))
+                                  glm::ivec2(GUTTER_SIZE_PX, 0),
+                                  glm::ivec2(size.x, size.y - GUTTER_SIZE_PX)))
     {
         // Cursor is in the main part of the graph, zoom both axes
         on_zoom(zoom_delta, zoom_delta);
@@ -507,7 +513,8 @@ void Graph::handle_cursor_move(double xpos, double ypos)
     const auto cursor_delta = cursor - m_cursor_old;
 
     // Work out the delta in graph space
-    const auto txform = m_state.view.matrix_inverse() * m_window.viewport_transform().matrix_inverse();
+    const auto txform =
+        m_state.view.matrix_inverse() * m_window.viewport_transform().matrix_inverse();
     const auto a = txform * glm::dvec3(0.0f);
     const auto b = txform * glm::dvec3(cursor_delta, 0.0f);
     const auto delta = b - a;
@@ -626,5 +633,3 @@ void Graph::on_zoom(double x, double y)
     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
     m_state.view.translate(cursor_delta);
 }
-
-

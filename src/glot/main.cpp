@@ -387,52 +387,52 @@ int main()
         Graph graph(window, state);
 
         // Listen to the keyboard events for hotkeys
-        boost::signals2::scoped_connection _(
-            window.on_key([&window, &state, &graph](int key, int, int action, int mods) {
-                if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
-                {
-                    window.set_fullscreen(!window.is_fullscreen());
-                }
-                if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-                {
-                    window.request_close();
-                }
-                if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-                {
-                    state.goto_newest_sample();
-                }
-                if (key == GLFW_KEY_A && action == GLFW_PRESS)
-                {
-                    if (mods == GLFW_MOD_CONTROL)
-                    {
-                        state.markers.first.visible = false;
-                    }
-                    else
-                    {
-                        const auto cursor_gs = graph.cursor_gs();
-                        state.markers.first.position = cursor_gs.x;
-                        state.markers.first.visible = true;
-                    }
-                }
-                else if (key == GLFW_KEY_B && action == GLFW_PRESS)
-                {
-                    if (mods == GLFW_MOD_CONTROL)
-                    {
-                        state.markers.second.visible = false;
-                    }
-                    else
-                    {
-                        const auto cursor_gs = graph.cursor_gs();
-                        state.markers.second.position = cursor_gs.x;
-                        state.markers.second.visible = true;
-                    }
-                }
-                else if (key == GLFW_KEY_C && action == GLFW_PRESS)
-                {
-                    state.markers.first.visible = false;
-                    state.markers.second.visible = false;
-                }
-            }));
+        // boost::signals2::scoped_connection _(
+        //     window.on_key([&window, &state, &graph](int key, int, int action, int mods) {
+        //         if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
+        //         {
+        //             window.set_fullscreen(!window.is_fullscreen());
+        //         }
+        //         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        //         {
+        //             window.request_close();
+        //         }
+        //         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        //         {
+        //             state.goto_newest_sample();
+        //         }
+        //         if (key == GLFW_KEY_A && action == GLFW_PRESS)
+        //         {
+        //             if (mods == GLFW_MOD_CONTROL)
+        //             {
+        //                 state.markers.first.visible = false;
+        //             }
+        //             else
+        //             {
+        //                 const auto cursor_gs = graph.cursor_gs();
+        //                 state.markers.first.position = cursor_gs.x;
+        //                 state.markers.first.visible = true;
+        //             }
+        //         }
+        //         else if (key == GLFW_KEY_B && action == GLFW_PRESS)
+        //         {
+        //             if (mods == GLFW_MOD_CONTROL)
+        //             {
+        //                 state.markers.second.visible = false;
+        //             }
+        //             else
+        //             {
+        //                 const auto cursor_gs = graph.cursor_gs();
+        //                 state.markers.second.position = cursor_gs.x;
+        //                 state.markers.second.visible = true;
+        //             }
+        //         }
+        //         else if (key == GLFW_KEY_C && action == GLFW_PRESS)
+        //         {
+        //             state.markers.first.visible = false;
+        //             state.markers.second.visible = false;
+        //         }
+        //     }));
 
         spdlog::info("Initialization OK, starting main loop");
 

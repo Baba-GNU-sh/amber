@@ -10,8 +10,7 @@
 #include "resources.hpp"
 
 Marker::Marker(Window &window)
-    : m_window(window), m_handle(window, "marker_center.png"), m_font("proggy_clean.png"),
-      m_label(m_window, m_font)
+    : m_window(window), m_handle("marker_center.png"), m_font("proggy_clean.png"), m_label(m_font)
 {
     glGenBuffers(1, &m_line_vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
@@ -67,8 +66,8 @@ void Marker::set_label_text(const std::string &text)
 
 void Marker::draw() const
 {
-    m_handle.draw();
-    m_label.draw();
+    m_handle.draw(m_window);
+    m_label.draw(m_window);
 
     // Align to the nearest half-pixel
     glm::vec2 position_float = m_position;

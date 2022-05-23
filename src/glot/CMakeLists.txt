@@ -19,7 +19,7 @@ add_library(
 		shader_program.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
-		window.cpp
+		window_glfw.cpp
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
 		imgui_window.cpp
@@ -31,6 +31,7 @@ add_library(
 		marker.cpp
 		selection_box.cpp
 		imgui_database_panel.cpp
+		axis.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

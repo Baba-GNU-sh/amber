@@ -23,6 +23,9 @@ endif()
 set_target_properties(main PROPERTIES OUTPUT_NAME glot)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
 
+add_executable(demo src/glot/demo.cpp)
+target_link_libraries(demo PRIVATE glot)
+
 # Copy assets and shaders to the build dir
 configure_file(shaders/plot/vertex.glsl shaders/plot/vertex.glsl COPYONLY)
 configure_file(shaders/plot/geometry.glsl shaders/plot/geometry.glsl COPYONLY)

@@ -7,7 +7,7 @@
 #include <vector>
 #include "resources.hpp"
 
-Sprite::Sprite(const Window &window, const std::string &file_name) : m_window(window)
+Sprite::Sprite(const std::string &file_name)
 {
     std::tie(m_texture, m_size) = load_texture(file_name);
 
@@ -43,9 +43,19 @@ Sprite::~Sprite()
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void Sprite::set_position(const glm::ivec2 &position)
+void Sprite::set_position(const glm::dvec2 &position)
 {
     m_position = position;
+}
+
+glm::dvec2 Sprite::position() const
+{
+    return m_position;
+}
+
+glm::dvec2 Sprite::size() const
+{
+    return m_size;
 }
 
 void Sprite::set_alignment(AlignmentVertical align)
@@ -63,7 +73,7 @@ void Sprite::set_tint(const glm::vec3 &colour)
     m_tint_colour = colour;
 }
 
-void Sprite::draw() const
+void Sprite::draw(const Window &window) const
 {
     m_shader.use();
     glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
@@ -71,7 +81,7 @@ void Sprite::draw() const
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
     int uniform_id = m_shader.uniform_location("view_matrix");
-    const auto vp_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
+    const auto vp_matrix_inv = glm::mat3(window.viewport_transform().matrix_inverse());
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
     uniform_id = m_shader.uniform_location("tint_colour");
