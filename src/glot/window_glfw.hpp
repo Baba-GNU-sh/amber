@@ -61,6 +61,7 @@ class Window_GLFW : public Window
 
   protected:
     std::vector<std::shared_ptr<View>> m_views;
+    std::shared_ptr<View> m_sticky_view;
 
   private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);

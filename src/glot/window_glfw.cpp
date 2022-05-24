@@ -194,9 +194,41 @@ void Window_GLFW::handle_scroll_callback(double xoffset, double yoffset)
 
 void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)
 {
-    std::for_each(m_views.begin(), m_views.end(), [button, action, mods](const auto &view) {
-        view->on_mouse_button(button, action, mods);
-    });
+    // This logic gets a bit tricky
+    // If a view is clicked, then the cursor moved outside of the view before the view is released,
+    // we still want to send the release event to the view.
+    // How do we handle multiple simultaneous button presses?
+    if (action == GLFW_PRESS)
+    {
+        std::for_each(
+            m_views.begin(), m_views.end(), [this, button, action, mods](const auto &view) {
+                if (GraphUtils::hit_test(
+                        cursor(), view->position(), view->position() + view->size()))
+                {
+                    view->on_mouse_button(button, action, mods);
+                    m_sticky_view = view;
+                }
+            });
+    }
+    else // Assume GLFW_RELEASE??
+    {
+        if (m_sticky_view)
+        {
+            m_sticky_view->on_mouse_button(button, action, mods);
+            m_sticky_view.reset();
+        }
+        else
+        {
+            std::for_each(
+                m_views.begin(), m_views.end(), [this, button, action, mods](const auto &view) {
+                    if (GraphUtils::hit_test(
+                            cursor(), view->position(), view->position() + view->size()))
+                    {
+                        view->on_mouse_button(button, action, mods);
+                    }
+                });
+        }
+    }
 }
 
 void Window_GLFW::handle_key_callback(int key, int scancode, int action, int mods)
