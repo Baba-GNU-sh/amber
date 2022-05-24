@@ -19,7 +19,12 @@
         {
             "label": "build",
             "type": "shell",
+            "linux": {
             "command": "cmake --build . -j`nproc`",
+            },
+            "osx": {
+                "command": "cmake --build . -j`sysctl -n hw.logicalcpu`"
+            },
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}/build/current"
