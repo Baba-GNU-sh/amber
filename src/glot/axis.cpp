@@ -1,7 +1,7 @@
 #include "axis.hpp"
 #include "resources.hpp"
 #include <glad/glad.h>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 
 Axis::Axis()
