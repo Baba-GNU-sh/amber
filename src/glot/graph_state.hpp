@@ -43,7 +43,8 @@ struct GraphState
         // Center the view on the latest sample
         view.translate(glm::dvec2(-latest_visibile_sample_time(), 0));
 
-        // Translate the view to the left by half a screen, to align the latest sample with the right edge of the view
+        // Translate the view to the left by half a screen, to align the latest sample with the
+        // right edge of the view
         const auto center_offset = view.apply_inverse_relative(glm::dvec2(1.0, 0.0));
         view.translate(center_offset);
     }
@@ -68,7 +69,7 @@ struct GraphState
 
     /**
      * @brief Fit the view into a rectangle defined by two points on the graph.
-     * 
+     *
      * @param tl Top-left corner of the rectangle.
      * @param end Bottom-right corner of the rectangle.
      */
