@@ -20,7 +20,7 @@
             "label": "build",
             "type": "shell",
             "linux": {
-            "command": "cmake --build . -j`nproc`",
+                "command": "cmake --build . -j`nproc`",
             },
             "osx": {
                 "command": "cmake --build . -j`sysctl -n hw.logicalcpu`"
@@ -81,7 +81,11 @@
             "id": "build_type",
             "description": "The type of build",
             "default": "Debug",
-            "type": "promptString"
-        },
+            "type": "pickString",
+            "options": [
+                "Debug",
+                "Release"
+            ]
+        }
     ]
 }
