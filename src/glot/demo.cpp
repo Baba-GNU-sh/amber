@@ -10,6 +10,9 @@ class Panel : public View
     void draw(const Window &window) const override
     {
         ImGui::Begin("Help");
+        ImGui::Text("%.1f ms/frame (%.1f FPS)",
+                    1000.0f / ImGui::GetIO().Framerate,
+                    ImGui::GetIO().Framerate);
         ImGui::End();
     }
 };
@@ -42,13 +45,21 @@ int main()
         offset += label->size().x;
     }
 
-    auto axis = std::make_shared<Axis>();
-    axis->set_position(glm::dvec2(0, 100));
-    window.add(axis);
+    Transform<double> graph_transform;
+    auto axis_vertical = std::make_shared<Axis>(Axis::Orientation::Vertical, graph_transform);
+    axis_vertical->set_position(glm::dvec2(0, 100));
+    axis_vertical->set_size(glm::dvec2(100, 500));
+    window.add(axis_vertical);
+
+    auto axis_horizontal = std::make_shared<Axis>(Axis::Orientation::Horizontal, graph_transform);
+    axis_horizontal->set_position(glm::dvec2(100, 600));
+    axis_horizontal->set_size(glm::dvec2(500, 100));
+    window.add(axis_horizontal);
 
     while (!window.should_close())
     {
         glfwPollEvents();
         window.render();
+        graph_transform.scale(glm::dvec2(1.001));
     }
 }

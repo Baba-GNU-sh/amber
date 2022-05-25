@@ -232,7 +232,7 @@ void Graph::draw_labels()
         label.draw(m_window);
     }
 
-    // Draw the y axis ticks
+    // Draw the x axis ticks
     auto left_gs = screen2graph(bl);
     auto right_gs = screen2graph(br);
     start = ceil(left_gs.x / tick_spacing_major.x) * tick_spacing_major.x;
