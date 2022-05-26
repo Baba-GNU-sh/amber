@@ -27,7 +27,7 @@ struct View
         //
     }
 
-    virtual void on_key(int, int, int, int)
+    virtual void on_key(Window &, int, int, int, int)
     {
         //
     }

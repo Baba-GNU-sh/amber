@@ -244,9 +244,10 @@ void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)
 
 void Window_GLFW::handle_key_callback(int key, int scancode, int action, int mods)
 {
-    std::for_each(m_views.begin(), m_views.end(), [key, scancode, action, mods](const auto &view) {
-        view->on_key(key, scancode, action, mods);
-    });
+    std::for_each(
+        m_views.begin(), m_views.end(), [this, key, scancode, action, mods](const auto &view) {
+            view->on_key(*this, key, scancode, action, mods);
+        });
 }
 
 void Window_GLFW::framebuffer_size_callback(GLFWwindow *window, int width, int height)

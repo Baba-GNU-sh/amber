@@ -334,6 +334,22 @@ void init_timeseries(Database &database, GraphState &state)
                    });
 }
 
+struct KeyController : public View
+{
+    void on_key(Window &window, int key, int, int action, int) override
+    {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        {
+            window.request_close();
+        }
+    }
+
+    void draw(const Window &) const override
+    {
+        // Nothing to do...
+    }
+};
+
 int main()
 {
     spdlog::info("Initializing...");
@@ -377,6 +393,9 @@ int main()
 
         auto graph = std::make_shared<Graph>(state);
         window.add(graph);
+
+        auto key_controller = std::make_shared<KeyController>();
+        window.add(key_controller);
 
         // Listen to the keyboard events for hotkeys
         // boost::signals2::scoped_connection _(
