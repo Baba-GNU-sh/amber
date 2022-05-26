@@ -22,6 +22,8 @@ class Window_GLFW : public Window
     Window_GLFW(Window_GLFW &&) = delete;
     Window_GLFW &operator=(Window_GLFW &&) = delete;
 
+    void init();
+
     void use() const;
     void finish() const;
     const Transform<double> &viewport_transform() const override;
@@ -69,6 +71,7 @@ class Window_GLFW : public Window
     static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
     static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void error_callback(int error, const char *msg);
     void update_vp_matrix();
     GLFWmonitor *get_current_monitor() const;
 

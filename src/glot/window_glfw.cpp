@@ -1,15 +1,25 @@
 #include "window_glfw.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 #include "graph_utils.hpp"
 
 bool Window_GLFW::m_first_window = true;
+
+void Window_GLFW::init()
+{
+    const auto window_size = size();
+    std::for_each(m_views.begin(), m_views.end(), [&window_size](const auto &view) {
+        view->on_resize(window_size.x, window_size.y);
+    });
+}
 
 Window_GLFW::Window_GLFW(int width, int height, const std::string &title)
     : m_title(title), m_bg_colour(0.0), m_fullscreen_mode(false)
 {
     if (m_first_window)
     {
+        glfwSetErrorCallback(Window_GLFW::error_callback);
         glfwInit();
     }
 
@@ -159,17 +169,18 @@ void Window_GLFW::scissor(int x, int y, int width, int height) const
 
 void Window_GLFW::handle_framebuffer_size_callback(int width, int height)
 {
-    const auto size_px = glm::vec2(width, height);
+    // TODO: We probably don't want to bother passing on the framebuffer size...?
+    const auto size_px = size();
 
     update_vp_matrix();
     glfwMakeContextCurrent(m_window);
-    glViewport(0, 0, size_px.x, size_px.y);
+    glViewport(0, 0, width, height);
 
     std::for_each(m_views.begin(), m_views.end(), [&size_px](const auto &view) {
         view->on_resize(size_px.x, size_px.y);
     });
 
-    m_logger->info("Window_GLFW resized: {}x{}px", width, height);
+    m_logger->info("Window_GLFW framebuffer resized: {}x{}px", width, height);
 }
 
 void Window_GLFW::handle_cursor_pos_callback(double xpos, double ypos)
@@ -317,4 +328,9 @@ GLFWmonitor *Window_GLFW::get_current_monitor() const
     }
 
     return bestmonitor;
+}
+
+void Window_GLFW::error_callback(int error, const char *msg)
+{
+    spdlog::error("[{}] {}", error, msg);
 }
