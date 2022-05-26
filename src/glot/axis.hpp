@@ -13,6 +13,7 @@ class Axis : public View
         Vertical
     };
 
+    // TODO: can we make this orientation setting a template parameter?
     Axis(Orientation ori, const Transform<double> &graph_transform);
     ~Axis();
 
@@ -23,7 +24,7 @@ class Axis : public View
     glm::dvec2 size() const override;
     void set_size(const glm::dvec2 &size) override;
     void set_orientation(Orientation ori);
-    void on_scroll(double x, double y) override;
+    void on_scroll(const Window &, double x, double y) override;
     void on_mouse_button(int button, int action, int mods) override;
 
   private:

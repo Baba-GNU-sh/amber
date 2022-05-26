@@ -7,7 +7,7 @@ struct View
     virtual ~View() = default;
     virtual void draw(const Window &window) const = 0;
 
-    virtual void on_scroll(double, double)
+    virtual void on_scroll(const Window &, double, double)
     {
         //
     }

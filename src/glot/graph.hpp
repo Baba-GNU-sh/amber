@@ -22,12 +22,17 @@ class Graph : public View
     glm::dvec2 cursor_gs() const;
     void draw(const Window &window) const override;
     void on_resize(int, int) override;
+    void on_scroll(const Window &, double, double) override;
+    glm::dvec2 size() const override;
+    glm::dvec2 position() const override;
 
   private:
     void layout();
     // glm::dvec2 screen2graph(const glm::ivec2 &value) const;
     // glm::dvec2 screen2graph_delta(const glm::ivec2 &value) const;
     // glm::dvec2 graph2screen(const glm::dvec2 &value) const;
+
+    static bool hit_test(const Window &window, const View &view);
 
     static constexpr double GUTTER_SIZE = 60;
     static constexpr double ZOOM_MAX = 10e6;

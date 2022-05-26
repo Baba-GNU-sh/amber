@@ -198,7 +198,7 @@ void Window_GLFW::handle_scroll_callback(double xoffset, double yoffset)
     std::for_each(m_views.begin(), m_views.end(), [this, xoffset, yoffset](const auto &view) {
         if (GraphUtils::hit_test(cursor(), view->position(), view->position() + view->size()))
         {
-            view->on_scroll(xoffset, yoffset);
+            view->on_scroll(*this, xoffset, yoffset);
         }
     });
 }

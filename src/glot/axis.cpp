@@ -155,7 +155,7 @@ void Axis::set_orientation(Orientation ori)
     m_orientation = ori;
 }
 
-void Axis::on_scroll(double xoffset, double yoffset)
+void Axis::on_scroll(const Window &, double xoffset, double yoffset)
 {
     spdlog::info("Scroll {} {}", xoffset, yoffset);
 }

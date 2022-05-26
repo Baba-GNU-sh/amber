@@ -79,6 +79,27 @@ void Graph::on_resize(int width, int height)
     layout();
 }
 
+void Graph::on_scroll(const Window &window, double x, double y)
+{
+    (void)x;
+
+    if (hit_test(window, m_axis_horizontal))
+        m_axis_horizontal.on_scroll(window, x, y);
+
+    if (hit_test(window, m_axis_vertical))
+        m_axis_vertical.on_scroll(window, x, y);
+}
+
+glm::dvec2 Graph::size() const
+{
+    return m_size;
+}
+
+glm::dvec2 Graph::position() const
+{
+    return m_position;
+}
+
 void Graph::layout()
 {
     m_axis_horizontal.set_size(glm::dvec2(m_size.x - GUTTER_SIZE, GUTTER_SIZE));
@@ -86,6 +107,11 @@ void Graph::layout()
 
     m_axis_vertical.set_size(glm::dvec2(GUTTER_SIZE, m_size.y - GUTTER_SIZE));
     m_axis_vertical.set_position(glm::dvec2(0.0) + m_position);
+}
+
+bool Graph::hit_test(const Window &window, const View &view)
+{
+    return GraphUtils::hit_test(window.cursor(), view.position(), view.position() + view.size());
 }
 
 // void Graph::handle_scroll(double /*xoffset*/, double yoffset)
