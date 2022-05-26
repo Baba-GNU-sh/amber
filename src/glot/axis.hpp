@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/signals2.hpp>
+
 #include "shader_utils.hpp"
 #include "view.hpp"
 #include "utils/transform.hpp"
@@ -26,6 +28,8 @@ class Axis : public View
     void set_orientation(Orientation ori);
     void on_scroll(const Window &, double x, double y) override;
     void on_mouse_button(int button, int action, int mods) override;
+
+    boost::signals2::signal<void(double)> on_zoom;
 
   private:
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing(

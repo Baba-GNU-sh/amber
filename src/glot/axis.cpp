@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <boost/signals2.hpp>
 
 Axis::Axis(Orientation ori, const Transform<double> &graph_transform)
     : m_orientation(ori), m_graph_transform(graph_transform)
@@ -155,9 +156,9 @@ void Axis::set_orientation(Orientation ori)
     m_orientation = ori;
 }
 
-void Axis::on_scroll(const Window &, double xoffset, double yoffset)
+void Axis::on_scroll(const Window &, double, double yoffset)
 {
-    spdlog::info("Scroll {} {}", xoffset, yoffset);
+    on_zoom(yoffset);
 }
 
 void Axis::on_mouse_button(int button, int action, int)

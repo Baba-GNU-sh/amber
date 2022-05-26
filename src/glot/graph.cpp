@@ -18,6 +18,16 @@ Graph::Graph(GraphState &state)
 
     state.view.set_zoom_limit(ZOOM_MAX);
 
+    m_axis_horizontal.on_zoom.connect([this](double amount) {
+        const auto delta = 1.0 + amount * 0.1;
+        m_state.view.scale(glm::dvec2(delta, 1.0));
+    });
+
+    m_axis_vertical.on_zoom.connect([this](double amount) {
+        const auto delta = 1.0 + amount * 0.1;
+        m_state.view.scale(glm::dvec2(1.0, delta));
+    });
+
     // for (int i = 0; i < 128; ++i)
     // {
     //     m_axis_labels.emplace_back(m_font);
