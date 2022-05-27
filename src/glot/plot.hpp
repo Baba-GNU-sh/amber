@@ -31,9 +31,13 @@ class Plot : public View
                    glm::vec3 plot_colour,
                    float y_offset) const;
 
-    void on_scroll(const Window &, double, double) override;
+    void on_scroll(Window &, double, double) override;
+
+    void on_mouse_button(Window &window, int, int, int) override;
+    void on_cursor_move(Window &window, double, double) override;
 
     boost::signals2::signal<void(const Window &, double)> on_zoom;
+    boost::signals2::signal<void(const Window &, const glm::dvec2 &)> on_pan;
 
   private:
     glm::dvec2 screen2graph(const Transform<double> &viewport_txform,
@@ -51,4 +55,7 @@ class Plot : public View
     Program m_shader;
     glm::dvec2 m_position;
     glm::dvec2 m_size;
+
+    bool m_is_dragging = false;
+    glm::dvec2 m_cursor_pos_old;
 };

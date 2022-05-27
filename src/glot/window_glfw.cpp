@@ -188,7 +188,7 @@ void Window_GLFW::handle_cursor_pos_callback(double xpos, double ypos)
     std::for_each(m_views.begin(), m_views.end(), [this, xpos, ypos](const auto &view) {
         if (GraphUtils::hit_test(cursor(), view->position(), view->position() + view->size()))
         {
-            view->on_cursor_move(xpos, ypos);
+            view->on_cursor_move(*this, xpos, ypos);
         }
     });
 }
@@ -216,7 +216,7 @@ void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)
                 if (GraphUtils::hit_test(
                         cursor(), view->position(), view->position() + view->size()))
                 {
-                    view->on_mouse_button(button, action, mods);
+                    view->on_mouse_button(*this, button, action, mods);
                     m_sticky_view = view;
                 }
             });
@@ -225,7 +225,7 @@ void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)
     {
         if (m_sticky_view)
         {
-            m_sticky_view->on_mouse_button(button, action, mods);
+            m_sticky_view->on_mouse_button(*this, button, action, mods);
             m_sticky_view.reset();
         }
         else
@@ -235,7 +235,7 @@ void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)
                     if (GraphUtils::hit_test(
                             cursor(), view->position(), view->position() + view->size()))
                     {
-                        view->on_mouse_button(button, action, mods);
+                        view->on_mouse_button(*this, button, action, mods);
                     }
                 });
         }

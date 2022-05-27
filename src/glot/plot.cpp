@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
@@ -140,9 +141,35 @@ void Plot::draw(const Window &window) const
     }
 }
 
-void Plot::on_scroll(const Window &window, double, double yoffset)
+void Plot::on_scroll(Window &window, double, double yoffset)
 {
     on_zoom(window, yoffset);
+}
+
+void Plot::on_mouse_button(Window &window, int button, int action, int mods)
+{
+    (void)mods;
+    (void)window;
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        m_is_dragging = true;
+    }
+    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        m_is_dragging = false;
+    }
+}
+
+void Plot::on_cursor_move(Window &window, double x, double y)
+{
+    const glm::dvec2 cursor_pos(x, y);
+    if (m_is_dragging)
+    {
+        const auto delta = cursor_pos - m_cursor_pos_old;
+        on_pan(window, delta);
+    }
+    m_cursor_pos_old = cursor_pos;
 }
 
 glm::dvec2 Plot::screen2graph(const Transform<double> &viewport_txform,

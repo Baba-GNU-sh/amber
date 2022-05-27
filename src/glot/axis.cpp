@@ -156,12 +156,12 @@ void Axis::set_orientation(Orientation ori)
     m_orientation = ori;
 }
 
-void Axis::on_scroll(const Window &window, double, double yoffset)
+void Axis::on_scroll(Window &window, double, double yoffset)
 {
     on_zoom(window, yoffset);
 }
 
-void Axis::on_mouse_button(int button, int action, int)
+void Axis::on_mouse_button(Window &, int button, int action, int)
 {
     spdlog::info("Click {} {}", button, action);
 }

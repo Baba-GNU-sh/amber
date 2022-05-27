@@ -7,22 +7,17 @@ struct View
     virtual ~View() = default;
     virtual void draw(const Window &window) const = 0;
 
-    virtual void on_scroll(const Window &, double, double)
+    virtual void on_scroll(Window &, double, double)
     {
         //
     }
 
-    virtual void on_zoom(double, double)
+    virtual void on_mouse_button(Window &, int, int, int)
     {
         //
     }
 
-    virtual void on_mouse_button(int, int, int)
-    {
-        //
-    }
-
-    virtual void on_cursor_move(double, double)
+    virtual void on_cursor_move(Window &, double, double)
     {
         //
     }

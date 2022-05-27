@@ -33,6 +33,11 @@ Graph::Graph(GraphState &state)
         apply_zoom(window, glm::dvec2(delta));
     });
 
+    m_plot.on_pan.connect([this](const Window &window, glm::dvec2 amount) {
+        const auto delta_gs = screen2graph_delta(window.viewport_transform(), amount);
+        m_state.view.translate(delta_gs);
+    });
+
     // for (int i = 0; i < 128; ++i)
     // {
     //     m_axis_labels.emplace_back(m_font);
@@ -96,7 +101,7 @@ void Graph::on_resize(int width, int height)
     layout();
 }
 
-void Graph::on_scroll(const Window &window, double x, double y)
+void Graph::on_scroll(Window &window, double x, double y)
 {
     if (hit_test(window, m_axis_horizontal))
         m_axis_horizontal.on_scroll(window, x, y);
@@ -106,6 +111,30 @@ void Graph::on_scroll(const Window &window, double x, double y)
 
     if (hit_test(window, m_plot))
         m_plot.on_scroll(window, x, y);
+}
+
+void Graph::on_mouse_button(Window &window, int button, int action, int mods)
+{
+    if (hit_test(window, m_axis_horizontal))
+        m_axis_horizontal.on_mouse_button(window, button, action, mods);
+
+    if (hit_test(window, m_axis_vertical))
+        m_axis_vertical.on_mouse_button(window, button, action, mods);
+
+    if (hit_test(window, m_plot))
+        m_plot.on_mouse_button(window, button, action, mods);
+}
+
+void Graph::on_cursor_move(Window &window, double x, double y)
+{
+    if (hit_test(window, m_axis_horizontal))
+        m_axis_horizontal.on_cursor_move(window, x, y);
+
+    if (hit_test(window, m_axis_vertical))
+        m_axis_vertical.on_cursor_move(window, x, y);
+
+    if (hit_test(window, m_plot))
+        m_plot.on_cursor_move(window, x, y);
 }
 
 glm::dvec2 Graph::size() const

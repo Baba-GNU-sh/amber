@@ -22,7 +22,10 @@ class Graph : public View
     glm::dvec2 cursor_gs() const;
     void draw(const Window &window) const override;
     void on_resize(int, int) override;
-    void on_scroll(const Window &, double, double) override;
+    void on_scroll(Window &, double, double) override;
+    void on_mouse_button(Window &, int button, int action, int mods) override;
+    void on_cursor_move(Window &window, double, double) override;
+
     glm::dvec2 size() const override;
     glm::dvec2 position() const override;
 

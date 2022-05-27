@@ -26,8 +26,8 @@ class Axis : public View
     glm::dvec2 size() const override;
     void set_size(const glm::dvec2 &size) override;
     void set_orientation(Orientation ori);
-    void on_scroll(const Window &, double x, double y) override;
-    void on_mouse_button(int button, int action, int mods) override;
+    void on_scroll(Window &, double x, double y) override;
+    void on_mouse_button(Window &, int button, int action, int mods) override;
 
     boost::signals2::signal<void(const Window &, double)> on_zoom;
 
