@@ -41,7 +41,7 @@ class Graph : public View
     GraphState &m_state;
     Axis m_axis_horizontal;
     Axis m_axis_vertical;
-    // Plot m_plot;
+    Plot m_plot;
 
     // std::vector<Label> m_axis_labels;
     // std::vector<Label> m_marker_ts_labels;

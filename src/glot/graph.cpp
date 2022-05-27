@@ -28,6 +28,11 @@ Graph::Graph(GraphState &state)
         m_state.view.scale(glm::dvec2(1.0, delta));
     });
 
+    m_plot.on_zoom.connect([this](double amount) {
+        const auto delta = 1.0 + amount * 0.1;
+        m_state.view.scale(glm::dvec2(delta));
+    });
+
     // for (int i = 0; i < 128; ++i)
     // {
     //     m_axis_labels.emplace_back(m_font);
@@ -98,6 +103,9 @@ void Graph::on_scroll(const Window &window, double x, double y)
 
     if (hit_test(window, m_axis_vertical))
         m_axis_vertical.on_scroll(window, x, y);
+
+    if (hit_test(window, m_plot))
+        m_plot.on_scroll(window, x, y);
 }
 
 glm::dvec2 Graph::size() const
@@ -112,11 +120,14 @@ glm::dvec2 Graph::position() const
 
 void Graph::layout()
 {
-    m_axis_horizontal.set_size(glm::dvec2(m_size.x - GUTTER_SIZE, GUTTER_SIZE));
     m_axis_horizontal.set_position(glm::dvec2(GUTTER_SIZE, m_size.y - GUTTER_SIZE) + m_position);
+    m_axis_horizontal.set_size(glm::dvec2(m_size.x - GUTTER_SIZE, GUTTER_SIZE));
 
-    m_axis_vertical.set_size(glm::dvec2(GUTTER_SIZE, m_size.y - GUTTER_SIZE));
     m_axis_vertical.set_position(glm::dvec2(0.0) + m_position);
+    m_axis_vertical.set_size(glm::dvec2(GUTTER_SIZE, m_size.y - GUTTER_SIZE));
+
+    m_plot.set_position(glm::dvec2(m_position.x + GUTTER_SIZE, m_position.y));
+    m_plot.set_size(m_size - glm::dvec2(GUTTER_SIZE));
 }
 
 bool Graph::hit_test(const Window &window, const View &view)
@@ -277,6 +288,21 @@ bool Graph::hit_test(const Window &window, const View &view)
 //     // Work out where the cursor would be under this new zoom level and recenter the view on the
 //     // cursor
 //     const auto cursor_in_gs_new = screen2graph(m_window.cursor());
+//     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
+//     m_state.view.translate(cursor_delta);
+// }
+
+// void Graph::on_zoom(Window &window, const glm::dvec2 &zoom_delta_vec)
+// {
+//     // Store where the pointer is in graph space before scaling
+//     const auto cursor_in_gs_old = screen2graph(window.cursor());
+
+//     // Scale the view matrix by the zoom amount
+//     m_state.view.scale(zoom_delta_vec);
+
+//     // Work out where the cursor would be under this new zoom level and recenter the view on the
+//     // cursor
+//     const auto cursor_in_gs_new = screen2graph(window.cursor());
 //     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
 //     m_state.view.translate(cursor_delta);
 // }

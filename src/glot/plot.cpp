@@ -6,7 +6,7 @@
 #include <database/timeseries.hpp>
 #include "resources.hpp"
 
-Plot::Plot(Window &window) : m_window(window)
+Plot::Plot()
 {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
@@ -39,7 +39,7 @@ Plot::~Plot()
         glDeleteBuffers(1, &m_vbo);
 }
 
-Plot::Plot(Plot &&other) : m_window(other.m_window), m_shader(other.m_shader)
+Plot::Plot(Plot &&other) : m_shader(other.m_shader)
 {
     m_vao = other.m_vao;
     m_vbo = other.m_vbo;
@@ -47,61 +47,82 @@ Plot::Plot(Plot &&other) : m_window(other.m_window), m_shader(other.m_shader)
     other.m_vbo = 0;
 }
 
-void Plot::set_position(const glm::ivec2 &position)
+glm::dvec2 Plot::position() const
+{
+    return m_position;
+}
+
+void Plot::set_position(const glm::dvec2 &position)
 {
     m_position = position;
 }
 
-void Plot::set_size(const glm::ivec2 &size)
+glm::dvec2 Plot::size() const
+{
+    return m_size;
+}
+
+void Plot::set_size(const glm::dvec2 &size)
 {
     m_size = size;
 }
 
-void Plot::draw(const glm::mat3 &view_matrix,
-                const std::vector<TSSample> &data,
-                int line_width,
-                glm::vec3 line_colour,
-                float y_offset,
-                bool show_line_segments) const
+// void Plot::draw(const glm::mat3 &view_matrix,
+//                 const std::vector<TSSample> &data,
+//                 int line_width,
+//                 glm::vec3 line_colour,
+//                 float y_offset,
+//                 bool show_line_segments) const
+// {
+//     glBindVertexArray(m_vao);
+//     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+//     glm::mat3 view_matrix_offset = glm::translate(view_matrix, glm::vec2(0.0f, y_offset));
+
+//     m_shader.use();
+//     int uniform_id = m_shader.uniform_location("view_matrix");
+//     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(view_matrix_offset[0]));
+
+//     uniform_id = m_shader.uniform_location("viewport_matrix");
+//     const auto viewport_matrix = glm::mat3(m_window.viewport_transform().matrix());
+//     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix[0]));
+
+//     uniform_id = m_shader.uniform_location("viewport_matrix_inv");
+//     const auto viewport_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
+//     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
+
+//     uniform_id = m_shader.uniform_location("line_thickness_px");
+//     glUniform1i(uniform_id, line_width);
+
+//     uniform_id = m_shader.uniform_location("show_line_segments");
+//     glUniform1i(uniform_id, show_line_segments);
+
+//     uniform_id = m_shader.uniform_location("plot_colour");
+//     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
+
+//     uniform_id = m_shader.uniform_location("minmax_colour");
+//     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
+
+//     // glScissor coordinates start in the bottom left
+//     glEnable(GL_SCISSOR_TEST);
+//     const auto window_size = m_window.size();
+//     m_window.scissor(m_position.x, window_size.y - (m_position.y + m_size.y), m_size.x,
+//     m_size.y);
+
+//     // Limit the number of samples we copy to the vertex buffer
+//     const auto num_samples = std::min(data.size(), COLS_MAX);
+
+//     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * num_samples, data.data());
+//     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, num_samples);
+//     glDisable(GL_SCISSOR_TEST);
+// }
+
+void Plot::draw(const Window &window) const
 {
-    glBindVertexArray(m_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    (void)window;
+}
 
-    glm::mat3 view_matrix_offset = glm::translate(view_matrix, glm::vec2(0.0f, y_offset));
-
-    m_shader.use();
-    int uniform_id = m_shader.uniform_location("view_matrix");
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(view_matrix_offset[0]));
-
-    uniform_id = m_shader.uniform_location("viewport_matrix");
-    const auto viewport_matrix = glm::mat3(m_window.viewport_transform().matrix());
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix[0]));
-
-    uniform_id = m_shader.uniform_location("viewport_matrix_inv");
-    const auto viewport_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
-
-    uniform_id = m_shader.uniform_location("line_thickness_px");
-    glUniform1i(uniform_id, line_width);
-
-    uniform_id = m_shader.uniform_location("show_line_segments");
-    glUniform1i(uniform_id, show_line_segments);
-
-    uniform_id = m_shader.uniform_location("plot_colour");
-    glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
-
-    uniform_id = m_shader.uniform_location("minmax_colour");
-    glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
-
-    // glScissor coordinates start in the bottom left
-    glEnable(GL_SCISSOR_TEST);
-    const auto window_size = m_window.size();
-    m_window.scissor(m_position.x, window_size.y - (m_position.y + m_size.y), m_size.x, m_size.y);
-
-    // Limit the number of samples we copy to the vertex buffer
-    const auto num_samples = std::min(data.size(), COLS_MAX);
-
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * num_samples, data.data());
-    glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, num_samples);
-    glDisable(GL_SCISSOR_TEST);
+void Plot::on_scroll(const Window &, double, double yoffset)
+{
+    on_zoom(yoffset);
 }
