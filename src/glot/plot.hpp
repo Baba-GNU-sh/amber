@@ -6,11 +6,12 @@
 #include "window.hpp"
 #include "view.hpp"
 #include <boost/signals2.hpp>
+#include "graph_state.hpp"
 
 class Plot : public View
 {
   public:
-    Plot();
+    Plot(GraphState &state);
     ~Plot();
     Plot(const Plot &) = delete;
     Plot &operator=(const Plot &) = delete;
@@ -25,18 +26,25 @@ class Plot : public View
 
     void draw(const Window &window) const override;
 
-    void draw(const glm::mat3 &view_matrix,
-              const std::vector<TSSample> &data,
-              int plot_width,
-              glm::vec3 plot_colour,
-              float y_offset,
-              bool show_line_segments) const;
+    void draw_plot(const Window &window,
+                   const std::vector<TSSample> &data,
+                   glm::vec3 plot_colour,
+                   float y_offset) const;
 
     void on_scroll(const Window &, double, double) override;
 
     boost::signals2::signal<void(const Window &, double)> on_zoom;
 
   private:
+    glm::dvec2 screen2graph(const Transform<double> &viewport_txform,
+                            const glm::ivec2 &value) const;
+    glm::dvec2 screen2graph_delta(const Transform<double> &viewport_txform,
+                                  const glm::ivec2 &value) const;
+    glm::dvec2 graph2screen(const Transform<double> &viewport_txform,
+                            const glm::dvec2 &value) const;
+
+    GraphState &m_state;
+    static constexpr size_t PIXELS_PER_COL = 1;
     static constexpr size_t COLS_MAX = 8192; // Number of preallocated buffer space for samples
     unsigned int m_vao;
     unsigned int m_vbo;

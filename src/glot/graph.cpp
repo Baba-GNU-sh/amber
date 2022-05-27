@@ -12,7 +12,7 @@
 
 Graph::Graph(GraphState &state)
     : m_state(state), m_axis_horizontal(Axis::Orientation::Horizontal, m_state.view),
-      m_axis_vertical(Axis::Orientation::Vertical, m_state.view)
+      m_axis_vertical(Axis::Orientation::Vertical, m_state.view), m_plot(state)
 {
     using namespace std::placeholders;
 
@@ -73,8 +73,10 @@ void Graph::draw(const Window &window) const
 
     m_axis_horizontal.draw(window);
     m_axis_vertical.draw(window);
+    m_plot.draw(window);
 
-    // draw_lines();
+    // Draw the marker and selection box too
+
     // draw_labels();
     // draw_plots();
     // draw_markers();
@@ -96,8 +98,6 @@ void Graph::on_resize(int width, int height)
 
 void Graph::on_scroll(const Window &window, double x, double y)
 {
-    (void)x;
-
     if (hit_test(window, m_axis_horizontal))
         m_axis_horizontal.on_scroll(window, x, y);
 

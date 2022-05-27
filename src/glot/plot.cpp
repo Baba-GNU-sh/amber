@@ -6,7 +6,7 @@
 #include <database/timeseries.hpp>
 #include "resources.hpp"
 
-Plot::Plot()
+Plot::Plot(GraphState &state) : m_state(state)
 {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
@@ -39,7 +39,7 @@ Plot::~Plot()
         glDeleteBuffers(1, &m_vbo);
 }
 
-Plot::Plot(Plot &&other) : m_shader(other.m_shader)
+Plot::Plot(Plot &&other) : m_state(other.m_state), m_shader(other.m_shader)
 {
     m_vao = other.m_vao;
     m_vbo = other.m_vbo;
@@ -66,62 +66,105 @@ void Plot::set_size(const glm::dvec2 &size)
 {
     m_size = size;
 }
-// void Plot::draw(const glm::mat3 &view_matrix,
-//                 const std::vector<TSSample> &data,
-//                 int line_width,
-//                 glm::vec3 line_colour,
-//                 float y_offset,
-//                 bool show_line_segments) const
-// {
-//     glBindVertexArray(m_vao);
-//     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-//     glm::mat3 view_matrix_offset = glm::translate(view_matrix, glm::vec2(0.0f, y_offset));
+void Plot::draw_plot(const Window &window,
+                     const std::vector<TSSample> &data,
+                     glm::vec3 line_colour,
+                     float y_offset) const
+{
+    glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-//     m_shader.use();
-//     int uniform_id = m_shader.uniform_location("view_matrix");
-//     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(view_matrix_offset[0]));
+    glm::mat3 view_matrix_offset =
+        glm::translate(m_state.view.matrix(), glm::dvec2(0.0f, y_offset));
 
-//     uniform_id = m_shader.uniform_location("viewport_matrix");
-//     const auto viewport_matrix = glm::mat3(m_window.viewport_transform().matrix());
-//     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix[0]));
+    m_shader.use();
+    int uniform_id = m_shader.uniform_location("view_matrix");
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(view_matrix_offset[0]));
 
-//     uniform_id = m_shader.uniform_location("viewport_matrix_inv");
-//     const auto viewport_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
-//     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
+    uniform_id = m_shader.uniform_location("viewport_matrix");
+    const auto viewport_matrix = glm::mat3(window.viewport_transform().matrix());
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix[0]));
 
-//     uniform_id = m_shader.uniform_location("line_thickness_px");
-//     glUniform1i(uniform_id, line_width);
+    uniform_id = m_shader.uniform_location("viewport_matrix_inv");
+    const auto viewport_matrix_inv = glm::mat3(window.viewport_transform().matrix_inverse());
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
 
-//     uniform_id = m_shader.uniform_location("show_line_segments");
-//     glUniform1i(uniform_id, show_line_segments);
+    uniform_id = m_shader.uniform_location("line_thickness_px");
+    glUniform1i(uniform_id, m_state.plot_width);
 
-//     uniform_id = m_shader.uniform_location("plot_colour");
-//     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
+    uniform_id = m_shader.uniform_location("show_line_segments");
+    glUniform1i(uniform_id, m_state.show_line_segments);
 
-//     uniform_id = m_shader.uniform_location("minmax_colour");
-//     glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
+    uniform_id = m_shader.uniform_location("plot_colour");
+    glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
 
-//     // glScissor coordinates start in the bottom left
-//     glEnable(GL_SCISSOR_TEST);
-//     const auto window_size = m_window.size();
-//     m_window.scissor(m_position.x, window_size.y - (m_position.y + m_size.y), m_size.x,
-//     m_size.y);
+    uniform_id = m_shader.uniform_location("minmax_colour");
+    glUniform3f(uniform_id, line_colour.r, line_colour.g, line_colour.b);
 
-//     // Limit the number of samples we copy to the vertex buffer
-//     const auto num_samples = std::min(data.size(), COLS_MAX);
+    // glScissor coordinates start in the bottom left
+    glEnable(GL_SCISSOR_TEST);
+    const auto window_size = window.size();
+    window.scissor(m_position.x, window_size.y - (m_position.y + m_size.y), m_size.x, m_size.y);
 
-//     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * num_samples, data.data());
-//     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, num_samples);
-//     glDisable(GL_SCISSOR_TEST);
-// }
+    // Limit the number of samples we copy to the vertex buffer
+    const auto num_samples = std::min(data.size(), COLS_MAX);
+
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * num_samples, data.data());
+    glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, num_samples);
+    glDisable(GL_SCISSOR_TEST);
+}
 
 void Plot::draw(const Window &window) const
 {
-    (void)window;
+    const auto plot_size_px = m_size;
+    const auto plot_position_px = m_position;
+
+    const int num_samples = plot_size_px.x / PIXELS_PER_COL;
+
+    const auto plot_position_gs = screen2graph(window.viewport_transform(), plot_position_px);
+    const auto plot_size_gs = screen2graph_delta(window.viewport_transform(), plot_size_px);
+    const auto interval_gs = PIXELS_PER_COL * plot_size_gs.x / num_samples;
+
+    for (auto &time_series : m_state.timeseries)
+    {
+        if (time_series.visible)
+        {
+            std::vector<TSSample> samples(num_samples);
+            auto n_samples = time_series.ts->get_samples(
+                samples.data(), plot_position_gs.x, interval_gs, num_samples);
+            samples.resize(n_samples);
+
+            draw_plot(window, samples, time_series.colour, time_series.y_offset);
+        }
+    }
 }
 
 void Plot::on_scroll(const Window &window, double, double yoffset)
 {
     on_zoom(window, yoffset);
+}
+
+glm::dvec2 Plot::screen2graph(const Transform<double> &viewport_txform,
+                              const glm::ivec2 &viewport_space) const
+{
+    const auto clip_space = viewport_txform.apply_inverse(viewport_space);
+    const auto graph_space = m_state.view.apply_inverse(clip_space);
+    return graph_space;
+}
+
+glm::dvec2 Plot::screen2graph_delta(const Transform<double> &viewport_txform,
+                                    const glm::ivec2 &delta) const
+{
+    auto begin_gs = screen2graph(viewport_txform, glm::ivec2(0, 0));
+    auto end_gs = screen2graph(viewport_txform, glm::ivec2(0, 0) + delta);
+    return end_gs - begin_gs;
+}
+
+glm::dvec2 Plot::graph2screen(const Transform<double> &viewport_txform,
+                              const glm::dvec2 &value) const
+{
+    const auto clip_space = m_state.view.apply(value);
+    const auto screen_space = viewport_txform.apply(clip_space);
+    return screen_space;
 }
