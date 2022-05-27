@@ -34,7 +34,7 @@ class Plot : public View
 
     void on_scroll(const Window &, double, double) override;
 
-    boost::signals2::signal<void(double)> on_zoom;
+    boost::signals2::signal<void(const Window &, double)> on_zoom;
 
   private:
     static constexpr size_t COLS_MAX = 8192; // Number of preallocated buffer space for samples

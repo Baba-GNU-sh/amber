@@ -29,7 +29,7 @@ class Axis : public View
     void on_scroll(const Window &, double x, double y) override;
     void on_mouse_button(int button, int action, int mods) override;
 
-    boost::signals2::signal<void(double)> on_zoom;
+    boost::signals2::signal<void(const Window &, double)> on_zoom;
 
   private:
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing(

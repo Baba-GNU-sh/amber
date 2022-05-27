@@ -66,7 +66,6 @@ void Plot::set_size(const glm::dvec2 &size)
 {
     m_size = size;
 }
-
 // void Plot::draw(const glm::mat3 &view_matrix,
 //                 const std::vector<TSSample> &data,
 //                 int line_width,
@@ -122,7 +121,7 @@ void Plot::draw(const Window &window) const
     (void)window;
 }
 
-void Plot::on_scroll(const Window &, double, double yoffset)
+void Plot::on_scroll(const Window &window, double, double yoffset)
 {
-    on_zoom(yoffset);
+    on_zoom(window, yoffset);
 }

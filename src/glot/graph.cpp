@@ -18,19 +18,19 @@ Graph::Graph(GraphState &state)
 
     state.view.set_zoom_limit(ZOOM_MAX);
 
-    m_axis_horizontal.on_zoom.connect([this](double amount) {
+    m_axis_horizontal.on_zoom.connect([this](const Window &window, double amount) {
         const auto delta = 1.0 + amount * 0.1;
-        m_state.view.scale(glm::dvec2(delta, 1.0));
+        apply_zoom(window, glm::dvec2(delta, 1.0));
     });
 
-    m_axis_vertical.on_zoom.connect([this](double amount) {
+    m_axis_vertical.on_zoom.connect([this](const Window &window, double amount) {
         const auto delta = 1.0 + amount * 0.1;
-        m_state.view.scale(glm::dvec2(1.0, delta));
+        apply_zoom(window, glm::dvec2(1.0, delta));
     });
 
-    m_plot.on_zoom.connect([this](double amount) {
+    m_plot.on_zoom.connect([this](const Window &window, double amount) {
         const auto delta = 1.0 + amount * 0.1;
-        m_state.view.scale(glm::dvec2(delta));
+        apply_zoom(window, glm::dvec2(delta));
     });
 
     // for (int i = 0; i < 128; ++i)
@@ -133,6 +133,30 @@ void Graph::layout()
 bool Graph::hit_test(const Window &window, const View &view)
 {
     return GraphUtils::hit_test(window.cursor(), view.position(), view.position() + view.size());
+}
+
+glm::dvec2 Graph::screen2graph(const Transform<double> &viewport_txform,
+                               const glm::ivec2 &viewport_space) const
+{
+    const auto clip_space = viewport_txform.apply_inverse(viewport_space);
+    const auto graph_space = m_state.view.apply_inverse(clip_space);
+    return graph_space;
+}
+
+glm::dvec2 Graph::screen2graph_delta(const Transform<double> &viewport_txform,
+                                     const glm::ivec2 &delta) const
+{
+    auto begin_gs = screen2graph(viewport_txform, glm::ivec2(0, 0));
+    auto end_gs = screen2graph(viewport_txform, glm::ivec2(0, 0) + delta);
+    return end_gs - begin_gs;
+}
+
+glm::dvec2 Graph::graph2screen(const Transform<double> &viewport_txform,
+                               const glm::dvec2 &value) const
+{
+    const auto clip_space = m_state.view.apply(value);
+    const auto screen_space = viewport_txform.apply(clip_space);
+    return screen_space;
 }
 
 // void Graph::handle_scroll(double /*xoffset*/, double yoffset)
@@ -274,23 +298,20 @@ bool Graph::hit_test(const Window &window, const View &view)
 //     return m_window.viewport_transform().apply(m_state.view.apply(value));
 // }
 
-// void Graph::on_zoom(double x, double y)
-// {
-//     // Make a vector from the zoom delta
-//     glm::dvec2 zoom_delta_vec(x, y);
+void Graph::apply_zoom(const Window &window, const glm::dvec2 &zoom_delta_vec)
+{
+    // Store where the pointer is in graph space before scaling
+    const auto cursor_in_gs_old = screen2graph(window.viewport_transform(), window.cursor());
 
-//     // Store where the pointer is in graph space before scaling
-//     const auto cursor_in_gs_old = screen2graph(m_window.cursor());
+    // Scale the view matrix by the zoom amount, clamping to some max value
+    m_state.view.scale(zoom_delta_vec);
 
-//     // Scale the view matrix by the zoom amount, clamping to some max value
-//     m_state.view.scale(zoom_delta_vec);
-
-//     // Work out where the cursor would be under this new zoom level and recenter the view on the
-//     // cursor
-//     const auto cursor_in_gs_new = screen2graph(m_window.cursor());
-//     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
-//     m_state.view.translate(cursor_delta);
-// }
+    // Work out where the cursor would be under this new zoom level and recenter the view on the
+    // cursor
+    const auto cursor_in_gs_new = screen2graph(window.viewport_transform(), window.cursor());
+    auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
+    m_state.view.translate(cursor_delta);
+}
 
 // void Graph::on_zoom(Window &window, const glm::dvec2 &zoom_delta_vec)
 // {

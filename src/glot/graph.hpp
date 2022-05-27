@@ -28,11 +28,17 @@ class Graph : public View
 
   private:
     void layout();
-    // glm::dvec2 screen2graph(const glm::ivec2 &value) const;
-    // glm::dvec2 screen2graph_delta(const glm::ivec2 &value) const;
-    // glm::dvec2 graph2screen(const glm::dvec2 &value) const;
 
     static bool hit_test(const Window &window, const View &view);
+
+    glm::dvec2 screen2graph(const Transform<double> &viewport_txform,
+                            const glm::ivec2 &value) const;
+    glm::dvec2 screen2graph_delta(const Transform<double> &viewport_txform,
+                                  const glm::ivec2 &value) const;
+    glm::dvec2 graph2screen(const Transform<double> &viewport_txform,
+                            const glm::dvec2 &value) const;
+
+    void apply_zoom(const Window &window, const glm::dvec2 &);
 
     static constexpr double GUTTER_SIZE = 60;
     static constexpr double ZOOM_MAX = 10e6;

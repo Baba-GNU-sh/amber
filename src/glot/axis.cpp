@@ -156,9 +156,9 @@ void Axis::set_orientation(Orientation ori)
     m_orientation = ori;
 }
 
-void Axis::on_scroll(const Window &, double, double yoffset)
+void Axis::on_scroll(const Window &window, double, double yoffset)
 {
-    on_zoom(yoffset);
+    on_zoom(window, yoffset);
 }
 
 void Axis::on_mouse_button(int button, int action, int)
