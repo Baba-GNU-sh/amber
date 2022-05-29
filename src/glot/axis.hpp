@@ -8,18 +8,11 @@
 #include "font.hpp"
 #include "label.hpp"
 
-class Axis : public View
+class AxisBase : public View
 {
   public:
-    enum class Orientation
-    {
-        Horizontal,
-        Vertical
-    };
-
-    // TODO: can we make this orientation setting a template parameter?
-    Axis(Orientation orientation, const Window &window);
-    ~Axis();
+    AxisBase(const Window &window);
+    ~AxisBase();
 
     void draw(const Window &window) const override;
 
@@ -35,7 +28,7 @@ class Axis : public View
 
     boost::signals2::signal<void(const Window &, double)> on_zoom;
 
-  private:
+  protected:
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing(
         const Transform<double> &viewport_transform) const;
     glm::dvec2 screen2graph(const Transform<double> &viewport_txform,
@@ -46,26 +39,26 @@ class Axis : public View
                             const glm::dvec2 &value) const;
 
     static glm::dvec2 crush(const glm::dvec2 &value, const glm::dvec2 &interval);
-    void draw_ticks(const glm::dvec2 &tick_spacing,
-                    double tick_size,
-                    glm::vec2 *const ptr,
-                    int &offset,
-                    const Transform<double> &vpt) const;
 
     void draw_ticks(const Window &window) const;
+
     void draw_labels(const Window &window) const;
+    virtual void draw_ticks(const glm::dvec2 &tick_spacing,
+                            double tick_size,
+                            glm::vec2 *const ptr,
+                            int &offset,
+                            const Transform<double> &vpt) const = 0;
 
     /**
      * @brief Re-lays out all the components. Call whenever buffers need to be updated.
      */
-    void update_layout();
+    virtual void update_layout() = 0;
 
     // Settings
     static constexpr double TICKLEN_PX = 5.0;
     static constexpr size_t NUM_LABELS = 128;
 
     // View invariates
-    const Orientation m_orientation; // TODO: make this a template parameter
     const Window &m_window;
     Font m_font;
 
@@ -79,4 +72,25 @@ class Axis : public View
     unsigned int m_linebuf_vao;
     unsigned int m_linebuf_vbo;
     Program m_lines_shader;
+};
+
+enum AxisOrientation
+{
+    AxisHorizontal,
+    AxisVertical
+};
+
+template <AxisOrientation Orientation> class Axis : public AxisBase
+{
+  public:
+    Axis(const Window &window);
+
+  private:
+    void draw_ticks(const glm::dvec2 &tick_spacing,
+                    double tick_size,
+                    glm::vec2 *const ptr,
+                    int &offset,
+                    const Transform<double> &vpt) const override;
+
+    void update_layout() override;
 };

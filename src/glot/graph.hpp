@@ -48,8 +48,8 @@ class Graph : public View
     static constexpr int PIXELS_PER_COL = 1;
 
     GraphState &m_state;
-    Axis m_axis_horizontal;
-    Axis m_axis_vertical;
+    Axis<AxisHorizontal> m_axis_horizontal;
+    Axis<AxisVertical> m_axis_vertical;
     Plot m_plot;
 
     // Marker m_marker_a;

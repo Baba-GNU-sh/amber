@@ -5,8 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <boost/signals2.hpp>
 
-Axis::Axis(Orientation orientation, const Window &window)
-    : m_orientation(orientation), m_window(window), m_font("proggy_clean.png")
+AxisBase::AxisBase(const Window &window) : m_window(window), m_font("proggy_clean.png")
 {
     glGenVertexArrays(1, &m_linebuf_vao);
     glBindVertexArray(m_linebuf_vao);
@@ -31,23 +30,29 @@ Axis::Axis(Orientation orientation, const Window &window)
     }
 
     m_labels_used = 0;
-
-    update_layout();
 }
 
-Axis::~Axis()
+AxisBase::~AxisBase()
 {
     glDeleteBuffers(1, &m_linebuf_vao);
     glDeleteVertexArrays(1, &m_linebuf_vao);
 }
 
-void Axis::draw(const Window &window) const
+template <> Axis<AxisVertical>::Axis(const Window &window) : AxisBase(window)
+{
+}
+
+template <> Axis<AxisHorizontal>::Axis(const Window &window) : AxisBase(window)
+{
+}
+
+void AxisBase::draw(const Window &window) const
 {
     draw_ticks(window);
     draw_labels(window);
 }
 
-void Axis::draw_ticks(const Window &window) const
+void AxisBase::draw_ticks(const Window &window) const
 {
     const auto &vpt = window.viewport_transform();
     int offset = 0;
@@ -64,17 +69,6 @@ void Axis::draw_ticks(const Window &window) const
     draw_ticks(tick_spacing_major, TICKLEN_PX, ptr, offset, vpt);
     draw_ticks(tick_spacing_minor, TICKLEN_PX / 2, ptr, offset, vpt);
 
-    if (m_orientation == Orientation::Horizontal)
-    {
-        ptr[offset++] = m_position;
-        ptr[offset++] = m_position + glm::dvec2(m_size.x, 0.0);
-    }
-    else
-    {
-        ptr[offset++] = m_position + glm::dvec2(m_size.x, 0.0);
-        ptr[offset++] = m_position + m_size;
-    }
-
     // make sure to tell OpenGL we're done with the pointer
     glUnmapBuffer(GL_ARRAY_BUFFER);
 
@@ -90,67 +84,77 @@ void Axis::draw_ticks(const Window &window) const
     glDrawArrays(GL_LINES, 0, offset);
 }
 
-void Axis::draw_ticks(const glm::dvec2 &tick_spacing,
-                      double tick_size,
-                      glm::vec2 *const ptr,
-                      int &offset,
-                      const Transform<double> &vpt) const
+template <>
+void Axis<AxisHorizontal>::draw_ticks(const glm::dvec2 &tick_spacing,
+                                      double tick_size,
+                                      glm::vec2 *const ptr,
+                                      int &offset,
+                                      const Transform<double> &vpt) const
 {
-    if (m_orientation == Orientation::Horizontal)
+    const glm::dvec2 tick_size_vec(0, tick_size);
+
+    // Work out the positions of the start and end of the axis in graph space
+    const auto axis_start_gs = screen2graph(vpt, m_position);
+    const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(m_size.x, 0.0));
+
+    // Align the start and end to the nearest tick to work out where the first and last
+    // ticks should go
+    const auto first_tick = crush(axis_start_gs, tick_spacing);
+    const auto last_tick = crush(axis_end_gs, tick_spacing);
+
+    // Work out how many ticks we are going to draw
+    const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / tick_spacing;
+
+    for (int tick = 0; tick < n_ticks.x; ++tick)
     {
-        const glm::dvec2 tick_size_vec(0, tick_size);
+        auto tick_pos = first_tick + (static_cast<double>(tick) * tick_spacing);
+        auto tick_pos_gs = graph2screen(vpt, tick_pos);
+        tick_pos_gs.y = m_position.y;
 
-        // Work out the positions of the start and end of the axis in graph space
-        const auto axis_start_gs = screen2graph(vpt, m_position);
-        const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(m_size.x, 0.0));
-
-        // Align the start and end to the nearest tick to work out where the first and last
-        // ticks should go
-        const auto first_tick = crush(axis_start_gs, tick_spacing);
-        const auto last_tick = crush(axis_end_gs, tick_spacing);
-
-        // Work out how many ticks we are going to draw
-        const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / tick_spacing;
-
-        for (int tick = 0; tick < n_ticks.x; ++tick)
-        {
-            auto tick_pos = first_tick + (static_cast<double>(tick) * tick_spacing);
-            auto tick_pos_gs = graph2screen(vpt, tick_pos);
-            tick_pos_gs.y = m_position.y;
-
-            ptr[offset++] = tick_pos_gs;
-            ptr[offset++] = tick_pos_gs + tick_size_vec;
-        }
+        ptr[offset++] = tick_pos_gs;
+        ptr[offset++] = tick_pos_gs + tick_size_vec;
     }
-    else
-    {
-        const glm::dvec2 tick_size_vec(-tick_size, 0.0);
 
-        // Work out the positions of the start and end of the axis in graph space
-        const auto axis_start_gs = screen2graph(vpt, m_position);
-        const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(0.0, m_size.y));
-
-        // Align the start and end to the nearest tick to work out where the first and last
-        // ticks should go
-        const auto first_tick = crush(axis_start_gs, tick_spacing);
-        const auto last_tick = crush(axis_end_gs, tick_spacing);
-
-        // Work out how many ticks we are going to draw
-        const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / tick_spacing;
-
-        for (int tick = 0; tick < n_ticks.y; ++tick)
-        {
-            auto tick_pos = first_tick - (static_cast<double>(tick) * tick_spacing);
-            auto tick_pos_gs = graph2screen(vpt, tick_pos);
-            tick_pos_gs.x = m_position.x + m_size.x;
-
-            ptr[offset++] = tick_pos_gs;
-            ptr[offset++] = tick_pos_gs + tick_size_vec;
-        }
-    }
+    ptr[offset++] = m_position;
+    ptr[offset++] = m_position + glm::dvec2(m_size.x, 0.0);
 }
 
-void Axis::draw_labels(const Window &window) const
+template <>
+void Axis<AxisVertical>::draw_ticks(const glm::dvec2 &tick_spacing,
+                                    double tick_size,
+                                    glm::vec2 *const ptr,
+                                    int &offset,
+                                    const Transform<double> &vpt) const
+{
+    const glm::dvec2 tick_size_vec(-tick_size, 0.0);
+
+    // Work out the positions of the start and end of the axis in graph space
+    const auto axis_start_gs = screen2graph(vpt, m_position);
+    const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(0.0, m_size.y));
+
+    // Align the start and end to the nearest tick to work out where the first and last
+    // ticks should go
+    const auto first_tick = crush(axis_start_gs, tick_spacing);
+    const auto last_tick = crush(axis_end_gs, tick_spacing);
+
+    // Work out how many ticks we are going to draw
+    const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / tick_spacing;
+
+    for (int tick = 0; tick < n_ticks.y; ++tick)
+    {
+        auto tick_pos = first_tick - (static_cast<double>(tick) * tick_spacing);
+        auto tick_pos_gs = graph2screen(vpt, tick_pos);
+        tick_pos_gs.x = m_position.x + m_size.x;
+
+        ptr[offset++] = tick_pos_gs;
+        ptr[offset++] = tick_pos_gs + tick_size_vec;
+    }
+
+    ptr[offset++] = m_position + glm::dvec2(m_size.x, 0.0);
+    ptr[offset++] = m_position + m_size;
+}
+
+void AxisBase::draw_labels(const Window &window) const
 {
     for (size_t i = 0; i < m_labels_used; i++)
     {
@@ -158,43 +162,43 @@ void Axis::draw_labels(const Window &window) const
     }
 }
 
-glm::dvec2 Axis::position() const
+glm::dvec2 AxisBase::position() const
 {
     return m_position;
 }
-void Axis::set_position(const glm::dvec2 &position)
+void AxisBase::set_position(const glm::dvec2 &position)
 {
     m_position = position;
     update_layout();
 }
 
-glm::dvec2 Axis::size() const
+glm::dvec2 AxisBase::size() const
 {
     return m_size;
 }
-void Axis::set_size(const glm::dvec2 &size)
+void AxisBase::set_size(const glm::dvec2 &size)
 {
     m_size = size;
     update_layout();
 }
 
-void Axis::set_graph_transform(const Transform<double> &t)
+void AxisBase::set_graph_transform(const Transform<double> &t)
 {
     m_graph_transform = t;
     update_layout();
 }
 
-void Axis::on_scroll(Window &window, double, double yoffset)
+void AxisBase::on_scroll(Window &window, double, double yoffset)
 {
     on_zoom(window, yoffset);
 }
 
-void Axis::on_mouse_button(Window &, int button, int action, int)
+void AxisBase::on_mouse_button(Window &, int button, int action, int)
 {
     spdlog::info("Click {} {}", button, action);
 }
 
-std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> Axis::tick_spacing(
+std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> AxisBase::tick_spacing(
     const Transform<double> &viewport_transform) const
 {
     // TODO: This needs to take into account the size of the axis... I think!?
@@ -238,103 +242,106 @@ std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> Axis::tick_spacing(
     return std::tuple(tick_spacing, minor_tick_spacing, precision);
 }
 
-glm::dvec2 Axis::screen2graph(const Transform<double> &viewport_txform,
-                              const glm::ivec2 &viewport_space) const
+glm::dvec2 AxisBase::screen2graph(const Transform<double> &viewport_txform,
+                                  const glm::ivec2 &viewport_space) const
 {
     const auto clip_space = viewport_txform.apply_inverse(viewport_space);
     const auto graph_space = m_graph_transform.apply_inverse(clip_space);
     return graph_space;
 }
 
-glm::dvec2 Axis::screen2graph_delta(const Transform<double> &viewport_txform,
-                                    const glm::ivec2 &delta) const
+glm::dvec2 AxisBase::screen2graph_delta(const Transform<double> &viewport_txform,
+                                        const glm::ivec2 &delta) const
 {
     auto begin_gs = screen2graph(viewport_txform, glm::ivec2(0, 0));
     auto end_gs = screen2graph(viewport_txform, glm::ivec2(0, 0) + delta);
     return end_gs - begin_gs;
 }
 
-glm::dvec2 Axis::graph2screen(const Transform<double> &viewport_txform,
-                              const glm::dvec2 &value) const
+glm::dvec2 AxisBase::graph2screen(const Transform<double> &viewport_txform,
+                                  const glm::dvec2 &value) const
 {
     const auto clip_space = m_graph_transform.apply(value);
     const auto screen_space = viewport_txform.apply(clip_space);
     return screen_space;
 }
 
-glm::dvec2 Axis::crush(const glm::dvec2 &value, const glm::dvec2 &interval)
+glm::dvec2 AxisBase::crush(const glm::dvec2 &value, const glm::dvec2 &interval)
 {
     return glm::dvec2(ceil(value.x / interval.x) * interval.x,
                       ceil(value.y / interval.y) * interval.y);
 }
 
-void Axis::update_layout()
+template <> void Axis<AxisHorizontal>::update_layout()
 {
     const auto vpt = m_window.viewport_transform();
     const auto [label_spacing, _, label_precision] = tick_spacing(vpt);
 
     m_labels_used = 0;
 
-    if (m_orientation == Orientation::Horizontal)
+    // Work out the positions of the start and end of the axis in graph space
+    const auto axis_start_gs = screen2graph(vpt, m_position);
+    const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(m_size.x, 0.0));
+
+    // Align the start and end to the nearest tick to work out where the first and last ticks
+    // should go
+    const auto first_tick = crush(axis_start_gs, label_spacing);
+    const auto last_tick = crush(axis_end_gs, label_spacing);
+
+    // Work out how many ticks we are going to draw
+    const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / label_spacing;
+
+    for (int tick = 0; tick < n_ticks.x; ++tick)
     {
-        // Work out the positions of the start and end of the axis in graph space
-        const auto axis_start_gs = screen2graph(vpt, m_position);
-        const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(m_size.x, 0.0));
+        auto tick_pos = first_tick + (static_cast<double>(tick) * label_spacing);
+        auto tick_pos_ss = graph2screen(vpt, tick_pos);
+        tick_pos_ss.y = m_position.y;
 
-        // Align the start and end to the nearest tick to work out where the first and last ticks
-        // should go
-        const auto first_tick = crush(axis_start_gs, label_spacing);
-        const auto last_tick = crush(axis_end_gs, label_spacing);
+        auto &label = m_labels[m_labels_used++];
+        label.set_position(tick_pos_ss);
 
-        // Work out how many ticks we are going to draw
-        const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / label_spacing;
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(label_precision.x) << tick_pos.x;
+        label.set_text(ss.str());
 
-        for (int tick = 0; tick < n_ticks.x; ++tick)
-        {
-            auto tick_pos = first_tick + (static_cast<double>(tick) * label_spacing);
-            auto tick_pos_ss = graph2screen(vpt, tick_pos);
-            tick_pos_ss.y = m_position.y;
-
-            auto &label = m_labels[m_labels_used++];
-            label.set_position(tick_pos_ss);
-
-            std::stringstream ss;
-            ss << std::fixed << std::setprecision(label_precision.x) << tick_pos.x;
-            label.set_text(ss.str());
-
-            label.set_alignment(Label::AlignmentHorizontal::Center);
-            label.set_alignment(Label::AlignmentVertical::Top);
-        }
+        label.set_alignment(Label::AlignmentHorizontal::Center);
+        label.set_alignment(Label::AlignmentVertical::Top);
     }
-    else
+}
+
+template <> void Axis<AxisVertical>::update_layout()
+{
+    const auto vpt = m_window.viewport_transform();
+    const auto [label_spacing, _, label_precision] = tick_spacing(vpt);
+
+    m_labels_used = 0;
+
+    // Work out the positions of the start and end of the axis in graph space
+    const auto axis_start_gs = screen2graph(vpt, m_position);
+    const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(0.0, m_size.y));
+
+    // Align the start and end to the nearest tick to work out where the first and last
+    // ticks should go
+    const auto first_tick = crush(axis_start_gs, label_spacing);
+    const auto last_tick = crush(axis_end_gs, label_spacing);
+
+    // Work out how many ticks we are going to draw
+    const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / label_spacing;
+
+    for (int tick = 0; tick < n_ticks.y; ++tick)
     {
-        // Work out the positions of the start and end of the axis in graph space
-        const auto axis_start_gs = screen2graph(vpt, m_position);
-        const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(0.0, m_size.y));
+        auto tick_pos = first_tick - (static_cast<double>(tick) * label_spacing);
+        auto tick_pos_ss = graph2screen(vpt, tick_pos);
+        tick_pos_ss.x = m_position.x + m_size.x;
 
-        // Align the start and end to the nearest tick to work out where the first and last
-        // ticks should go
-        const auto first_tick = crush(axis_start_gs, label_spacing);
-        const auto last_tick = crush(axis_end_gs, label_spacing);
+        auto &label = m_labels[m_labels_used++];
+        label.set_position(tick_pos_ss);
 
-        // Work out how many ticks we are going to draw
-        const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / label_spacing;
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(label_precision.y) << tick_pos.y;
+        label.set_text(ss.str());
 
-        for (int tick = 0; tick < n_ticks.y; ++tick)
-        {
-            auto tick_pos = first_tick - (static_cast<double>(tick) * label_spacing);
-            auto tick_pos_ss = graph2screen(vpt, tick_pos);
-            tick_pos_ss.x = m_position.x + m_size.x;
-
-            auto &label = m_labels[m_labels_used++];
-            label.set_position(tick_pos_ss);
-
-            std::stringstream ss;
-            ss << std::fixed << std::setprecision(label_precision.y) << tick_pos.y;
-            label.set_text(ss.str());
-
-            label.set_alignment(Label::AlignmentHorizontal::Right);
-            label.set_alignment(Label::AlignmentVertical::Center);
-        }
+        label.set_alignment(Label::AlignmentHorizontal::Right);
+        label.set_alignment(Label::AlignmentVertical::Center);
     }
 }

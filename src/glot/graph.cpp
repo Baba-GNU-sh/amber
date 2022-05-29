@@ -11,8 +11,7 @@
 #include "graph_utils.hpp"
 
 Graph::Graph(GraphState &state, Window &window)
-    : m_state(state), m_axis_horizontal(Axis::Orientation::Horizontal, window),
-      m_axis_vertical(Axis::Orientation::Vertical, window), m_plot(state)
+    : m_state(state), m_axis_horizontal(window), m_axis_vertical(window), m_plot(state)
 {
     using namespace std::placeholders;
 

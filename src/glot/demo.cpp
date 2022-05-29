@@ -46,12 +46,12 @@ int main()
     }
 
     Transform<double> graph_transform;
-    auto axis_vertical = std::make_shared<Axis>(Axis::Orientation::Vertical, window);
+    auto axis_vertical = std::make_shared<Axis<AxisVertical>>(window);
     axis_vertical->set_position(glm::dvec2(0, 100));
     axis_vertical->set_size(glm::dvec2(100, 500));
     window.add(axis_vertical);
 
-    auto axis_horizontal = std::make_shared<Axis>(Axis::Orientation::Horizontal, window);
+    auto axis_horizontal = std::make_shared<Axis<AxisHorizontal>>(window);
     axis_horizontal->set_position(glm::dvec2(100, 600));
     axis_horizontal->set_size(glm::dvec2(500, 100));
     window.add(axis_horizontal);
