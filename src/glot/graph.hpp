@@ -22,20 +22,17 @@ class Graph : public View
     glm::dvec2 cursor_gs() const;
     void draw(const Window &window) const override;
     void on_resize(int, int) override;
-    // void on_scroll(Window &, double, double) override;
-    // void on_mouse_button(Window &, int button, int action, int mods) override;
-    // void on_cursor_move(Window &window, double, double) override;
 
     glm::dvec2 size() const override;
     glm::dvec2 position() const override;
+    void on_mouse_button(Window &window, int button, int action, int mods) override;
+    void on_cursor_move(Window &window, double xpos, double ypos) override;
 
   private:
     void layout();
 
-    glm::dvec2 screen2graph(const Transform<double> &viewport_txform,
-                            const glm::ivec2 &value) const;
-    glm::dvec2 screen2graph_delta(const Transform<double> &viewport_txform,
-                                  const glm::ivec2 &value) const;
+    glm::dvec2 screen2graph(const glm::ivec2 &value) const;
+    glm::dvec2 screen2graph_delta(const glm::ivec2 &value) const;
     glm::dvec2 graph2screen(const Transform<double> &viewport_txform,
                             const glm::dvec2 &value) const;
 
@@ -46,18 +43,19 @@ class Graph : public View
     static constexpr int PIXELS_PER_COL = 1;
 
     GraphState &m_state;
+    Window &m_window;
     Axis<AxisHorizontal> m_axis_horizontal;
     Axis<AxisVertical> m_axis_vertical;
     Plot m_plot;
     Marker m_marker_a;
     Marker m_marker_b;
+    SelectionBox m_selection_box;
 
-    // SelectionBox m_selection_box;
     glm::dvec2 m_size;
     glm::dvec2 m_position;
 
     // glm::dvec2 m_cursor_old;
     // bool m_is_dragging = false;
-    // bool m_is_selecting = false;
-    // glm::dvec2 m_selection_start;
+    bool m_is_selecting = false;
+    glm::dvec2 m_selection_start;
 };

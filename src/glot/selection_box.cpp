@@ -28,18 +28,26 @@ SelectionBox::~SelectionBox()
     glDeleteBuffers(1, &m_vbo);
 }
 
-void SelectionBox::set_position(const glm::ivec2 &position)
+void SelectionBox::set_position(const glm::dvec2 &position)
 {
     m_position = position;
 }
 
-void SelectionBox::set_size(const glm::ivec2 &size)
+void SelectionBox::set_size(const glm::dvec2 &size)
 {
     m_size = size;
 }
 
-void SelectionBox::draw() const
+void SelectionBox::set_visible(bool visible)
 {
+    m_is_visible = visible;
+}
+
+void SelectionBox::draw(const Window &) const
+{
+    if (!m_is_visible)
+        return;
+
     glBindVertexArray(m_vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 

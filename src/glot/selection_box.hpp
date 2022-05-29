@@ -3,8 +3,9 @@
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
 #include "window.hpp"
+#include "view.hpp"
 
-class SelectionBox
+class SelectionBox : public View
 {
   public:
     SelectionBox(Window &window);
@@ -14,9 +15,10 @@ class SelectionBox
     SelectionBox(SelectionBox &&) = delete;
     SelectionBox &operator=(SelectionBox &&) = delete;
 
-    void set_position(const glm::ivec2 &position);
-    void set_size(const glm::ivec2 &size);
-    void draw() const;
+    void set_position(const glm::dvec2 &position) override;
+    void set_size(const glm::dvec2 &size) override;
+    void set_visible(bool visible);
+    void draw(const Window &) const override;
 
   private:
     struct BoxVerticies
@@ -31,4 +33,5 @@ class SelectionBox
     glm::ivec2 m_position;
     glm::ivec2 m_size;
     glm::vec3 m_colour;
+    bool m_is_visible = false;
 };
