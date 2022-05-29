@@ -74,6 +74,8 @@ class Graph : public View
         }
     }
 
+    void fit_graph(const glm::dvec2 &tl, const glm::dvec2 &br);
+
     static constexpr double GUTTER_SIZE = 60;
     static constexpr double ZOOM_MAX = 10e6;
     static constexpr int PIXELS_PER_COL = 1;

@@ -19,29 +19,6 @@ struct GraphState
         float y_offset = 0.0;
     };
 
-    GraphState()
-    {
-        view.update(glm::dmat3(1.0));
-    }
-
-    /**
-     * @brief Fit the view into a rectangle defined by two points on the graph.
-     *
-     * @param tl Top-left corner of the rectangle.
-     * @param end Bottom-right corner of the rectangle.
-     */
-    void fit_graph(const glm::dvec2 &tl, const glm::dvec2 &br)
-    {
-        view.update(glm::dmat3(1.0));
-
-        const auto delta = glm::abs(br - tl);
-        const auto scaling_factor = 2.0 / delta;
-        view.scale(scaling_factor);
-
-        const auto translation = (tl + br) / 2.0;
-        view.translate(-translation);
-    }
-
     int plot_width = 2;
 
     /**

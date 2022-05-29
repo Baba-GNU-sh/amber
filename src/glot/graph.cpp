@@ -106,7 +106,7 @@ void Graph::on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action
     else if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_RIGHT)
     {
         m_is_selecting = false;
-        m_state.fit_graph(screen2graph(m_selection_start), screen2graph(m_window.cursor()));
+        fit_graph(screen2graph(m_selection_start), screen2graph(m_window.cursor()));
         m_selection_box.set_visible(false);
         m_axis_horizontal.set_graph_transform(m_state.view);
         m_axis_vertical.set_graph_transform(m_state.view);
@@ -237,4 +237,22 @@ void Graph::apply_zoom(const Window &window, const glm::dvec2 &zoom_delta_vec)
     m_axis_vertical.set_graph_transform(m_state.view);
     m_marker_a.set_graph_transform(m_state.view);
     m_marker_b.set_graph_transform(m_state.view);
+}
+
+/**
+ * @brief Fit the view into a rectangle defined by two points on the graph.
+ *
+ * @param tl Top-left corner of the rectangle.
+ * @param end Bottom-right corner of the rectangle.
+ */
+void Graph::fit_graph(const glm::dvec2 &tl, const glm::dvec2 &br)
+{
+    m_state.view.update(glm::dmat3(1.0));
+
+    const auto delta = glm::abs(br - tl);
+    const auto scaling_factor = 2.0 / delta;
+    m_state.view.scale(scaling_factor);
+
+    const auto translation = (tl + br) / 2.0;
+    m_state.view.translate(-translation);
 }
