@@ -11,7 +11,7 @@
 class Plot : public View
 {
   public:
-    Plot(GraphState &state);
+    Plot(GraphState &state, Window &m_window);
     ~Plot();
     Plot(const Plot &) = delete;
     Plot &operator=(const Plot &) = delete;
@@ -40,14 +40,12 @@ class Plot : public View
     boost::signals2::signal<void(const Window &, const glm::dvec2 &)> on_pan;
 
   private:
-    glm::dvec2 screen2graph(const Transform<double> &viewport_txform,
-                            const glm::ivec2 &value) const;
-    glm::dvec2 screen2graph_delta(const Transform<double> &viewport_txform,
-                                  const glm::ivec2 &value) const;
-    glm::dvec2 graph2screen(const Transform<double> &viewport_txform,
-                            const glm::dvec2 &value) const;
+    glm::dvec2 screen2graph(const glm::dvec2 &value) const;
+    glm::dvec2 screen2graph_delta(const glm::dvec2 &value) const;
+    glm::dvec2 graph2screen(const glm::dvec2 &value) const;
 
     GraphState &m_state;
+    Window &m_window;
     static constexpr size_t PIXELS_PER_COL = 1;
     static constexpr size_t COLS_MAX = 8192; // Number of preallocated buffer space for samples
     unsigned int m_vao;

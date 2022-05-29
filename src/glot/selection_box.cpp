@@ -62,7 +62,7 @@ void SelectionBox::draw(const Window &) const
     uniform_id = m_shader.uniform_location("alpha");
     glUniform1f(uniform_id, 0.5);
 
-    auto align_to_pixel = [](const glm::ivec2 &in) { return glm::vec2(round(in.x), round(in.y)); };
+    auto align_to_pixel = [](const glm::dvec2 &in) { return glm::vec2(round(in.x), round(in.y)); };
 
     BoxVerticies verts{align_to_pixel(m_position),
                        align_to_pixel(glm::vec2(m_position.x + m_size.x, m_position.y)),

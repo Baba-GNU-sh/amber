@@ -60,7 +60,7 @@ class Label : public View
     std::size_t m_capacity;
     std::string m_text;
     glm::vec3 m_colour;
-    glm::ivec2 m_position;
+    glm::dvec2 m_position;
     AlignmentHorizontal m_halign;
     AlignmentVertical m_valign;
 

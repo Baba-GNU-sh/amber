@@ -61,7 +61,6 @@ void AxisBase::draw(const Window &window) const
 
 void AxisBase::draw_ticks(const Window &window) const
 {
-    const auto &vpt = window.viewport_transform();
     int offset = 0;
 
     glBindVertexArray(m_linebuf_vao);
@@ -71,10 +70,10 @@ void AxisBase::draw_ticks(const Window &window) const
     void *raw_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     auto *ptr = reinterpret_cast<glm::vec2 *>(raw_ptr);
 
-    const auto [tick_spacing_major, tick_spacing_minor, _] = tick_spacing(vpt);
+    const auto [tick_spacing_major, tick_spacing_minor, _] = tick_spacing();
 
-    draw_ticks(tick_spacing_major, TICKLEN_PX, ptr, offset, vpt);
-    draw_ticks(tick_spacing_minor, TICKLEN_PX / 2, ptr, offset, vpt);
+    draw_ticks(tick_spacing_major, TICKLEN_PX, ptr, offset);
+    draw_ticks(tick_spacing_minor, TICKLEN_PX / 2, ptr, offset);
 
     // make sure to tell OpenGL we're done with the pointer
     glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -95,14 +94,13 @@ template <>
 void Axis<AxisHorizontal>::draw_ticks(const glm::dvec2 &tick_spacing,
                                       double tick_size,
                                       glm::vec2 *const ptr,
-                                      int &offset,
-                                      const Transform<double> &vpt) const
+                                      int &offset) const
 {
     const glm::dvec2 tick_size_vec(0, tick_size);
 
     // Work out the positions of the start and end of the axis in graph space
-    const auto axis_start_gs = screen2graph(vpt, m_position);
-    const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(m_size.x, 0.0));
+    const auto axis_start_gs = screen2graph(m_position);
+    const auto axis_end_gs = screen2graph(m_position + glm::dvec2(m_size.x, 0.0));
 
     // Align the start and end to the nearest tick to work out where the first and last
     // ticks should go
@@ -115,7 +113,7 @@ void Axis<AxisHorizontal>::draw_ticks(const glm::dvec2 &tick_spacing,
     for (int tick = 0; tick < n_ticks.x; ++tick)
     {
         auto tick_pos = first_tick + (static_cast<double>(tick) * tick_spacing);
-        auto tick_pos_gs = graph2screen(vpt, tick_pos);
+        auto tick_pos_gs = graph2screen(tick_pos);
         tick_pos_gs.y = m_position.y;
 
         ptr[offset++] = tick_pos_gs;
@@ -130,14 +128,13 @@ template <>
 void Axis<AxisVertical>::draw_ticks(const glm::dvec2 &tick_spacing,
                                     double tick_size,
                                     glm::vec2 *const ptr,
-                                    int &offset,
-                                    const Transform<double> &vpt) const
+                                    int &offset) const
 {
     const glm::dvec2 tick_size_vec(-tick_size, 0.0);
 
     // Work out the positions of the start and end of the axis in graph space
-    const auto axis_start_gs = screen2graph(vpt, m_position);
-    const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(0.0, m_size.y));
+    const auto axis_start_gs = screen2graph(m_position);
+    const auto axis_end_gs = screen2graph(m_position + glm::dvec2(0.0, m_size.y));
 
     // Align the start and end to the nearest tick to work out where the first and last
     // ticks should go
@@ -150,7 +147,7 @@ void Axis<AxisVertical>::draw_ticks(const glm::dvec2 &tick_spacing,
     for (int tick = 0; tick < n_ticks.y; ++tick)
     {
         auto tick_pos = first_tick - (static_cast<double>(tick) * tick_spacing);
-        auto tick_pos_gs = graph2screen(vpt, tick_pos);
+        auto tick_pos_gs = graph2screen(tick_pos);
         tick_pos_gs.x = m_position.x + m_size.x;
 
         ptr[offset++] = tick_pos_gs;
@@ -205,16 +202,14 @@ void AxisBase::on_mouse_button(const glm::dvec2 &, int button, int action, int)
     spdlog::info("Click {} {}", button, action);
 }
 
-std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> AxisBase::tick_spacing(
-    const Transform<double> &viewport_transform) const
+std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> AxisBase::tick_spacing() const
 {
     // TODO: This needs to take into account the size of the axis... I think!?
     const glm::dvec2 MIN_TICK_SPACING_PX(80, 50);
 
     // Calc the size of this vector in graph space (ignoring translation & sign)
     const glm::dvec2 min_tick_spacing_gs =
-        glm::abs(screen2graph(viewport_transform, glm::dvec2(0.0f, 0.0f)) -
-                 screen2graph(viewport_transform, MIN_TICK_SPACING_PX));
+        glm::abs(screen2graph(glm::dvec2(0.0f, 0.0f)) - screen2graph(MIN_TICK_SPACING_PX));
 
     // Round this size up to the nearest power of 10
     glm::dvec2 tick_spacing;
@@ -249,27 +244,24 @@ std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> AxisBase::tick_spacing(
     return std::tuple(tick_spacing, minor_tick_spacing, precision);
 }
 
-glm::dvec2 AxisBase::screen2graph(const Transform<double> &viewport_txform,
-                                  const glm::ivec2 &viewport_space) const
+glm::dvec2 AxisBase::screen2graph(const glm::dvec2 &viewport_space) const
 {
-    const auto clip_space = viewport_txform.apply_inverse(viewport_space);
+    const auto clip_space = m_window.viewport_transform().apply_inverse(viewport_space);
     const auto graph_space = m_graph_transform.apply_inverse(clip_space);
     return graph_space;
 }
 
-glm::dvec2 AxisBase::screen2graph_delta(const Transform<double> &viewport_txform,
-                                        const glm::ivec2 &delta) const
+glm::dvec2 AxisBase::screen2graph_delta(const glm::dvec2 &delta) const
 {
-    auto begin_gs = screen2graph(viewport_txform, glm::ivec2(0, 0));
-    auto end_gs = screen2graph(viewport_txform, glm::ivec2(0, 0) + delta);
+    auto begin_gs = screen2graph(glm::dvec2(0, 0));
+    auto end_gs = screen2graph(glm::dvec2(0, 0) + delta);
     return end_gs - begin_gs;
 }
 
-glm::dvec2 AxisBase::graph2screen(const Transform<double> &viewport_txform,
-                                  const glm::dvec2 &value) const
+glm::dvec2 AxisBase::graph2screen(const glm::dvec2 &value) const
 {
     const auto clip_space = m_graph_transform.apply(value);
-    const auto screen_space = viewport_txform.apply(clip_space);
+    const auto screen_space = m_window.viewport_transform().apply(clip_space);
     return screen_space;
 }
 
@@ -281,14 +273,13 @@ glm::dvec2 AxisBase::crush(const glm::dvec2 &value, const glm::dvec2 &interval)
 
 template <> void Axis<AxisHorizontal>::update_layout()
 {
-    const auto vpt = m_window.viewport_transform();
-    const auto [label_spacing, _, label_precision] = tick_spacing(vpt);
+    const auto [label_spacing, _, label_precision] = tick_spacing();
 
     m_labels_used = 0;
 
     // Work out the positions of the start and end of the axis in graph space
-    const auto axis_start_gs = screen2graph(vpt, m_position);
-    const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(m_size.x, 0.0));
+    const auto axis_start_gs = screen2graph(m_position);
+    const auto axis_end_gs = screen2graph(m_position + glm::dvec2(m_size.x, 0.0));
 
     // Align the start and end to the nearest tick to work out where the first and last ticks
     // should go
@@ -301,7 +292,7 @@ template <> void Axis<AxisHorizontal>::update_layout()
     for (int tick = 0; tick < n_ticks.x; ++tick)
     {
         auto tick_pos = first_tick + (static_cast<double>(tick) * label_spacing);
-        auto tick_pos_ss = graph2screen(vpt, tick_pos);
+        auto tick_pos_ss = graph2screen(tick_pos);
         tick_pos_ss.y = m_position.y;
 
         auto &label = m_labels[m_labels_used++];
@@ -318,14 +309,13 @@ template <> void Axis<AxisHorizontal>::update_layout()
 
 template <> void Axis<AxisVertical>::update_layout()
 {
-    const auto vpt = m_window.viewport_transform();
-    const auto [label_spacing, _, label_precision] = tick_spacing(vpt);
+    const auto [label_spacing, _, label_precision] = tick_spacing();
 
     m_labels_used = 0;
 
     // Work out the positions of the start and end of the axis in graph space
-    const auto axis_start_gs = screen2graph(vpt, m_position);
-    const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(0.0, m_size.y));
+    const auto axis_start_gs = screen2graph(m_position);
+    const auto axis_end_gs = screen2graph(m_position + glm::dvec2(0.0, m_size.y));
 
     // Align the start and end to the nearest tick to work out where the first and last
     // ticks should go
@@ -338,7 +328,7 @@ template <> void Axis<AxisVertical>::update_layout()
     for (int tick = 0; tick < n_ticks.y; ++tick)
     {
         auto tick_pos = first_tick - (static_cast<double>(tick) * label_spacing);
-        auto tick_pos_ss = graph2screen(vpt, tick_pos);
+        auto tick_pos_ss = graph2screen(tick_pos);
         tick_pos_ss.x = m_position.x + m_size.x;
 
         auto &label = m_labels[m_labels_used++];

@@ -42,10 +42,9 @@ class Graph : public View
   private:
     void layout();
 
-    glm::dvec2 screen2graph(const glm::ivec2 &value) const;
-    glm::dvec2 screen2graph_delta(const glm::ivec2 &value) const;
-    glm::dvec2 graph2screen(const Transform<double> &viewport_txform,
-                            const glm::dvec2 &value) const;
+    glm::dvec2 screen2graph(const glm::dvec2 &value) const;
+    glm::dvec2 screen2graph_delta(const glm::dvec2 &value) const;
+    glm::dvec2 graph2screen(const glm::dvec2 &value) const;
 
     void apply_zoom(const Window &window, const glm::dvec2 &);
 

@@ -30,8 +30,8 @@ class SelectionBox : public View
     unsigned int m_vbo;
     unsigned int m_vao;
     Program m_shader;
-    glm::ivec2 m_position;
-    glm::ivec2 m_size;
+    glm::dvec2 m_position;
+    glm::dvec2 m_size;
     glm::vec3 m_colour;
     bool m_is_visible = false;
 };

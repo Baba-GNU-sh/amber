@@ -7,7 +7,7 @@
 #include <database/timeseries.hpp>
 #include "resources.hpp"
 
-Plot::Plot(GraphState &state) : m_state(state)
+Plot::Plot(GraphState &state, Window &window) : m_state(state), m_window(window)
 {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
@@ -40,7 +40,8 @@ Plot::~Plot()
         glDeleteBuffers(1, &m_vbo);
 }
 
-Plot::Plot(Plot &&other) : m_state(other.m_state), m_shader(other.m_shader)
+Plot::Plot(Plot &&other)
+    : m_state(other.m_state), m_window(other.m_window), m_shader(other.m_shader)
 {
     m_vao = other.m_vao;
     m_vbo = other.m_vbo;
@@ -122,8 +123,8 @@ void Plot::draw(const Window &window) const
 
     const int num_samples = plot_size_px.x / PIXELS_PER_COL;
 
-    const auto plot_position_gs = screen2graph(window.viewport_transform(), plot_position_px);
-    const auto plot_size_gs = screen2graph_delta(window.viewport_transform(), plot_size_px);
+    const auto plot_position_gs = screen2graph(plot_position_px);
+    const auto plot_size_gs = screen2graph_delta(plot_size_px);
     const auto interval_gs = PIXELS_PER_COL * plot_size_gs.x / num_samples;
 
     for (auto &time_series : m_state.timeseries)
@@ -163,31 +164,29 @@ void Plot::on_cursor_move(Window &window, double x, double y)
     if (m_is_dragging)
     {
         const auto delta = cursor_pos - m_cursor_pos_old;
+        spdlog::info("{}{}", delta.x, delta.y);
         on_pan(window, delta);
     }
     m_cursor_pos_old = cursor_pos;
 }
 
-glm::dvec2 Plot::screen2graph(const Transform<double> &viewport_txform,
-                              const glm::ivec2 &viewport_space) const
+glm::dvec2 Plot::screen2graph(const glm::dvec2 &viewport_space) const
 {
-    const auto clip_space = viewport_txform.apply_inverse(viewport_space);
+    const auto clip_space = m_window.viewport_transform().apply_inverse(viewport_space);
     const auto graph_space = m_state.view.apply_inverse(clip_space);
     return graph_space;
 }
 
-glm::dvec2 Plot::screen2graph_delta(const Transform<double> &viewport_txform,
-                                    const glm::ivec2 &delta) const
+glm::dvec2 Plot::screen2graph_delta(const glm::dvec2 &delta) const
 {
-    auto begin_gs = screen2graph(viewport_txform, glm::ivec2(0, 0));
-    auto end_gs = screen2graph(viewport_txform, glm::ivec2(0, 0) + delta);
+    auto begin_gs = screen2graph(glm::dvec2(0, 0));
+    auto end_gs = screen2graph(glm::dvec2(0, 0) + delta);
     return end_gs - begin_gs;
 }
 
-glm::dvec2 Plot::graph2screen(const Transform<double> &viewport_txform,
-                              const glm::dvec2 &value) const
+glm::dvec2 Plot::graph2screen(const glm::dvec2 &value) const
 {
     const auto clip_space = m_state.view.apply(value);
-    const auto screen_space = viewport_txform.apply(clip_space);
+    const auto screen_space = m_window.viewport_transform().apply(clip_space);
     return screen_space;
 }

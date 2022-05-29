@@ -29,14 +29,10 @@ class AxisBase : public View
     boost::signals2::signal<void(const Window &, double)> on_zoom;
 
   protected:
-    std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing(
-        const Transform<double> &viewport_transform) const;
-    glm::dvec2 screen2graph(const Transform<double> &viewport_txform,
-                            const glm::ivec2 &value) const;
-    glm::dvec2 screen2graph_delta(const Transform<double> &viewport_txform,
-                                  const glm::ivec2 &value) const;
-    glm::dvec2 graph2screen(const Transform<double> &viewport_txform,
-                            const glm::dvec2 &value) const;
+    std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;
+    glm::dvec2 screen2graph(const glm::dvec2 &value) const;
+    glm::dvec2 screen2graph_delta(const glm::dvec2 &value) const;
+    glm::dvec2 graph2screen(const glm::dvec2 &value) const;
 
     static glm::dvec2 crush(const glm::dvec2 &value, const glm::dvec2 &interval);
 
@@ -46,8 +42,7 @@ class AxisBase : public View
     virtual void draw_ticks(const glm::dvec2 &tick_spacing,
                             double tick_size,
                             glm::vec2 *const ptr,
-                            int &offset,
-                            const Transform<double> &vpt) const = 0;
+                            int &offset) const = 0;
 
     /**
      * @brief Re-lays out all the components. Call whenever buffers need to be updated.
@@ -89,8 +84,7 @@ template <AxisOrientation Orientation> class Axis : public AxisBase
     void draw_ticks(const glm::dvec2 &tick_spacing,
                     double tick_size,
                     glm::vec2 *const ptr,
-                    int &offset,
-                    const Transform<double> &vpt) const override;
+                    int &offset) const override;
 
     void update_layout() override;
 };

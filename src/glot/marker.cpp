@@ -15,7 +15,7 @@ Marker::Marker(Window &window)
 {
     glGenBuffers(1, &m_line_vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(glm::ivec2), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(glm::vec2), nullptr, GL_STREAM_DRAW);
 
     glGenVertexArrays(1, &m_line_vao);
     glBindVertexArray(m_line_vao);

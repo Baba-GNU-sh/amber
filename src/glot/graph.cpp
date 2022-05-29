@@ -12,7 +12,7 @@
 
 Graph::Graph(GraphState &state, Window &window)
     : m_state(state), m_window(window), m_axis_horizontal(window), m_axis_vertical(window),
-      m_plot(state), m_marker_a(window), m_marker_b(window), m_selection_box(window)
+      m_plot(state, window), m_marker_a(window), m_marker_b(window), m_selection_box(window)
 {
     using namespace std::placeholders;
 
@@ -169,25 +169,24 @@ void Graph::layout()
     m_marker_b.set_screen_height(m_size.y - GUTTER_SIZE);
 }
 
-glm::dvec2 Graph::screen2graph(const glm::ivec2 &viewport_space) const
+glm::dvec2 Graph::screen2graph(const glm::dvec2 &viewport_space) const
 {
     const auto clip_space = m_window.viewport_transform().apply_inverse(viewport_space);
     const auto graph_space = m_state.view.apply_inverse(clip_space);
     return graph_space;
 }
 
-glm::dvec2 Graph::screen2graph_delta(const glm::ivec2 &delta) const
+glm::dvec2 Graph::screen2graph_delta(const glm::dvec2 &delta) const
 {
-    auto begin_gs = screen2graph(glm::ivec2(0, 0));
-    auto end_gs = screen2graph(glm::ivec2(0, 0) + delta);
+    auto begin_gs = screen2graph(glm::dvec2(0, 0));
+    auto end_gs = screen2graph(glm::dvec2(0, 0) + delta);
     return end_gs - begin_gs;
 }
 
-glm::dvec2 Graph::graph2screen(const Transform<double> &viewport_txform,
-                               const glm::dvec2 &value) const
+glm::dvec2 Graph::graph2screen(const glm::dvec2 &value) const
 {
     const auto clip_space = m_state.view.apply(value);
-    const auto screen_space = viewport_txform.apply(clip_space);
+    const auto screen_space = m_window.viewport_transform().apply(clip_space);
     return screen_space;
 }
 
