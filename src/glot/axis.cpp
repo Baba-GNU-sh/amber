@@ -6,7 +6,7 @@
 #include <boost/signals2.hpp>
 
 Axis::Axis(Orientation ori, const Transform<double> &graph_transform)
-    : m_orientation(ori), m_graph_transform(graph_transform)
+    : m_orientation(ori), m_graph_transform(graph_transform), m_font("proggy_clean.png")
 {
     glGenVertexArrays(1, &m_linebuf_vao);
     glBindVertexArray(m_linebuf_vao);
@@ -22,6 +22,13 @@ Axis::Axis(Orientation ori, const Transform<double> &graph_transform)
         Shader(Resources::find_shader("block/vertex.glsl"), GL_VERTEX_SHADER),
         Shader(Resources::find_shader("block/fragment.glsl"), GL_FRAGMENT_SHADER)};
     m_lines_shader = Program(shaders);
+
+    // TODO: Lose the magic number here
+    for (int i = 0; i < 128; ++i)
+    {
+        m_axis_labels.emplace_back(m_font);
+        m_axis_labels.back().set_colour(glm::vec3(1.0, 1.0, 1.0));
+    }
 }
 
 Axis::~Axis()
@@ -31,6 +38,12 @@ Axis::~Axis()
 }
 
 void Axis::draw(const Window &window) const
+{
+    draw_ticks(window);
+    draw_labels(window);
+}
+
+void Axis::draw_ticks(const Window &window) const
 {
     const auto &vpt = window.viewport_transform();
     int offset = 0;
@@ -87,8 +100,8 @@ void Axis::draw_ticks(const glm::dvec2 &tick_spacing,
         const auto axis_start_gs = screen2graph(vpt, m_position);
         const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(m_size.x, 0.0));
 
-        // Align the start and end to the nearest tick to work out where the first and last ticks
-        // should go
+        // Align the start and end to the nearest tick to work out where the first and last
+        // ticks should go
         const auto first_tick = crush(axis_start_gs, tick_spacing);
         const auto last_tick = crush(axis_end_gs, tick_spacing);
 
@@ -113,8 +126,8 @@ void Axis::draw_ticks(const glm::dvec2 &tick_spacing,
         const auto axis_start_gs = screen2graph(vpt, m_position);
         const auto axis_end_gs = screen2graph(vpt, m_position + glm::dvec2(0.0, m_size.y));
 
-        // Align the start and end to the nearest tick to work out where the first and last ticks
-        // should go
+        // Align the start and end to the nearest tick to work out where the first and last
+        // ticks should go
         const auto first_tick = crush(axis_start_gs, tick_spacing);
         const auto last_tick = crush(axis_end_gs, tick_spacing);
 
@@ -130,6 +143,123 @@ void Axis::draw_ticks(const glm::dvec2 &tick_spacing,
             ptr[offset++] = tick_pos_gs;
             ptr[offset++] = tick_pos_gs + tick_size_vec;
         }
+    }
+}
+
+void Axis::draw_labels(const Window &window)
+{
+    const auto vpt = window.viewport_transform();
+
+    glm::ivec2 tl(GUTTER_SIZE_PX, 0);
+    glm::ivec2 bl(GUTTER_SIZE_PX, m_size.y - GUTTER_SIZE_PX);
+    glm::ivec2 br(m_size.x, m_size.y - GUTTER_SIZE_PX);
+
+    auto [tick_spacing_major, _, precision] = tick_spacing(vpt);
+
+    // Draw one label per tick on the y axis
+    auto top_gs = screen2graph(vpt, tl);
+    auto bottom_gs = screen2graph(vpt, bl);
+    double start = ceil(bottom_gs.y / tick_spacing_major.y) * tick_spacing_major.y;
+    double end = ceil(top_gs.y / tick_spacing_major.y) * tick_spacing_major.y;
+
+    std::size_t label_offset = 0;
+
+    // Place a tick at every unit up the y axis
+    for (double i = start; i < end; i += tick_spacing_major.y)
+    {
+        auto tick_y_vpspace = vpt.apply(m_graph_transform.apply(glm::dvec2(0.0f, i)));
+        glm::ivec2 point(GUTTER_SIZE_PX - TICKLEN_PX, tick_y_vpspace.y);
+
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision.y) << i;
+
+        auto &label = m_axis_labels[label_offset++];
+        label.set_text(ss.str());
+        label.set_position(point);
+        label.set_alignment(Label::AlignmentHorizontal::Right);
+        label.set_alignment(Label::AlignmentVertical::Center);
+        label.draw();
+    }
+
+    // Draw the y axis ticks
+    auto left_gs = screen2graph(vpt, bl);
+    auto right_gs = screen2graph(vpt, br);
+    start = ceil(left_gs.x / tick_spacing_major.x) * tick_spacing_major.x;
+    end = ceil(right_gs.x / tick_spacing_major.x) * tick_spacing_major.x;
+
+    // Place a tick at every unit along the x axis
+    for (double i = start; i < end; i += tick_spacing_major.x)
+    {
+        auto tick_x_vpspace =
+            window.viewport_transform().apply(m_graph_transform.apply(glm::dvec2(i, 0.0f)));
+        glm::ivec2 point(tick_x_vpspace.x, m_size.y - GUTTER_SIZE_PX + TICKLEN_PX);
+
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision.x) << i;
+
+        auto &label = m_axis_labels[label_offset++];
+        label.set_text(ss.str());
+        label.set_position(point);
+        label.set_alignment(Label::AlignmentHorizontal::Center);
+        label.set_alignment(Label::AlignmentVertical::Top);
+        label.draw();
+    }
+
+    // if (hit_test(m_window.cursor(),
+    //              glm::ivec2(GUTTER_SIZE_PX, m_size.y - GUTTER_SIZE_PX),
+    //              glm::ivec2(m_size.x, m_size.y)))
+    // {
+    //     // Find the nearest sample and draw labels for it
+    //     auto cursor_gs =
+    //         glm::inverse(_view_matrix) * m_window.vp_matrix_inv() * glm::vec3(cursor, 1.0f);
+    //     auto cursor_gs2 = glm::inverse(_view_matrix) * m_window.vp_matrix_inv() *
+    //                       glm::vec3(cursor.x + 1.0f, _cursor.y, 1.0f);
+
+    //     for (const auto &ts : time_series)
+    //     {
+    //         if (ts.visible)
+    //         {
+    //             auto sample = ts.ts->get_sample(cursor_gs.x, cursor_gs2.x - cursor_gs.x);
+
+    //             const auto draw_label = [&](double value) {
+    //                 glm::vec2 sample_gs(cursor_gs.x, value);
+
+    //                 glm::vec3 point3 =
+    //                     m_window.vp_matrix() * _view_matrix * glm::vec3(sample_gs, 1.0f);
+    //                 glm::vec2 point(point3.x, point3.y);
+
+    //                 std::stringstream ss;
+    //                 ss << value;
+    //                 _draw_label(ss.str(),
+    //                             point,
+    //                             18,
+    //                             7,
+    //                             Alignment::Right,
+    //                             AlignmentVertical::Center);
+    //             };
+
+    //             draw_label(sample.average);
+    //             // draw_label(sample.min);
+    //             // draw_label(sample.max);
+    //         }
+    //     }
+    // }
+}
+
+void Axis::draw_labels(const Window &window) const
+{
+    const auto &vpt = window.viewport_transform();
+
+    const auto [tick_spacing_major, _, precision] = tick_spacing(vpt);
+
+    (void)tick_spacing_major;
+    (void)precision;
+
+    if (m_orientation == Orientation::Horizontal)
+    {
+    }
+    else
+    {
     }
 }
 

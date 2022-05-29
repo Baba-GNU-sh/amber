@@ -38,12 +38,6 @@ Graph::Graph(GraphState &state)
         m_state.view.translate(delta_gs);
     });
 
-    // for (int i = 0; i < 128; ++i)
-    // {
-    //     m_axis_labels.emplace_back(m_font);
-    //     m_axis_labels.back().set_colour(glm::vec3(1.0, 1.0, 1.0));
-    // }
-
     // for (auto &ts : m_state.timeseries)
     // {
     //     (void)ts;
@@ -52,7 +46,6 @@ Graph::Graph(GraphState &state)
     //     m_plots.emplace_back(m_window);
     // }
 
-    // m_size = m_window.size();
     // m_marker_a.set_colour(glm::vec3(0.0, 1.0, 1.0));
     // m_marker_b.set_colour(glm::vec3(1.0, 1.0, 0.0));
 }
@@ -82,7 +75,6 @@ void Graph::draw(const Window &window) const
 
     // Draw the marker and selection box too
 
-    // draw_labels();
     // draw_plots();
     // draw_markers();
 

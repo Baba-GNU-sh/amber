@@ -52,7 +52,6 @@ class Graph : public View
     Axis m_axis_vertical;
     Plot m_plot;
 
-    // std::vector<Label> m_axis_labels;
     // std::vector<Label> m_marker_ts_labels;
     // std::vector<Plot> m_plots;
     // Marker m_marker_a;

@@ -5,6 +5,8 @@
 #include "shader_utils.hpp"
 #include "view.hpp"
 #include "utils/transform.hpp"
+#include "font.hpp"
+#include "label.hpp"
 
 class Axis : public View
 {
@@ -48,10 +50,15 @@ class Axis : public View
                     int &offset,
                     const Transform<double> &vpt) const;
 
+    void draw_ticks(const Window &window) const;
+    void draw_labels(const Window &window) const;
+
     Orientation m_orientation;
     const Transform<double> &m_graph_transform;
     glm::dvec2 m_position = glm::dvec2(0.0);
     glm::dvec2 m_size = glm::dvec2(100.0);
+    Font m_font;
+    std::vector<Label> m_axis_labels;
 
     unsigned int m_linebuf_vao;
     unsigned int m_linebuf_vbo;
