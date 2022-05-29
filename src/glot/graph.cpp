@@ -99,7 +99,7 @@ glm::dvec2 Graph::position() const
     return m_position;
 }
 
-void Graph::on_mouse_button(Window &window, int button, int action, int mods)
+void Graph::on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods)
 {
     if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT)
     {
@@ -119,7 +119,7 @@ void Graph::on_mouse_button(Window &window, int button, int action, int mods)
     }
     else
     {
-        View::on_mouse_button(window, button, action, mods);
+        View::on_mouse_button(cursor_pos, button, action, mods);
     }
 }
 

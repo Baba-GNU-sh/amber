@@ -25,7 +25,7 @@ class Graph : public View
 
     glm::dvec2 size() const override;
     glm::dvec2 position() const override;
-    void on_mouse_button(Window &window, int button, int action, int mods) override;
+    void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
     void on_cursor_move(Window &window, double xpos, double ypos) override;
 
   private:

@@ -196,7 +196,7 @@ void Window_GLFW::handle_scroll_callback(double xoffset, double yoffset)
 
 void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)
 {
-    on_mouse_button(*this, button, action, mods);
+    on_mouse_button(cursor(), button, action, mods);
 }
 
 void Window_GLFW::handle_key_callback(int key, int scancode, int action, int mods)

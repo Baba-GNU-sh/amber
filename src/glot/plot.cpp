@@ -145,11 +145,8 @@ void Plot::on_scroll(Window &window, double, double yoffset)
     on_zoom(window, yoffset);
 }
 
-void Plot::on_mouse_button(Window &window, int button, int action, int mods)
+void Plot::on_mouse_button(const glm::dvec2 &, int button, int action, int)
 {
-    (void)mods;
-    (void)window;
-
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         m_is_dragging = true;

@@ -30,7 +30,7 @@ struct View
         });
     }
 
-    virtual void on_mouse_button(Window &window, int button, int action, int mods)
+    virtual void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods)
     {
         // This logic gets a bit tricky
         // If a view is clicked, then the cursor moved outside of the view before the view is
@@ -38,33 +38,37 @@ struct View
         // simultaneous button presses?
         if (action == GLFW_PRESS)
         {
-            std::for_each(
-                m_views.begin(), m_views.end(), [this, &window, button, action, mods](auto *view) {
-                    if (GraphUtils::hit_test(
-                            window.cursor(), view->position(), view->position() + view->size()))
-                    {
-                        view->on_mouse_button(window, button, action, mods);
-                        m_sticky_view = view;
-                    }
-                });
+            std::for_each(m_views.begin(),
+                          m_views.end(),
+                          [this, &cursor_pos, button, action, mods](auto *view) {
+                              if (GraphUtils::hit_test(cursor_pos,
+                                                       view->position(),
+                                                       view->position() + view->size()))
+                              {
+                                  view->on_mouse_button(cursor_pos, button, action, mods);
+                                  m_sticky_view = view;
+                              }
+                          });
         }
         else if (action == GLFW_RELEASE)
         {
             if (m_sticky_view)
             {
-                m_sticky_view->on_mouse_button(window, button, action, mods);
+                m_sticky_view->on_mouse_button(cursor_pos, button, action, mods);
                 m_sticky_view = nullptr;
             }
             else
             {
-                std::for_each(
-                    m_views.begin(), m_views.end(), [&window, button, action, mods](auto *view) {
-                        if (GraphUtils::hit_test(
-                                window.cursor(), view->position(), view->position() + view->size()))
-                        {
-                            view->on_mouse_button(window, button, action, mods);
-                        }
-                    });
+                std::for_each(m_views.begin(),
+                              m_views.end(),
+                              [&cursor_pos, button, action, mods](auto *view) {
+                                  if (GraphUtils::hit_test(cursor_pos,
+                                                           view->position(),
+                                                           view->position() + view->size()))
+                                  {
+                                      view->on_mouse_button(cursor_pos, button, action, mods);
+                                  }
+                              });
             }
         }
     }

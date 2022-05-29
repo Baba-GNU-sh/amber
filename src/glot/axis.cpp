@@ -200,7 +200,7 @@ void AxisBase::on_scroll(Window &window, double, double yoffset)
     on_zoom(window, yoffset);
 }
 
-void AxisBase::on_mouse_button(Window &, int button, int action, int)
+void AxisBase::on_mouse_button(const glm::dvec2 &, int button, int action, int)
 {
     spdlog::info("Click {} {}", button, action);
 }

@@ -33,7 +33,7 @@ class Plot : public View
 
     void on_scroll(Window &, double, double) override;
 
-    void on_mouse_button(Window &window, int, int, int) override;
+    void on_mouse_button(const glm::dvec2 &cursor_pos, int, int, int) override;
     void on_cursor_move(Window &window, double, double) override;
 
     boost::signals2::signal<void(const Window &, double)> on_zoom;

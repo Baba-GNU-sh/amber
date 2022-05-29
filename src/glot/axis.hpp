@@ -24,7 +24,7 @@ class AxisBase : public View
     void set_graph_transform(const Transform<double> &t);
 
     void on_scroll(Window &, double x, double y) override;
-    void on_mouse_button(Window &, int button, int action, int mods) override;
+    void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
 
     boost::signals2::signal<void(const Window &, double)> on_zoom;
 

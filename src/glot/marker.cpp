@@ -122,7 +122,7 @@ glm::dvec2 Marker::size() const
     return m_handle.size();
 }
 
-void Marker::on_mouse_button(Window &, int button, int action, int)
+void Marker::on_mouse_button(const glm::dvec2 &, int button, int action, int)
 {
     if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT)
     {
