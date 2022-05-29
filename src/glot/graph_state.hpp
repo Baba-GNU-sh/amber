@@ -25,43 +25,6 @@ struct GraphState
     }
 
     /**
-     * @brief Align the newest sample with the left side of the view.
-     */
-    void goto_newest_sample()
-    {
-        // Zero out the x translation element of the view transform - centers the view on time=0
-        auto view_matrix_copy = view.matrix();
-        view_matrix_copy[2][0] = 0;
-        view.update(view_matrix_copy);
-
-        // Center the view on the latest sample
-        view.translate(glm::dvec2(-latest_visibile_sample_time(), 0));
-
-        // Translate the view to the left by half a screen, to align the latest sample with the
-        // right edge of the view
-        const auto center_offset = view.apply_inverse_relative(glm::dvec2(1.0, 0.0));
-        view.translate(center_offset);
-    }
-
-    /**
-     * @brief Evalulate the time latest (newest) visible sample.
-     */
-    double latest_visibile_sample_time() const
-    {
-        double latest_sample_time = 0.0;
-        for (std::size_t i = 0; i < timeseries.size(); ++i)
-        {
-            const auto &ts = timeseries[i];
-            if (ts.visible)
-            {
-                const auto span = ts.ts->get_span();
-                latest_sample_time = std::max(latest_sample_time, span.second);
-            }
-        }
-        return latest_sample_time;
-    }
-
-    /**
      * @brief Fit the view into a rectangle defined by two points on the graph.
      *
      * @param tl Top-left corner of the rectangle.
@@ -87,5 +50,4 @@ struct GraphState
     Transform<double> view;
     bool show_line_segments = false;
     std::vector<TimeSeriesState> timeseries;
-    bool sync_latest_data = false;
 };

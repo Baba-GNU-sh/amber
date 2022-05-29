@@ -38,6 +38,8 @@ class Graph : public View
     double marker_position(MarkerType m) const;
     void set_marker_visible(MarkerType m, bool marker);
     void set_marker_position(MarkerType m, double position);
+    void reveal_newest_sample();
+    double latest_visibile_sample_time() const;
 
   private:
     void layout();
@@ -88,8 +90,6 @@ class Graph : public View
     glm::dvec2 m_size;
     glm::dvec2 m_position;
 
-    // glm::dvec2 m_cursor_old;
-    // bool m_is_dragging = false;
     bool m_is_selecting = false;
     glm::dvec2 m_selection_start;
 };

@@ -20,6 +20,7 @@
 static bool m_call_glfinish = false;
 static bool m_enable_vsync = true;
 static bool m_enable_multisampling = true;
+static bool m_sync_latest_sample = false;
 static glm::vec3 m_clear_colour(0.1, 0.1, 0.1);
 
 static void update_multisampling()
@@ -133,8 +134,7 @@ void init_timeseries(Database &database, GraphState &state)
 class KeyController : public View
 {
   public:
-    KeyController(Window &window, Graph &graph, GraphState &graph_state)
-        : m_window(window), m_graph(graph), m_graph_state(graph_state)
+    KeyController(Window &window, Graph &graph) : m_window(window), m_graph(graph)
     {
         //
     }
@@ -153,7 +153,7 @@ class KeyController : public View
             }
             if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
             {
-                m_graph_state.goto_newest_sample();
+                m_graph.reveal_newest_sample();
             }
             if (key == GLFW_KEY_A && action == GLFW_PRESS)
             {
@@ -192,7 +192,6 @@ class KeyController : public View
   private:
     Window &m_window;
     Graph &m_graph;
-    GraphState &m_graph_state;
 };
 
 class ImGuiMenuView : public View
@@ -253,10 +252,10 @@ class ImGuiMenuView : public View
             {
                 if (ImGui::MenuItem("Go to newst sample", "Space"))
                 {
-                    m_graph_state.goto_newest_sample();
+                    m_graph.reveal_newest_sample();
                 }
 
-                ImGui::Checkbox("Sync with latest data", &m_graph_state.sync_latest_data);
+                ImGui::Checkbox("Sync with latest data", &m_sync_latest_sample);
                 ImGui::SliderInt("Line width", &m_graph_state.plot_width, 1, 4);
                 ImGui::Checkbox("Show line segments", &m_graph_state.show_line_segments);
 
@@ -460,7 +459,7 @@ int main()
         Graph graph(state, window);
         window.add_view(&graph);
 
-        KeyController key_controller(window, graph, state);
+        KeyController key_controller(window, graph);
         window.add_view(&key_controller);
 
         ImGuiMenuView gui(window, plugin_manager, graph, db, state);
@@ -474,6 +473,12 @@ int main()
         while (!window.should_close())
         {
             glfwPollEvents();
+
+            if (m_sync_latest_sample)
+            {
+                graph.reveal_newest_sample();
+            }
+
             window.render();
 
             if (m_call_glfinish)

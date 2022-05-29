@@ -73,11 +73,6 @@ glm::dvec2 Graph::cursor_gs() const
 
 void Graph::draw(const Window &window) const
 {
-    if (m_state.sync_latest_data)
-    {
-        m_state.goto_newest_sample();
-    }
-
     View::draw(window);
 }
 
@@ -167,6 +162,40 @@ void Graph::layout()
 
     m_marker_a.set_screen_height(m_size.y - GUTTER_SIZE);
     m_marker_b.set_screen_height(m_size.y - GUTTER_SIZE);
+}
+
+void Graph::reveal_newest_sample()
+{
+    // Zero out the x translation element of the view transform - centers the view on time=0
+    auto view_matrix_copy = m_state.view.matrix();
+    view_matrix_copy[2][0] = 0;
+    m_state.view.update(view_matrix_copy);
+
+    // Center the view on the latest sample
+    m_state.view.translate(glm::dvec2(-latest_visibile_sample_time(), 0));
+
+    // Translate the view to the left by half a screen, to align the latest sample with the
+    // right edge of the view
+    const auto center_offset = m_state.view.apply_inverse_relative(glm::dvec2(1.0, 0.0));
+    m_state.view.translate(center_offset);
+}
+
+/**
+ * @brief Evalulate the time latest (newest) visible sample.
+ */
+double Graph::latest_visibile_sample_time() const
+{
+    double latest_sample_time = 0.0;
+    for (std::size_t i = 0; i < m_state.timeseries.size(); ++i)
+    {
+        const auto &ts = m_state.timeseries[i];
+        if (ts.visible)
+        {
+            const auto span = ts.ts->get_span();
+            latest_sample_time = std::max(latest_sample_time, span.second);
+        }
+    }
+    return latest_sample_time;
 }
 
 glm::dvec2 Graph::screen2graph(const glm::dvec2 &viewport_space) const
