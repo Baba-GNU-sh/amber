@@ -104,8 +104,8 @@ void Axis<AxisHorizontal>::draw_ticks(const glm::dvec2 &tick_spacing,
 
     // Align the start and end to the nearest tick to work out where the first and last
     // ticks should go
-    const auto first_tick = crush(axis_start_gs, tick_spacing);
-    const auto last_tick = crush(axis_end_gs, tick_spacing);
+    const auto first_tick = crush(axis_start_gs, tick_spacing, true);
+    const auto last_tick = crush(axis_end_gs, tick_spacing, true);
 
     // Work out how many ticks we are going to draw
     const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / tick_spacing;
@@ -138,8 +138,8 @@ void Axis<AxisVertical>::draw_ticks(const glm::dvec2 &tick_spacing,
 
     // Align the start and end to the nearest tick to work out where the first and last
     // ticks should go
-    const auto first_tick = crush(axis_start_gs, tick_spacing);
-    const auto last_tick = crush(axis_end_gs, tick_spacing);
+    const auto first_tick = crush(axis_start_gs, tick_spacing, false);
+    const auto last_tick = crush(axis_end_gs, tick_spacing, false);
 
     // Work out how many ticks we are going to draw
     const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / tick_spacing;
@@ -265,10 +265,19 @@ glm::dvec2 AxisBase::graph2screen(const glm::dvec2 &value) const
     return screen_space;
 }
 
-glm::dvec2 AxisBase::crush(const glm::dvec2 &value, const glm::dvec2 &interval)
+glm::dvec2 AxisBase::crush(const glm::dvec2 &value, const glm::dvec2 &interval, bool ceil)
 {
-    return glm::dvec2(ceil(value.x / interval.x) * interval.x,
-                      ceil(value.y / interval.y) * interval.y);
+    if (ceil)
+    {
+        return glm::dvec2(std::ceil(value.x / interval.x) * interval.x,
+                          std::ceil(value.y / interval.y) * interval.y);
+    }
+    else
+    {
+
+        return glm::dvec2(std::floor(value.x / interval.x) * interval.x,
+                          std::floor(value.y / interval.y) * interval.y);
+    }
 }
 
 template <> void Axis<AxisHorizontal>::update_layout()
@@ -283,8 +292,8 @@ template <> void Axis<AxisHorizontal>::update_layout()
 
     // Align the start and end to the nearest tick to work out where the first and last ticks
     // should go
-    const auto first_tick = crush(axis_start_gs, label_spacing);
-    const auto last_tick = crush(axis_end_gs, label_spacing);
+    const auto first_tick = crush(axis_start_gs, label_spacing, true);
+    const auto last_tick = crush(axis_end_gs, label_spacing, true);
 
     // Work out how many ticks we are going to draw
     const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / label_spacing;
@@ -319,8 +328,8 @@ template <> void Axis<AxisVertical>::update_layout()
 
     // Align the start and end to the nearest tick to work out where the first and last
     // ticks should go
-    const auto first_tick = crush(axis_start_gs, label_spacing);
-    const auto last_tick = crush(axis_end_gs, label_spacing);
+    const auto first_tick = crush(axis_start_gs, label_spacing, false);
+    const auto last_tick = crush(axis_end_gs, label_spacing, false);
 
     // Work out how many ticks we are going to draw
     const glm::ivec2 n_ticks = glm::abs(last_tick - first_tick) / label_spacing;

@@ -34,7 +34,7 @@ class AxisBase : public View
     glm::dvec2 screen2graph_delta(const glm::dvec2 &value) const;
     glm::dvec2 graph2screen(const glm::dvec2 &value) const;
 
-    static glm::dvec2 crush(const glm::dvec2 &value, const glm::dvec2 &interval);
+    static glm::dvec2 crush(const glm::dvec2 &value, const glm::dvec2 &interval, bool ceil);
 
     void draw_ticks(const Window &window) const;
 
