@@ -12,7 +12,7 @@
 #include <imgui.h>
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
-#include "imgui_window.hpp"
+#include "window_glfw_imgui.hpp"
 #include "graph.hpp"
 #include "audiofile_plugin.hpp"
 #include "wavegen_plugin.hpp"
@@ -437,7 +437,7 @@ int main()
         plugin_manager.start_all();
 
         // Create a new window using GLFW, OpenGL and initializing ImGui
-        ImGuiContextWindow window(1024, 768, "GLot");
+        Window_GLFW_ImGui window(1024, 768, "GLot");
 
         // We need to do this after creating our GL context which is done when the first GLFW
         // window is created

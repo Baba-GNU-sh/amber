@@ -20,9 +20,9 @@ add_library(
 		plugin_context.cpp
 		plugin_manager.cpp
 		window_glfw.cpp
+		window_glfw_imgui.cpp
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
-		imgui_window.cpp
 		graph.cpp
 		label.cpp
 		plot.cpp

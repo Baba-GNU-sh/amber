@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "imgui_window.hpp"
+#include "window_glfw_imgui.hpp"
 #include "sprite.hpp"
 #include "label.hpp"
 #include "axis.hpp"
@@ -19,7 +19,7 @@ class Panel : public View
 
 int main()
 {
-    ImGuiContextWindow window(1024, 768, "demo");
+    Window_GLFW_ImGui window(1024, 768, "demo");
 
     Panel panel;
     window.add_imgui_view(&panel);

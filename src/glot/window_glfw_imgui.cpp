@@ -1,7 +1,7 @@
-#include "imgui_window.hpp"
+#include "window_glfw_imgui.hpp"
 #include "window_glfw.hpp"
 
-ImGuiContextWindow::ImGuiContextWindow(int width, int height, const std::string &title)
+Window_GLFW_ImGui::Window_GLFW_ImGui(int width, int height, const std::string &title)
     : Window_GLFW(width, height, title)
 {
     IMGUI_CHECKVERSION();
@@ -11,19 +11,19 @@ ImGuiContextWindow::ImGuiContextWindow(int width, int height, const std::string 
     ImGui_ImplOpenGL3_Init("#version 330");
 }
 
-ImGuiContextWindow::~ImGuiContextWindow()
+Window_GLFW_ImGui::~Window_GLFW_ImGui()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void ImGuiContextWindow::add_imgui_view(View *view)
+void Window_GLFW_ImGui::add_imgui_view(View *view)
 {
     m_imgui_views.push_back(view);
 }
 
-void ImGuiContextWindow::render() const
+void Window_GLFW_ImGui::render() const
 {
     use();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -43,7 +43,7 @@ void ImGuiContextWindow::render() const
     finish();
 }
 
-void ImGuiContextWindow::handle_cursor_pos_callback(double xpos, double ypos)
+void Window_GLFW_ImGui::handle_cursor_pos_callback(double xpos, double ypos)
 {
     if (!ImGui::GetIO().WantCaptureMouse)
     {
@@ -51,7 +51,7 @@ void ImGuiContextWindow::handle_cursor_pos_callback(double xpos, double ypos)
     }
 }
 
-void ImGuiContextWindow::handle_scroll_callback(double xoffset, double yoffset)
+void Window_GLFW_ImGui::handle_scroll_callback(double xoffset, double yoffset)
 {
     if (!ImGui::GetIO().WantCaptureMouse)
     {
@@ -59,7 +59,7 @@ void ImGuiContextWindow::handle_scroll_callback(double xoffset, double yoffset)
     }
 }
 
-void ImGuiContextWindow::handle_mouse_button_callback(int button, int action, int mods)
+void Window_GLFW_ImGui::handle_mouse_button_callback(int button, int action, int mods)
 {
     if (!ImGui::GetIO().WantCaptureMouse)
     {
