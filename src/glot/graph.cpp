@@ -10,9 +10,9 @@
 #include "resources.hpp"
 #include "graph_utils.hpp"
 
-Graph::Graph(GraphState &state)
-    : m_state(state), m_axis_horizontal(Axis::Orientation::Horizontal, m_state.view),
-      m_axis_vertical(Axis::Orientation::Vertical, m_state.view), m_plot(state)
+Graph::Graph(GraphState &state, Window &window)
+    : m_state(state), m_axis_horizontal(Axis::Orientation::Horizontal, window),
+      m_axis_vertical(Axis::Orientation::Vertical, window), m_plot(state)
 {
     using namespace std::placeholders;
 
@@ -36,6 +36,8 @@ Graph::Graph(GraphState &state)
     m_plot.on_pan.connect([this](const Window &window, glm::dvec2 amount) {
         const auto delta_gs = screen2graph_delta(window.viewport_transform(), amount);
         m_state.view.translate(delta_gs);
+        m_axis_horizontal.set_graph_transform(m_state.view);
+        m_axis_vertical.set_graph_transform(m_state.view);
     });
 
     // for (auto &ts : m_state.timeseries)
@@ -332,6 +334,9 @@ void Graph::apply_zoom(const Window &window, const glm::dvec2 &zoom_delta_vec)
     const auto cursor_in_gs_new = screen2graph(window.viewport_transform(), window.cursor());
     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
     m_state.view.translate(cursor_delta);
+
+    m_axis_horizontal.set_graph_transform(m_state.view);
+    m_axis_vertical.set_graph_transform(m_state.view);
 }
 
 // void Graph::on_zoom(Window &window, const glm::dvec2 &zoom_delta_vec)

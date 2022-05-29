@@ -391,7 +391,7 @@ int main()
         update_vsync();
         window.set_bg_colour(m_clear_colour);
 
-        auto graph = std::make_shared<Graph>(state);
+        auto graph = std::make_shared<Graph>(state, window);
         window.add(graph);
 
         auto key_controller = std::make_shared<KeyController>();

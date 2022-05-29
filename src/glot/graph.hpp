@@ -12,7 +12,7 @@
 class Graph : public View
 {
   public:
-    Graph(GraphState &state);
+    Graph(GraphState &state, Window &window);
     ~Graph();
     Graph(const Graph &) = delete;
     Graph(Graph &&) = delete;
@@ -52,18 +52,11 @@ class Graph : public View
     Axis m_axis_vertical;
     Plot m_plot;
 
-    // std::vector<Label> m_marker_ts_labels;
-    // std::vector<Plot> m_plots;
     // Marker m_marker_a;
     // Marker m_marker_b;
     // SelectionBox m_selection_box;
     glm::dvec2 m_size;
     glm::dvec2 m_position;
-
-    // Line buffers - TODO move these to some other primitive class thing
-    // GLuint m_linebuf_vao;
-    // GLuint m_linebuf_vbo;
-    // Program m_lines_shader;
 
     // glm::dvec2 m_cursor_old;
     // bool m_is_dragging = false;

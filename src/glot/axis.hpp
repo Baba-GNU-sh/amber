@@ -18,16 +18,18 @@ class Axis : public View
     };
 
     // TODO: can we make this orientation setting a template parameter?
-    Axis(Orientation ori, const Transform<double> &graph_transform);
+    Axis(Orientation orientation, const Window &window);
     ~Axis();
 
     void draw(const Window &window) const override;
 
     glm::dvec2 position() const override;
-    void set_position(const glm::dvec2 &position) override;
     glm::dvec2 size() const override;
+
+    void set_position(const glm::dvec2 &position) override;
     void set_size(const glm::dvec2 &size) override;
-    void set_orientation(Orientation ori);
+    void set_graph_transform(const Transform<double> &t);
+
     void on_scroll(Window &, double x, double y) override;
     void on_mouse_button(Window &, int button, int action, int mods) override;
 
@@ -53,16 +55,28 @@ class Axis : public View
     void draw_ticks(const Window &window) const;
     void draw_labels(const Window &window) const;
 
-    Orientation m_orientation;
-    const Transform<double> &m_graph_transform;
+    /**
+     * @brief Re-lays out all the components. Call whenever buffers need to be updated.
+     */
+    void update_layout();
+
+    // Settings
+    static constexpr double TICKLEN_PX = 5.0;
+    static constexpr size_t NUM_LABELS = 128;
+
+    // View invariates
+    const Orientation m_orientation; // TODO: make this a template parameter
+    const Window &m_window;
+    Font m_font;
+
+    // View variables
+    Transform<double> m_graph_transform;
     glm::dvec2 m_position = glm::dvec2(0.0);
     glm::dvec2 m_size = glm::dvec2(100.0);
-    Font m_font;
-    std::vector<Label> m_axis_labels;
+    std::vector<Label> m_labels;
+    size_t m_labels_used;
 
     unsigned int m_linebuf_vao;
     unsigned int m_linebuf_vbo;
     Program m_lines_shader;
-
-    static constexpr double TICKLEN_PX = 5.0;
 };
