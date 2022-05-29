@@ -48,8 +48,15 @@ template <> Axis<AxisHorizontal>::Axis(const Window &window) : AxisBase(window)
 
 void AxisBase::draw(const Window &window) const
 {
+    // glScissor coordinates start in the bottom left
+    glEnable(GL_SCISSOR_TEST);
+    const auto window_size = window.size();
+    window.scissor(m_position.x, window_size.y - (m_position.y + m_size.y), m_size.x, m_size.y);
+
     draw_ticks(window);
     draw_labels(window);
+
+    glDisable(GL_SCISSOR_TEST);
 }
 
 void AxisBase::draw_ticks(const Window &window) const
