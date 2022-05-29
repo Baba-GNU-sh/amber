@@ -20,11 +20,6 @@ struct GraphState
     };
 
     int plot_width = 2;
-
-    /**
-     * @brief This transform describes how the graph maps to the viewable area of the graph.
-     */
-    Transform<double> view;
     bool show_line_segments = false;
     std::vector<TimeSeriesState> timeseries;
 };

@@ -7,7 +7,8 @@
 #include <database/timeseries.hpp>
 #include "resources.hpp"
 
-Plot::Plot(GraphState &state, Window &window) : m_state(state), m_window(window)
+Plot::Plot(GraphState &state, const Transform<double> &view, Window &window)
+    : m_state(state), m_view(view), m_window(window)
 {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
@@ -41,7 +42,8 @@ Plot::~Plot()
 }
 
 Plot::Plot(Plot &&other)
-    : m_state(other.m_state), m_window(other.m_window), m_shader(other.m_shader)
+    : m_state(other.m_state), m_view(other.m_view), m_window(other.m_window),
+      m_shader(other.m_shader)
 {
     m_vao = other.m_vao;
     m_vbo = other.m_vbo;
@@ -77,8 +79,7 @@ void Plot::draw_plot(const Window &window,
     glBindVertexArray(m_vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-    glm::mat3 view_matrix_offset =
-        glm::translate(m_state.view.matrix(), glm::dvec2(0.0f, y_offset));
+    glm::mat3 view_matrix_offset = glm::translate(m_view.matrix(), glm::dvec2(0.0f, y_offset));
 
     m_shader.use();
     int uniform_id = m_shader.uniform_location("view_matrix");
@@ -173,7 +174,7 @@ void Plot::on_cursor_move(Window &window, double x, double y)
 glm::dvec2 Plot::screen2graph(const glm::dvec2 &viewport_space) const
 {
     const auto clip_space = m_window.viewport_transform().apply_inverse(viewport_space);
-    const auto graph_space = m_state.view.apply_inverse(clip_space);
+    const auto graph_space = m_view.apply_inverse(clip_space);
     return graph_space;
 }
 
@@ -186,7 +187,7 @@ glm::dvec2 Plot::screen2graph_delta(const glm::dvec2 &delta) const
 
 glm::dvec2 Plot::graph2screen(const glm::dvec2 &value) const
 {
-    const auto clip_space = m_state.view.apply(value);
+    const auto clip_space = m_view.apply(value);
     const auto screen_space = m_window.viewport_transform().apply(clip_space);
     return screen_space;
 }

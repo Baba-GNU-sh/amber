@@ -11,7 +11,7 @@
 class Plot : public View
 {
   public:
-    Plot(GraphState &state, Window &m_window);
+    Plot(GraphState &state, const Transform<double> &view, Window &m_window);
     ~Plot();
     Plot(const Plot &) = delete;
     Plot &operator=(const Plot &) = delete;
@@ -45,6 +45,7 @@ class Plot : public View
     glm::dvec2 graph2screen(const glm::dvec2 &value) const;
 
     GraphState &m_state;
+    const Transform<double> &m_view;
     Window &m_window;
     static constexpr size_t PIXELS_PER_COL = 1;
     static constexpr size_t COLS_MAX = 8192; // Number of preallocated buffer space for samples

@@ -40,6 +40,7 @@ class Graph : public View
     void set_marker_position(MarkerType m, double position);
     void reveal_newest_sample();
     double latest_visibile_sample_time() const;
+    const Transform<double> &get_view_transform() const;
 
   private:
     void layout();
@@ -80,6 +81,7 @@ class Graph : public View
     static constexpr double ZOOM_MAX = 10e6;
     static constexpr int PIXELS_PER_COL = 1;
 
+    Transform<double> m_view;
     GraphState &m_state;
     Window &m_window;
     Axis<AxisHorizontal> m_axis_horizontal;

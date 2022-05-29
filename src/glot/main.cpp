@@ -265,7 +265,8 @@ class ImGuiMenuView : public View
                 {
                     if (ImGui::MenuItem("Show Marker A", "A"))
                     {
-                        const auto marker_pos_gs = m_graph_state.view.apply(glm::vec2(0.0, 0.0));
+                        const auto marker_pos_gs =
+                            m_graph.get_view_transform().apply(glm::vec2(0.0, 0.0));
                         m_graph.set_marker_position(Graph::MarkerType::A, marker_pos_gs.x);
                         m_graph.set_marker_visible(Graph::MarkerType::A, true);
                     }
@@ -282,7 +283,8 @@ class ImGuiMenuView : public View
                 {
                     if (ImGui::MenuItem("Show Marker B", "B"))
                     {
-                        const auto marker_pos_gs = m_graph_state.view.apply(glm::vec2(0.0, 0.0));
+                        const auto marker_pos_gs =
+                            m_graph.get_view_transform().apply(glm::vec2(0.0, 0.0));
                         m_graph.set_marker_position(Graph::MarkerType::B, marker_pos_gs.x);
                         m_graph.set_marker_visible(Graph::MarkerType::B, true);
                     }
@@ -352,12 +354,12 @@ class ImGuiMenuView : public View
                 if (ImGui::CollapsingHeader("Graph", ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     ImGui::Text("View Matrix:");
-                    imgui_print_matrix(m_graph_state.view.matrix());
+                    imgui_print_matrix(m_graph.get_view_transform().matrix());
 
                     ImGui::Text("Viewport Matrix:");
                     imgui_print_matrix(m_window.viewport_transform().matrix());
 
-                    const auto &view_matrix = m_graph_state.view.matrix();
+                    const auto &view_matrix = m_graph.get_view_transform().matrix();
                     ImGui::Text("View Matrix:");
                     for (int i = 0; i < 3; i++)
                     {
