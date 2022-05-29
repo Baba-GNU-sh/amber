@@ -159,32 +159,32 @@ class KeyController : public View
             {
                 if (mods == GLFW_MOD_CONTROL)
                 {
-                    m_graph_state.markers.first.visible = false;
+                    m_graph.set_marker_visible(Graph::MarkerType::A, false);
                 }
                 else
                 {
                     const auto cursor_gs = m_graph.cursor_gs();
-                    m_graph_state.markers.first.position = cursor_gs.x;
-                    m_graph_state.markers.first.visible = true;
+                    m_graph.set_marker_visible(Graph::MarkerType::A, true);
+                    m_graph.set_marker_position(Graph::MarkerType::A, cursor_gs.x);
                 }
             }
             else if (key == GLFW_KEY_B && action == GLFW_PRESS)
             {
                 if (mods == GLFW_MOD_CONTROL)
                 {
-                    m_graph_state.markers.second.visible = false;
+                    m_graph.set_marker_visible(Graph::MarkerType::B, false);
                 }
                 else
                 {
                     const auto cursor_gs = m_graph.cursor_gs();
-                    m_graph_state.markers.second.position = cursor_gs.x;
-                    m_graph_state.markers.second.visible = true;
+                    m_graph.set_marker_visible(Graph::MarkerType::B, true);
+                    m_graph.set_marker_position(Graph::MarkerType::B, cursor_gs.x);
                 }
             }
             else if (key == GLFW_KEY_C && action == GLFW_PRESS)
             {
-                m_graph_state.markers.first.visible = false;
-                m_graph_state.markers.second.visible = false;
+                m_graph.set_marker_visible(Graph::MarkerType::A, false);
+                m_graph.set_marker_visible(Graph::MarkerType::B, false);
             }
         }
     }
@@ -262,47 +262,48 @@ class ImGuiMenuView : public View
 
                 ImGui::Separator();
 
-                if (!m_graph_state.markers.first.visible)
+                if (!m_graph.marker_is_visible(Graph::MarkerType::A))
                 {
                     if (ImGui::MenuItem("Show Marker A", "A"))
                     {
                         const auto marker_pos_gs = m_graph_state.view.apply(glm::vec2(0.0, 0.0));
-                        m_graph_state.markers.first.position = marker_pos_gs.x;
-                        m_graph_state.markers.first.visible = true;
+                        m_graph.set_marker_position(Graph::MarkerType::A, marker_pos_gs.x);
+                        m_graph.set_marker_visible(Graph::MarkerType::A, true);
                     }
                 }
                 else
                 {
                     if (ImGui::MenuItem("Hide Marker A", "Ctrl+A"))
                     {
-                        m_graph_state.markers.first.visible = false;
+                        m_graph.set_marker_visible(Graph::MarkerType::A, false);
                     }
                 }
 
-                if (!m_graph_state.markers.second.visible)
+                if (!m_graph.marker_is_visible(Graph::MarkerType::B))
                 {
                     if (ImGui::MenuItem("Show Marker B", "B"))
                     {
                         const auto marker_pos_gs = m_graph_state.view.apply(glm::vec2(0.0, 0.0));
-                        m_graph_state.markers.second.position = marker_pos_gs.x;
-                        m_graph_state.markers.second.visible = true;
+                        m_graph.set_marker_position(Graph::MarkerType::B, marker_pos_gs.x);
+                        m_graph.set_marker_visible(Graph::MarkerType::B, true);
                     }
                 }
                 else
                 {
                     if (ImGui::MenuItem("Hide Marker B", "Ctrl+B"))
                     {
-                        m_graph_state.markers.second.visible = false;
+                        m_graph.set_marker_visible(Graph::MarkerType::B, false);
                     }
                 }
 
-                if (m_graph_state.markers.first.visible || m_graph_state.markers.second.visible)
+                if (m_graph.marker_is_visible(Graph::MarkerType::A) ||
+                    m_graph.marker_is_visible(Graph::MarkerType::B))
                 {
                     ImGui::Separator();
                     if (ImGui::MenuItem("Hide Markers", "C"))
                     {
-                        m_graph_state.markers.first.visible = false;
-                        m_graph_state.markers.second.visible = false;
+                        m_graph.set_marker_visible(Graph::MarkerType::A, false);
+                        m_graph.set_marker_visible(Graph::MarkerType::B, false);
                     }
                 }
 
@@ -367,18 +368,19 @@ class ImGuiMenuView : public View
                     const auto cursor_gs = m_graph.cursor_gs();
                     ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
 
-                    const auto &marker_a = m_graph_state.markers.first;
-                    const auto &marker_b = m_graph_state.markers.second;
+                    if (m_graph.marker_is_visible(Graph::MarkerType::A))
+                        ImGui::Text("Marker A: %0.3f",
+                                    m_graph.marker_position(Graph::MarkerType::A));
 
-                    if (marker_a.visible)
-                        ImGui::Text("Marker A: %0.3f", marker_a.position);
+                    if (m_graph.marker_is_visible(Graph::MarkerType::B))
+                        ImGui::Text("Marker B: %0.3f",
+                                    m_graph.marker_position(Graph::MarkerType::B));
 
-                    if (marker_b.visible)
-                        ImGui::Text("Marker B: %0.3f", marker_b.position);
-
-                    if (marker_a.visible && marker_b.visible)
+                    if (m_graph.marker_is_visible(Graph::MarkerType::A) &&
+                        m_graph.marker_is_visible(Graph::MarkerType::B))
                     {
-                        const auto marker_interval = marker_b.position - marker_a.position;
+                        const auto marker_interval = m_graph.marker_position(Graph::MarkerType::B) -
+                                                     m_graph.marker_position(Graph::MarkerType::A);
                         ImGui::Text("Marker Interval: %0.3f, %0.1fHz",
                                     marker_interval,
                                     1.0 / std::abs(marker_interval));

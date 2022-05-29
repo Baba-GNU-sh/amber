@@ -12,6 +12,12 @@
 class Graph : public View
 {
   public:
+    enum class MarkerType
+    {
+        A,
+        B
+    };
+
     Graph(GraphState &state, Window &window);
     ~Graph() = default;
     Graph(const Graph &) = delete;
@@ -28,6 +34,11 @@ class Graph : public View
     void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
     void on_cursor_move(Window &window, double xpos, double ypos) override;
 
+    bool marker_is_visible(MarkerType m) const;
+    double marker_position(MarkerType m) const;
+    void set_marker_visible(MarkerType m, bool marker);
+    void set_marker_position(MarkerType m, double position);
+
   private:
     void layout();
 
@@ -37,6 +48,30 @@ class Graph : public View
                             const glm::dvec2 &value) const;
 
     void apply_zoom(const Window &window, const glm::dvec2 &);
+
+    const Marker &get_marker(MarkerType m) const
+    {
+        switch (m)
+        {
+        default:
+        case MarkerType::A:
+            return m_marker_a;
+        case MarkerType::B:
+            return m_marker_b;
+        }
+    }
+
+    Marker &get_marker(MarkerType m)
+    {
+        switch (m)
+        {
+        default:
+        case MarkerType::A:
+            return m_marker_a;
+        case MarkerType::B:
+            return m_marker_b;
+        }
+    }
 
     static constexpr double GUTTER_SIZE = 60;
     static constexpr double ZOOM_MAX = 10e6;

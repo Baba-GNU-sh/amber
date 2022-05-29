@@ -68,8 +68,7 @@ Graph::Graph(GraphState &state, Window &window)
 
 glm::dvec2 Graph::cursor_gs() const
 {
-    // return screen2graph(m_cursor_old);
-    return glm::dvec2(0.0);
+    return screen2graph(m_window.cursor());
 }
 
 void Graph::draw(const Window &window) const
@@ -134,6 +133,27 @@ void Graph::on_cursor_move(Window &window, double x, double y)
     View::on_cursor_move(window, x, y);
 }
 
+bool Graph::marker_is_visible(MarkerType m) const
+{
+    const auto &marker = get_marker(m);
+    return marker.is_visible();
+}
+double Graph::marker_position(MarkerType m) const
+{
+    const auto &marker = get_marker(m);
+    return marker.x_position();
+}
+void Graph::set_marker_visible(MarkerType m, bool visible)
+{
+    auto &marker = get_marker(m);
+    marker.set_visible(visible);
+}
+void Graph::set_marker_position(MarkerType m, double position)
+{
+    auto &marker = get_marker(m);
+    marker.set_x_position(position);
+}
+
 void Graph::layout()
 {
     m_axis_horizontal.set_position(glm::dvec2(GUTTER_SIZE, m_size.y - GUTTER_SIZE) + m_position);
@@ -146,6 +166,7 @@ void Graph::layout()
     m_plot.set_size(m_size - glm::dvec2(GUTTER_SIZE));
 
     m_marker_a.set_screen_height(m_size.y - GUTTER_SIZE);
+    m_marker_b.set_screen_height(m_size.y - GUTTER_SIZE);
 }
 
 glm::dvec2 Graph::screen2graph(const glm::ivec2 &viewport_space) const

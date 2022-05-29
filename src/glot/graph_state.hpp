@@ -19,12 +19,6 @@ struct GraphState
         float y_offset = 0.0;
     };
 
-    struct MarkerState
-    {
-        bool visible = false;
-        double position = 0.0;
-    };
-
     GraphState()
     {
         view.update(glm::dmat3(1.0));
@@ -92,7 +86,6 @@ struct GraphState
      */
     Transform<double> view;
     bool show_line_segments = false;
-    std::pair<MarkerState, MarkerState> markers;
     std::vector<TimeSeriesState> timeseries;
     bool sync_latest_data = false;
 };

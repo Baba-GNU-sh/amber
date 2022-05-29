@@ -79,6 +79,11 @@ void Marker::set_visible(bool visible)
     m_is_visible = visible;
 }
 
+bool Marker::is_visible() const
+{
+    return m_is_visible;
+}
+
 void Marker::draw(const Window &) const
 {
     if (!m_is_visible)

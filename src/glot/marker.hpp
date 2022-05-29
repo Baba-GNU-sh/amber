@@ -20,6 +20,7 @@ class Marker : public View
     Marker &operator=(Marker &&) = delete;
 
     double x_position() const;
+    bool is_visible() const;
     void set_x_position(double position);
     void set_graph_transform(const Transform<double> &transform);
     void set_screen_height(int height);
