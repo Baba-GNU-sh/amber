@@ -21,8 +21,8 @@ int main()
 {
     ImGuiContextWindow window(1024, 768, "demo");
 
-    auto panel = std::make_shared<Panel>();
-    window.add_imgui_view(panel);
+    Panel panel;
+    window.add_imgui_view(&panel);
 
     int offset = 0;
     for (int i = 0; i < 10; i++)

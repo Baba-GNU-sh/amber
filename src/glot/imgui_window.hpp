@@ -11,7 +11,7 @@ class ImGuiContextWindow : public Window_GLFW
   public:
     ImGuiContextWindow(int width, int height, const std::string &title);
     virtual ~ImGuiContextWindow();
-    void add_imgui_view(std::shared_ptr<View> view);
+    void add_imgui_view(View *view);
     void render() const override;
 
   private:
@@ -19,5 +19,5 @@ class ImGuiContextWindow : public Window_GLFW
     virtual void handle_scroll_callback(double xoffset, double yoffset) override;
     virtual void handle_mouse_button_callback(int button, int action, int mods) override;
 
-    std::vector<std::shared_ptr<View>> m_imgui_views;
+    std::vector<View *> m_imgui_views;
 };

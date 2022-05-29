@@ -74,210 +74,6 @@ std::pair<double, const char *> human_readable(std::size_t size,
     return std::make_pair(size_hr, suffix);
 }
 
-// static void draw_gui(Window &window,
-//                      PluginManager &plugin_manager,
-//                      Graph &graph,
-//                      Database &database,
-//                      GraphState &graph_state)
-// {
-//     ImGui_ImplOpenGL3_NewFrame();
-//     ImGui_ImplGlfw_NewFrame();
-//     ImGui::NewFrame();
-
-//     ImGuiDatabasePanel panel(graph_state);
-
-//     ImVec2 menubar_size;
-//     if (ImGui::BeginMainMenuBar())
-//     {
-//         if (ImGui::BeginMenu("File"))
-//         {
-//             if (ImGui::MenuItem("Close", "Esc"))
-//             {
-//                 window.request_close();
-//             }
-//             ImGui::EndMenu();
-//         }
-
-//         if (ImGui::BeginMenu("View"))
-//         {
-//             if (ImGui::MenuItem("Toggle Fullscreen", "F11"))
-//                 window.set_fullscreen(!window.is_fullscreen());
-
-//             ImGui::Separator();
-
-//             if (ImGui::Checkbox("Enable VSync", &m_enable_vsync))
-//                 update_vsync();
-
-//             if (ImGui::Checkbox("Multisampling", &m_enable_multisampling))
-//                 update_multisampling();
-
-//             ImGui::Checkbox("Call glFinish", &m_call_glfinish);
-
-//             ImGui::Separator();
-
-//             if (ImGui::ColorEdit3(
-//                     "Clear colour", &(m_clear_colour.x), ImGuiColorEditFlags_NoInputs))
-//                 window.set_bg_colour(m_clear_colour);
-
-//             ImGui::EndMenu();
-//         }
-
-//         if (ImGui::BeginMenu("Graph"))
-//         {
-//             if (ImGui::MenuItem("Go to newst sample", "Space"))
-//             {
-//                 graph_state.goto_newest_sample();
-//             }
-
-//             ImGui::Checkbox("Sync with latest data", &graph_state.sync_latest_data);
-//             ImGui::SliderInt("Line width", &graph_state.plot_width, 1, 4);
-//             ImGui::Checkbox("Show line segments", &graph_state.show_line_segments);
-
-//             ImGui::Separator();
-
-//             if (!graph_state.markers.first.visible)
-//             {
-//                 if (ImGui::MenuItem("Show Marker A", "A"))
-//                 {
-//                     const auto marker_pos_gs = graph_state.view.apply(glm::vec2(0.0, 0.0));
-//                     graph_state.markers.first.position = marker_pos_gs.x;
-//                     graph_state.markers.first.visible = true;
-//                 }
-//             }
-//             else
-//             {
-//                 if (ImGui::MenuItem("Hide Marker A", "Ctrl+A"))
-//                 {
-//                     graph_state.markers.first.visible = false;
-//                 }
-//             }
-
-//             if (!graph_state.markers.second.visible)
-//             {
-//                 if (ImGui::MenuItem("Show Marker B", "B"))
-//                 {
-//                     const auto marker_pos_gs = graph_state.view.apply(glm::vec2(0.0, 0.0));
-//                     graph_state.markers.second.position = marker_pos_gs.x;
-//                     graph_state.markers.second.visible = true;
-//                 }
-//             }
-//             else
-//             {
-//                 if (ImGui::MenuItem("Hide Marker B", "Ctrl+B"))
-//                 {
-//                     graph_state.markers.second.visible = false;
-//                 }
-//             }
-
-//             if (graph_state.markers.first.visible || graph_state.markers.second.visible)
-//             {
-//                 ImGui::Separator();
-//                 if (ImGui::MenuItem("Hide Markers", "C"))
-//                 {
-//                     graph_state.markers.first.visible = false;
-//                     graph_state.markers.second.visible = false;
-//                 }
-//             }
-
-//             ImGui::Separator();
-
-//             panel.draw_imgui_panel();
-
-//             ImGui::EndMenu();
-//         }
-
-//         if (ImGui::BeginMenu("Plugins"))
-//         {
-//             plugin_manager.draw_menu();
-//             ImGui::EndMenu();
-//         }
-
-//         if (ImGui::BeginMenu("Help"))
-//         {
-//             ImGui::BulletText("Left mouse + drag to pan");
-//             ImGui::BulletText("Scroll to zoom");
-//             ImGui::BulletText("Scroll on gutters to zoom individual axes");
-//             ImGui::BulletText("Press A or B to place markers");
-//             ImGui::EndMenu();
-//         }
-
-//         menubar_size = ImGui::GetWindowSize();
-//         ImGui::EndMainMenuBar();
-//     }
-
-//     ImGui::Begin("Info",
-//                  0,
-//                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
-//                      ImGuiWindowFlags_NoMove);
-//     ImGui::SetWindowPos(ImVec2(window.size().x - ImGui::GetWindowWidth() - 10, menubar_size.y),
-//                         true);
-
-//     if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen))
-//     {
-//         ImGui::Text("%.1f ms/frame (%.1f FPS)",
-//                     1000.0f / ImGui::GetIO().Framerate,
-//                     ImGui::GetIO().Framerate);
-//     }
-
-//     if (ImGui::CollapsingHeader("Graph", ImGuiTreeNodeFlags_DefaultOpen))
-//     {
-//         ImGui::Text("View Matrix:");
-//         imgui_print_matrix(graph_state.view.matrix());
-
-//         ImGui::Text("Viewport Matrix:");
-//         imgui_print_matrix(window.viewport_transform().matrix());
-
-//         const auto &view_matrix = graph_state.view.matrix();
-//         ImGui::Text("View Matrix:");
-//         for (int i = 0; i < 3; i++)
-//         {
-//             ImGui::Text(" %f %f %f", view_matrix[0][i], view_matrix[1][i], view_matrix[2][i]);
-//         }
-
-//         const auto cursor_gs = graph.cursor_gs();
-//         ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
-
-//         const auto &marker_a = graph_state.markers.first;
-//         const auto &marker_b = graph_state.markers.second;
-
-//         if (marker_a.visible)
-//             ImGui::Text("Marker A: %0.3f", marker_a.position);
-
-//         if (marker_b.visible)
-//             ImGui::Text("Marker B: %0.3f", marker_b.position);
-
-//         if (marker_a.visible && marker_b.visible)
-//         {
-//             const auto marker_interval = marker_b.position - marker_a.position;
-//             ImGui::Text("Marker Interval: %0.3f, %0.1fHz",
-//                         marker_interval,
-//                         1.0 / std::abs(marker_interval));
-//         }
-//     }
-
-//     if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))
-//     {
-//         // Show database stats
-//         auto [total_bytes, suffix] =
-//             human_readable(database.memory_usage(), 1024, {"KiB", "MiB", "GiB", "TiB"});
-//         ImGui::Text("Memory Used: %.1f%s", total_bytes, suffix);
-
-//         auto [total_samples, samples_suffix] =
-//             human_readable(database.num_samples(), 1000, {"K", "M", "B"});
-//         ImGui::Text("Total Samples: %.1f%s", total_samples, samples_suffix);
-
-//         ImGui::Text("Bytes/sample: %.1f",
-//                     static_cast<double>(database.memory_usage()) /
-//                         static_cast<double>(database.num_samples()));
-//     }
-
-//     plugin_manager.draw_dialogs();
-
-//     ImGui::End();
-//     ImGui::Render();
-//     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-// }
-
 void init_timeseries(Database &database, GraphState &state)
 {
     const auto createGlmColour = [](int code) {
@@ -334,20 +130,290 @@ void init_timeseries(Database &database, GraphState &state)
                    });
 }
 
-struct KeyController : public View
+class KeyController : public View
 {
-    void on_key(Window &window, int key, int, int action, int) override
+  public:
+    KeyController(Window &window, Graph &graph, GraphState &graph_state)
+        : m_window(window), m_graph(graph), m_graph_state(graph_state)
     {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        //
+    }
+
+    void on_key(Window &, int key, int, int action, int mods) override
+    {
+        if (action == GLFW_PRESS)
         {
-            window.request_close();
+            if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
+            {
+                m_window.set_fullscreen(!m_window.is_fullscreen());
+            }
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            {
+                m_window.request_close();
+            }
+            if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+            {
+                m_graph_state.goto_newest_sample();
+            }
+            if (key == GLFW_KEY_A && action == GLFW_PRESS)
+            {
+                if (mods == GLFW_MOD_CONTROL)
+                {
+                    m_graph_state.markers.first.visible = false;
+                }
+                else
+                {
+                    const auto cursor_gs = m_graph.cursor_gs();
+                    m_graph_state.markers.first.position = cursor_gs.x;
+                    m_graph_state.markers.first.visible = true;
+                }
+            }
+            else if (key == GLFW_KEY_B && action == GLFW_PRESS)
+            {
+                if (mods == GLFW_MOD_CONTROL)
+                {
+                    m_graph_state.markers.second.visible = false;
+                }
+                else
+                {
+                    const auto cursor_gs = m_graph.cursor_gs();
+                    m_graph_state.markers.second.position = cursor_gs.x;
+                    m_graph_state.markers.second.visible = true;
+                }
+            }
+            else if (key == GLFW_KEY_C && action == GLFW_PRESS)
+            {
+                m_graph_state.markers.first.visible = false;
+                m_graph_state.markers.second.visible = false;
+            }
         }
+    }
+
+  private:
+    Window &m_window;
+    Graph &m_graph;
+    GraphState &m_graph_state;
+};
+
+class ImGuiMenuView : public View
+{
+  public:
+    ImGuiMenuView(Window &window,
+                  PluginManager &plugin_manager,
+                  Graph &graph,
+                  Database &database,
+                  GraphState &graph_state)
+        : m_window(window), m_plugin_manager(plugin_manager), m_graph(graph), m_database(database),
+          m_graph_state(graph_state)
+    {
+        //
     }
 
     void draw(const Window &) const override
     {
-        // Nothing to do...
+        ImGuiDatabasePanel panel(m_graph_state);
+
+        ImVec2 menubar_size;
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Close", "Esc"))
+                {
+                    m_window.request_close();
+                }
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("View"))
+            {
+                if (ImGui::MenuItem("Toggle Fullscreen", "F11"))
+                    m_window.set_fullscreen(!m_window.is_fullscreen());
+
+                ImGui::Separator();
+
+                if (ImGui::Checkbox("Enable VSync", &m_enable_vsync))
+                    update_vsync();
+
+                if (ImGui::Checkbox("Multisampling", &m_enable_multisampling))
+                    update_multisampling();
+
+                ImGui::Checkbox("Call glFinish", &m_call_glfinish);
+
+                ImGui::Separator();
+
+                if (ImGui::ColorEdit3(
+                        "Clear colour", &(m_clear_colour.x), ImGuiColorEditFlags_NoInputs))
+                    m_window.set_bg_colour(m_clear_colour);
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Graph"))
+            {
+                if (ImGui::MenuItem("Go to newst sample", "Space"))
+                {
+                    m_graph_state.goto_newest_sample();
+                }
+
+                ImGui::Checkbox("Sync with latest data", &m_graph_state.sync_latest_data);
+                ImGui::SliderInt("Line width", &m_graph_state.plot_width, 1, 4);
+                ImGui::Checkbox("Show line segments", &m_graph_state.show_line_segments);
+
+                ImGui::Separator();
+
+                if (!m_graph_state.markers.first.visible)
+                {
+                    if (ImGui::MenuItem("Show Marker A", "A"))
+                    {
+                        const auto marker_pos_gs = m_graph_state.view.apply(glm::vec2(0.0, 0.0));
+                        m_graph_state.markers.first.position = marker_pos_gs.x;
+                        m_graph_state.markers.first.visible = true;
+                    }
+                }
+                else
+                {
+                    if (ImGui::MenuItem("Hide Marker A", "Ctrl+A"))
+                    {
+                        m_graph_state.markers.first.visible = false;
+                    }
+                }
+
+                if (!m_graph_state.markers.second.visible)
+                {
+                    if (ImGui::MenuItem("Show Marker B", "B"))
+                    {
+                        const auto marker_pos_gs = m_graph_state.view.apply(glm::vec2(0.0, 0.0));
+                        m_graph_state.markers.second.position = marker_pos_gs.x;
+                        m_graph_state.markers.second.visible = true;
+                    }
+                }
+                else
+                {
+                    if (ImGui::MenuItem("Hide Marker B", "Ctrl+B"))
+                    {
+                        m_graph_state.markers.second.visible = false;
+                    }
+                }
+
+                if (m_graph_state.markers.first.visible || m_graph_state.markers.second.visible)
+                {
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Hide Markers", "C"))
+                    {
+                        m_graph_state.markers.first.visible = false;
+                        m_graph_state.markers.second.visible = false;
+                    }
+                }
+
+                ImGui::Separator();
+
+                panel.draw_imgui_panel();
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Plugins"))
+            {
+                m_plugin_manager.draw_menu();
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Help"))
+            {
+                ImGui::BulletText("Left mouse + drag to pan");
+                ImGui::BulletText("Scroll to zoom");
+                ImGui::BulletText("Scroll on gutters to zoom individual axes");
+                ImGui::BulletText("Press A or B to place markers");
+                ImGui::EndMenu();
+            }
+
+            menubar_size = ImGui::GetWindowSize();
+            ImGui::EndMainMenuBar();
+        }
+
+        {
+            ImGui::Begin("Info",
+                         0,
+                         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
+                             ImGuiWindowFlags_NoMove);
+            {
+                ImGui::SetWindowPos(ImVec2(800 - ImGui::GetWindowWidth() - 10, menubar_size.y),
+                                    true);
+
+                if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    ImGui::Text("%.1f ms/frame (%.1f FPS)",
+                                1000.0f / ImGui::GetIO().Framerate,
+                                ImGui::GetIO().Framerate);
+                }
+
+                if (ImGui::CollapsingHeader("Graph", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    ImGui::Text("View Matrix:");
+                    imgui_print_matrix(m_graph_state.view.matrix());
+
+                    ImGui::Text("Viewport Matrix:");
+                    imgui_print_matrix(m_window.viewport_transform().matrix());
+
+                    const auto &view_matrix = m_graph_state.view.matrix();
+                    ImGui::Text("View Matrix:");
+                    for (int i = 0; i < 3; i++)
+                    {
+                        ImGui::Text(
+                            " %f %f %f", view_matrix[0][i], view_matrix[1][i], view_matrix[2][i]);
+                    }
+
+                    const auto cursor_gs = m_graph.cursor_gs();
+                    ImGui::Text("Cursor: %f %f", cursor_gs.x, cursor_gs.y);
+
+                    const auto &marker_a = m_graph_state.markers.first;
+                    const auto &marker_b = m_graph_state.markers.second;
+
+                    if (marker_a.visible)
+                        ImGui::Text("Marker A: %0.3f", marker_a.position);
+
+                    if (marker_b.visible)
+                        ImGui::Text("Marker B: %0.3f", marker_b.position);
+
+                    if (marker_a.visible && marker_b.visible)
+                    {
+                        const auto marker_interval = marker_b.position - marker_a.position;
+                        ImGui::Text("Marker Interval: %0.3f, %0.1fHz",
+                                    marker_interval,
+                                    1.0 / std::abs(marker_interval));
+                    }
+                }
+
+                if (ImGui::CollapsingHeader("Database", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    // Show database stats
+                    auto [total_bytes, suffix] = human_readable(
+                        m_database.memory_usage(), 1024, {"KiB", "MiB", "GiB", "TiB"});
+                    ImGui::Text("Memory Used: %.1f%s", total_bytes, suffix);
+
+                    auto [total_samples, samples_suffix] =
+                        human_readable(m_database.num_samples(), 1000, {"K", "M", "B"});
+                    ImGui::Text("Total Samples: %.1f%s", total_samples, samples_suffix);
+
+                    ImGui::Text("Bytes/sample: %.1f",
+                                static_cast<double>(m_database.memory_usage()) /
+                                    static_cast<double>(m_database.num_samples()));
+                }
+
+                m_plugin_manager.draw_dialogs();
+            }
+
+            ImGui::End();
+        }
     }
+
+  private:
+    Window &m_window;
+    PluginManager &m_plugin_manager;
+    Graph &m_graph;
+    Database &m_database;
+    GraphState &m_graph_state;
 };
 
 int main()
@@ -381,9 +447,6 @@ int main()
         GraphState state;
         init_timeseries(db, state);
 
-        // Our graph renderer requires depth testing, and blending to be enabled in order to
-        // render correcly
-        // glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -394,56 +457,11 @@ int main()
         Graph graph(state, window);
         window.add_view(&graph);
 
-        KeyController key_controller;
+        KeyController key_controller(window, graph, state);
         window.add_view(&key_controller);
 
-        // Listen to the keyboard events for hotkeys
-        // boost::signals2::scoped_connection _(
-        //     window.on_key([&window, &state, &graph](int key, int, int action, int mods) {
-        //         if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
-        //         {
-        //             window.set_fullscreen(!window.is_fullscreen());
-        //         }
-        //         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        //         {
-        //             window.request_close();
-        //         }
-        //         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-        //         {
-        //             state.goto_newest_sample();
-        //         }
-        //         if (key == GLFW_KEY_A && action == GLFW_PRESS)
-        //         {
-        //             if (mods == GLFW_MOD_CONTROL)
-        //             {
-        //                 state.markers.first.visible = false;
-        //             }
-        //             else
-        //             {
-        //                 const auto cursor_gs = graph.cursor_gs();
-        //                 state.markers.first.position = cursor_gs.x;
-        //                 state.markers.first.visible = true;
-        //             }
-        //         }
-        //         else if (key == GLFW_KEY_B && action == GLFW_PRESS)
-        //         {
-        //             if (mods == GLFW_MOD_CONTROL)
-        //             {
-        //                 state.markers.second.visible = false;
-        //             }
-        //             else
-        //             {
-        //                 const auto cursor_gs = graph.cursor_gs();
-        //                 state.markers.second.position = cursor_gs.x;
-        //                 state.markers.second.visible = true;
-        //             }
-        //         }
-        //         else if (key == GLFW_KEY_C && action == GLFW_PRESS)
-        //         {
-        //             state.markers.first.visible = false;
-        //             state.markers.second.visible = false;
-        //         }
-        //     }));
+        ImGuiMenuView gui(window, plugin_manager, graph, db, state);
+        window.add_imgui_view(&gui);
 
         spdlog::info("Initialization OK, starting main loop");
 

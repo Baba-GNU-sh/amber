@@ -18,7 +18,7 @@ ImGuiContextWindow::~ImGuiContextWindow()
     ImGui::DestroyContext();
 }
 
-void ImGuiContextWindow::add_imgui_view(std::shared_ptr<View> view)
+void ImGuiContextWindow::add_imgui_view(View *view)
 {
     m_imgui_views.push_back(view);
 }
@@ -46,17 +46,23 @@ void ImGuiContextWindow::render() const
 void ImGuiContextWindow::handle_cursor_pos_callback(double xpos, double ypos)
 {
     if (!ImGui::GetIO().WantCaptureMouse)
+    {
         Window_GLFW::handle_cursor_pos_callback(xpos, ypos);
+    }
 }
 
 void ImGuiContextWindow::handle_scroll_callback(double xoffset, double yoffset)
 {
     if (!ImGui::GetIO().WantCaptureMouse)
+    {
         Window_GLFW::handle_scroll_callback(xoffset, yoffset);
+    }
 }
 
 void ImGuiContextWindow::handle_mouse_button_callback(int button, int action, int mods)
 {
     if (!ImGui::GetIO().WantCaptureMouse)
+    {
         Window_GLFW::handle_mouse_button_callback(button, action, mods);
+    }
 }
