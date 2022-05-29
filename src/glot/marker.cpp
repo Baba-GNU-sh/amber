@@ -164,4 +164,8 @@ void Marker::update_layout()
 
     m_handle.set_position(position_ss + glm::dvec2(0, m_height));
     m_label.set_position(position_ss + glm::dvec2(0, m_height + 16));
+
+    std::stringstream ss;
+    ss << m_position;
+    m_label.set_text(ss.str());
 }
