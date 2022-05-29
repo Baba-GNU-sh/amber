@@ -38,9 +38,10 @@ Marker::~Marker()
     glDeleteVertexArrays(1, &m_line_vao);
 }
 
-void Marker::set_position(const glm::ivec2 &position)
+void Marker::set_x_position(double position)
 {
     m_position = position;
+    update_layout();
     m_handle.set_position(m_position + glm::ivec2(0, m_height));
     m_label.set_position(m_position + glm::ivec2(0, m_height + 16));
 }
@@ -55,6 +56,7 @@ void Marker::set_colour(const glm::vec3 &colour)
 void Marker::set_height(int height)
 {
     m_height = height;
+    update_layout();
     m_handle.set_position(m_position + glm::ivec2(0, m_height));
     m_label.set_position(m_position + glm::ivec2(0, m_height + 16));
 }
@@ -64,7 +66,7 @@ void Marker::set_label_text(const std::string &text)
     m_label.set_text(text);
 }
 
-void Marker::draw() const
+void Marker::draw(const Window &) const
 {
     m_handle.draw(m_window);
     m_label.draw(m_window);
@@ -93,28 +95,6 @@ void Marker::draw() const
     glDrawArrays(GL_LINES, 0, 2);
 }
 
-unsigned int Marker::load_texture(const std::string &file_name) const
+void Marker::update_layout()
 {
-    unsigned int texture_handle;
-    glGenTextures(1, &texture_handle);
-    glBindTexture(GL_TEXTURE_2D, texture_handle);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    int width, height, nrChannels;
-    auto file_path = Resources::find_sprite(file_name);
-    unsigned char *tex_data = stbi_load(file_path.c_str(), &width, &height, &nrChannels, 0);
-    if (!tex_data)
-    {
-        throw std::runtime_error("Unable to load marker texture: " +
-                                 std::string(stbi_failure_reason()));
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
-    stbi_image_free(tex_data);
-
-    return texture_handle;
 }

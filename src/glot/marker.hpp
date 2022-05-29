@@ -7,7 +7,7 @@
 #include "window.hpp"
 #include "sprite.hpp"
 
-class Marker
+class Marker : public View
 {
   public:
     Marker(Window &window);
@@ -17,11 +17,14 @@ class Marker
     Marker(Marker &&) = delete;
     Marker &operator=(Marker &&) = delete;
 
-    void set_position(const glm::ivec2 &position);
+    void set_x_position(double position);
     void set_colour(const glm::vec3 &colour);
     void set_height(int height);
     void set_label_text(const std::string &text);
-    void draw() const;
+    void draw(const Window &) const override;
+
+    glm::dvec2 position() const override;
+    glm::dvec2 size() const override;
 
     bool is_dragging = false; // TODO The marker object should listen to mouse events from the
                               // window and decide when it is clicked and when to start dragging
@@ -33,7 +36,7 @@ class Marker
         glm::vec2 texture_pos;
     };
 
-    unsigned int load_texture(const std::string &filename) const;
+    void update_layout();
 
     Window &m_window;
     Sprite m_handle;
@@ -42,7 +45,7 @@ class Marker
     unsigned int m_line_vertex_buffer;
     unsigned int m_line_vao;
     Program m_line_shader;
-    glm::ivec2 m_position;
+    double m_position;
     glm::vec3 m_colour;
     int m_height;
 };

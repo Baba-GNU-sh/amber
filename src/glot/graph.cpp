@@ -11,7 +11,8 @@
 #include "graph_utils.hpp"
 
 Graph::Graph(GraphState &state, Window &window)
-    : m_state(state), m_axis_horizontal(window), m_axis_vertical(window), m_plot(state)
+    : m_state(state), m_axis_horizontal(window), m_axis_vertical(window), m_plot(state),
+      m_marker_a(window), m_marker_b(window)
 {
     using namespace std::placeholders;
 
@@ -42,6 +43,8 @@ Graph::Graph(GraphState &state, Window &window)
     add_view(&m_axis_horizontal);
     add_view(&m_axis_vertical);
     add_view(&m_plot);
+    add_view(&m_marker_a);
+    add_view(&m_marker_b);
 
     // for (auto &ts : m_state.timeseries)
     // {

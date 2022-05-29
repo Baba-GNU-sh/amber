@@ -51,9 +51,9 @@ class Graph : public View
     Axis<AxisHorizontal> m_axis_horizontal;
     Axis<AxisVertical> m_axis_vertical;
     Plot m_plot;
+    Marker m_marker_a;
+    Marker m_marker_b;
 
-    // Marker m_marker_a;
-    // Marker m_marker_b;
     // SelectionBox m_selection_box;
     glm::dvec2 m_size;
     glm::dvec2 m_position;
