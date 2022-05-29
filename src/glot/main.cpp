@@ -391,11 +391,11 @@ int main()
         update_vsync();
         window.set_bg_colour(m_clear_colour);
 
-        auto graph = std::make_shared<Graph>(state, window);
-        window.add(graph);
+        Graph graph(state, window);
+        window.add_view(&graph);
 
-        auto key_controller = std::make_shared<KeyController>();
-        window.add(key_controller);
+        KeyController key_controller;
+        window.add_view(&key_controller);
 
         // Listen to the keyboard events for hotkeys
         // boost::signals2::scoped_connection _(

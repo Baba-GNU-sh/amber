@@ -27,10 +27,10 @@ int main()
     int offset = 0;
     for (int i = 0; i < 10; i++)
     {
-        auto sprite = std::make_shared<Sprite>("marker_center.png");
+        auto sprite = new Sprite("marker_center.png");
         sprite->set_position(glm::dvec2(offset, 0));
         offset += sprite->size().x;
-        window.add(sprite);
+        window.add_view(sprite);
     }
 
     Font font("proggy_clean.png");
@@ -38,28 +38,30 @@ int main()
     offset = 0;
     for (int i = 0; i < 10; i++)
     {
-        auto label = std::make_shared<Label>(font, "Hello!");
-        window.add(label);
+        auto label = new Label(font, "Hello!");
+        window.add_view(label);
         label->set_position(glm::dvec2(offset, 50));
         label->set_colour(glm::vec3(1.0, 1.0, 1.0));
         offset += label->size().x;
     }
 
+    Axis<AxisVertical> axis_vertical(window);
+    axis_vertical.set_position(glm::dvec2(0, 100));
+    axis_vertical.set_size(glm::dvec2(100, 500));
+    window.add_view(&axis_vertical);
+
+    Axis<AxisVertical> axis_horizontal(window);
+    axis_vertical.set_position(glm::dvec2(0, 100));
+    axis_vertical.set_size(glm::dvec2(100, 500));
+    window.add_view(&axis_horizontal);
+
     Transform<double> graph_transform;
-    auto axis_vertical = std::make_shared<Axis<AxisVertical>>(window);
-    axis_vertical->set_position(glm::dvec2(0, 100));
-    axis_vertical->set_size(glm::dvec2(100, 500));
-    window.add(axis_vertical);
-
-    auto axis_horizontal = std::make_shared<Axis<AxisHorizontal>>(window);
-    axis_horizontal->set_position(glm::dvec2(100, 600));
-    axis_horizontal->set_size(glm::dvec2(500, 100));
-    window.add(axis_horizontal);
-
     while (!window.should_close())
     {
         glfwPollEvents();
         window.render();
         graph_transform.scale(glm::dvec2(1.001));
+        axis_vertical.set_graph_transform(graph_transform);
+        axis_horizontal.set_graph_transform(graph_transform);
     }
 }

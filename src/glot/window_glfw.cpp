@@ -83,7 +83,7 @@ const Transform<double> &Window_GLFW::viewport_transform() const
     return m_viewport_transform;
 }
 
-glm::ivec2 Window_GLFW::size() const
+glm::dvec2 Window_GLFW::size() const
 {
     glm::ivec2 size(0.0);
     glfwGetWindowSize(m_window, &size.x, &size.y);
@@ -162,7 +162,8 @@ glm::vec2 Window_GLFW::scaling() const
 
 void Window_GLFW::scissor(int x, int y, int width, int height) const
 {
-    const auto pos = glm::vec2(x, y) * scaling();
+    const auto window_size = size();
+    const auto pos = glm::vec2(x, window_size.y - (y + height)) * scaling();
     const auto size = glm::vec2(width, height) * scaling();
     glScissor(pos.x, pos.y, size.x, size.y);
 }
@@ -185,69 +186,22 @@ void Window_GLFW::handle_framebuffer_size_callback(int width, int height)
 
 void Window_GLFW::handle_cursor_pos_callback(double xpos, double ypos)
 {
-    std::for_each(m_views.begin(), m_views.end(), [this, xpos, ypos](const auto &view) {
-        if (GraphUtils::hit_test(cursor(), view->position(), view->position() + view->size()))
-        {
-            view->on_cursor_move(*this, xpos, ypos);
-        }
-    });
+    on_cursor_move(*this, xpos, ypos);
 }
 
 void Window_GLFW::handle_scroll_callback(double xoffset, double yoffset)
 {
-    std::for_each(m_views.begin(), m_views.end(), [this, xoffset, yoffset](const auto &view) {
-        if (GraphUtils::hit_test(cursor(), view->position(), view->position() + view->size()))
-        {
-            view->on_scroll(*this, xoffset, yoffset);
-        }
-    });
+    on_scroll(*this, xoffset, yoffset);
 }
 
 void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)
 {
-    // This logic gets a bit tricky
-    // If a view is clicked, then the cursor moved outside of the view before the view is released,
-    // we still want to send the release event to the view.
-    // How do we handle multiple simultaneous button presses?
-    if (action == GLFW_PRESS)
-    {
-        std::for_each(
-            m_views.begin(), m_views.end(), [this, button, action, mods](const auto &view) {
-                if (GraphUtils::hit_test(
-                        cursor(), view->position(), view->position() + view->size()))
-                {
-                    view->on_mouse_button(*this, button, action, mods);
-                    m_sticky_view = view;
-                }
-            });
-    }
-    else // Assume GLFW_RELEASE??
-    {
-        if (m_sticky_view)
-        {
-            m_sticky_view->on_mouse_button(*this, button, action, mods);
-            m_sticky_view.reset();
-        }
-        else
-        {
-            std::for_each(
-                m_views.begin(), m_views.end(), [this, button, action, mods](const auto &view) {
-                    if (GraphUtils::hit_test(
-                            cursor(), view->position(), view->position() + view->size()))
-                    {
-                        view->on_mouse_button(*this, button, action, mods);
-                    }
-                });
-        }
-    }
+    on_mouse_button(*this, button, action, mods);
 }
 
 void Window_GLFW::handle_key_callback(int key, int scancode, int action, int mods)
 {
-    std::for_each(
-        m_views.begin(), m_views.end(), [this, key, scancode, action, mods](const auto &view) {
-            view->on_key(*this, key, scancode, action, mods);
-        });
+    on_key(*this, key, scancode, action, mods);
 }
 
 void Window_GLFW::framebuffer_size_callback(GLFWwindow *window, int width, int height)

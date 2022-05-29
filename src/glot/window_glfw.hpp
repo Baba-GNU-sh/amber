@@ -12,7 +12,7 @@
 #include "view.hpp"
 #include "window.hpp"
 
-class Window_GLFW : public Window
+class Window_GLFW : public Window, public View
 {
   public:
     Window_GLFW(int width, int height, const std::string &title);
@@ -27,7 +27,7 @@ class Window_GLFW : public Window
     void use() const;
     void finish() const;
     const Transform<double> &viewport_transform() const override;
-    glm::ivec2 size() const override;
+    glm::dvec2 size() const override;
     GLFWwindow *handle();
     bool should_close() const override;
     void request_close() override;
@@ -39,17 +39,11 @@ class Window_GLFW : public Window
     glm::vec2 scaling() const;
     void scissor(int x, int y, int width, int height) const override;
 
-    void add(std::shared_ptr<View> view)
-    {
-        m_views.push_back(view);
-    }
-
     virtual void render() const
     {
         use();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        std::for_each(
-            m_views.begin(), m_views.end(), [this](const auto &view) { view->draw(*this); });
+        draw(*this);
         finish();
     }
 
@@ -60,10 +54,6 @@ class Window_GLFW : public Window
     virtual void handle_scroll_callback(double xoffset, double yoffset);
     virtual void handle_mouse_button_callback(int button, int action, int mods);
     virtual void handle_key_callback(int key, int scancode, int action, int mods);
-
-  protected:
-    std::vector<std::shared_ptr<View>> m_views;
-    std::shared_ptr<View> m_sticky_view;
 
   private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);

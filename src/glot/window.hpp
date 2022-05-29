@@ -6,7 +6,6 @@
 struct Window
 {
     virtual glm::dvec2 cursor() const = 0;
-    virtual glm::ivec2 size() const = 0;
     virtual const Transform<double> &viewport_transform() const = 0;
     virtual void scissor(int x, int y, int width, int height) const = 0;
     virtual void request_close() = 0;
