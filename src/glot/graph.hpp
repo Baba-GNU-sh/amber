@@ -32,8 +32,6 @@ class Graph : public View
   private:
     void layout();
 
-    static bool hit_test(const Window &window, const View &view);
-
     glm::dvec2 screen2graph(const Transform<double> &viewport_txform,
                             const glm::ivec2 &value) const;
     glm::dvec2 screen2graph_delta(const Transform<double> &viewport_txform,

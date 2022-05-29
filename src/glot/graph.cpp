@@ -38,6 +38,20 @@ Graph::Graph(GraphState &state, Window &window)
         m_state.view.translate(delta_gs);
         m_axis_horizontal.set_graph_transform(m_state.view);
         m_axis_vertical.set_graph_transform(m_state.view);
+        m_marker_a.set_graph_transform(m_state.view);
+        m_marker_b.set_graph_transform(m_state.view);
+    });
+
+    m_marker_a.on_drag.connect([this, &window](double delta) {
+        const auto position_gs =
+            screen2graph_delta(window.viewport_transform(), glm::dvec2(delta, 0));
+        m_marker_a.set_x_position(m_marker_a.x_position() + position_gs.x);
+    });
+
+    m_marker_b.on_drag.connect([this, &window](double delta) {
+        const auto position_gs =
+            screen2graph_delta(window.viewport_transform(), glm::dvec2(delta, 0));
+        m_marker_b.set_x_position(m_marker_b.x_position() + position_gs.x);
     });
 
     add_view(&m_axis_horizontal);
@@ -45,6 +59,9 @@ Graph::Graph(GraphState &state, Window &window)
     add_view(&m_plot);
     add_view(&m_marker_a);
     add_view(&m_marker_b);
+
+    m_marker_a.set_x_position(0.0);
+    m_marker_b.set_x_position(0.0);
 
     // for (auto &ts : m_state.timeseries)
     // {
@@ -54,8 +71,8 @@ Graph::Graph(GraphState &state, Window &window)
     //     m_plots.emplace_back(m_window);
     // }
 
-    // m_marker_a.set_colour(glm::vec3(0.0, 1.0, 1.0));
-    // m_marker_b.set_colour(glm::vec3(1.0, 1.0, 0.0));
+    m_marker_a.set_colour(glm::vec3(0.0, 1.0, 1.0));
+    m_marker_b.set_colour(glm::vec3(1.0, 1.0, 0.0));
 }
 
 glm::dvec2 Graph::cursor_gs() const
@@ -153,11 +170,8 @@ void Graph::layout()
 
     m_plot.set_position(glm::dvec2(m_position.x + GUTTER_SIZE, m_position.y));
     m_plot.set_size(m_size - glm::dvec2(GUTTER_SIZE));
-}
 
-bool Graph::hit_test(const Window &window, const View &view)
-{
-    return GraphUtils::hit_test(window.cursor(), view.position(), view.position() + view.size());
+    m_marker_a.set_screen_height(m_size.y - GUTTER_SIZE);
 }
 
 glm::dvec2 Graph::screen2graph(const Transform<double> &viewport_txform,
@@ -242,7 +256,8 @@ glm::dvec2 Graph::graph2screen(const Transform<double> &viewport_txform,
 
 //     if (m_marker_b.is_dragging)
 //     {
-//         m_state.markers.second.position = m_state.markers.second.position + cursor_gs_delta.x;
+//         m_state.markers.second.position = m_state.markers.second.position +
+//         cursor_gs_delta.x;
 //     }
 
 //     // Cache the position of the cursor for next time
@@ -339,6 +354,8 @@ void Graph::apply_zoom(const Window &window, const glm::dvec2 &zoom_delta_vec)
 
     m_axis_horizontal.set_graph_transform(m_state.view);
     m_axis_vertical.set_graph_transform(m_state.view);
+    m_marker_a.set_graph_transform(m_state.view);
+    m_marker_b.set_graph_transform(m_state.view);
 }
 
 // void Graph::on_zoom(Window &window, const glm::dvec2 &zoom_delta_vec)
@@ -349,7 +366,8 @@ void Graph::apply_zoom(const Window &window, const glm::dvec2 &zoom_delta_vec)
 //     // Scale the view matrix by the zoom amount
 //     m_state.view.scale(zoom_delta_vec);
 
-//     // Work out where the cursor would be under this new zoom level and recenter the view on the
+//     // Work out where the cursor would be under this new zoom level and recenter the view on
+//     the
 //     // cursor
 //     const auto cursor_in_gs_new = screen2graph(window.cursor());
 //     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
