@@ -339,8 +339,9 @@ class ImGuiMenuView : public View
                          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
                              ImGuiWindowFlags_NoMove);
             {
-                ImGui::SetWindowPos(ImVec2(800 - ImGui::GetWindowWidth() - 10, menubar_size.y),
-                                    true);
+                ImGui::SetWindowPos(
+                    ImVec2(m_window.window_size().x - ImGui::GetWindowWidth() - 10, menubar_size.y),
+                    true);
 
                 if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen))
                 {

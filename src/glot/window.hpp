@@ -13,4 +13,5 @@ struct Window
     virtual void set_fullscreen(bool fullscreen) = 0;
     virtual bool is_fullscreen() const = 0;
     virtual void set_bg_colour(const glm::vec3 &colour) = 0;
+    virtual glm::ivec2 window_size() const = 0;
 };

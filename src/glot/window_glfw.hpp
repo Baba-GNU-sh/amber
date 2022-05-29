@@ -38,6 +38,7 @@ class Window_GLFW : public Window, public View
     bool is_fullscreen() const override;
     glm::vec2 scaling() const;
     void scissor(int x, int y, int width, int height) const override;
+    glm::ivec2 window_size() const override;
 
     virtual void render() const
     {

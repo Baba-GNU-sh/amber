@@ -90,6 +90,13 @@ glm::dvec2 Window_GLFW::size() const
     return size;
 }
 
+glm::ivec2 Window_GLFW::window_size() const
+{
+    glm::ivec2 size(0.0);
+    glfwGetWindowSize(m_window, &size.x, &size.y);
+    return size;
+}
+
 GLFWwindow *Window_GLFW::handle()
 {
     return m_window;
