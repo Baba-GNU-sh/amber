@@ -37,7 +37,7 @@ class Sprite : public View
     void set_alignment(AlignmentVertical align);
     void set_alignment(AlignmentHorizontal align);
     void set_tint(const glm::vec3 &colour);
-    virtual void draw(const Window &window) const override;
+    virtual void draw(const Window &window) override;
 
   private:
     struct TextureCoord

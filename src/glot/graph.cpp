@@ -71,8 +71,13 @@ glm::dvec2 Graph::cursor_gs() const
     return screen2graph(m_window.cursor());
 }
 
-void Graph::draw(const Window &window) const
+void Graph::draw(const Window &window)
 {
+    if (m_follow_latest_data)
+    {
+        reveal_newest_sample();
+    }
+
     View::draw(window);
 }
 
@@ -260,4 +265,9 @@ void Graph::fit_graph(const glm::dvec2 &tl, const glm::dvec2 &br)
 
     const auto translation = (tl + br) / 2.0;
     m_view.translate(-translation);
+}
+
+void Graph::set_follow_latest_data(bool value)
+{
+    m_follow_latest_data = value;
 }

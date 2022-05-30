@@ -117,7 +117,7 @@ void Plot::draw_plot(const Window &window,
     glDisable(GL_SCISSOR_TEST);
 }
 
-void Plot::draw(const Window &window) const
+void Plot::draw(const Window &window)
 {
     const auto plot_size_px = m_size;
     const auto plot_position_px = m_position;

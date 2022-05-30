@@ -38,7 +38,7 @@ class Label : public View
     glm::dvec2 position() const override;
     void set_alignment(AlignmentHorizontal halign);
     void set_alignment(AlignmentVertical valign);
-    void draw(const Window &window) const override;
+    void draw(const Window &window) override;
     glm::dvec2 size() const override;
 
   private:

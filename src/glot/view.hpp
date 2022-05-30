@@ -13,10 +13,10 @@
 struct View
 {
     virtual ~View() = default;
-    virtual void draw(const Window &window) const
+    virtual void draw(const Window &window)
     {
         std::for_each(
-            m_views.begin(), m_views.end(), [&window](const View *view) { view->draw(window); });
+            m_views.begin(), m_views.end(), [&window](View *view) { view->draw(window); });
     }
 
     virtual void on_scroll(Window &window, double xoffset, double yoffset)

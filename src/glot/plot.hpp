@@ -24,7 +24,7 @@ class Plot : public View
     glm::dvec2 size() const override;
     void set_size(const glm::dvec2 &size) override;
 
-    void draw(const Window &window) const override;
+    void draw(const Window &window) override;
 
     void draw_plot(const Window &window,
                    const std::vector<TSSample> &data,

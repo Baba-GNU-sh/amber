@@ -7,7 +7,7 @@
 
 class Panel : public View
 {
-    void draw(const Window &window) const override
+    void draw(const Window &window) override
     {
         ImGui::Begin("Help");
         ImGui::Text("%.1f ms/frame (%.1f FPS)",

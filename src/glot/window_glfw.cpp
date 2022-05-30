@@ -73,9 +73,19 @@ void Window_GLFW::use() const
     glClearColor(m_bg_colour.r, m_bg_colour.g, m_bg_colour.b, 1.0f);
 }
 
+void Window_GLFW::set_call_glfinish(bool value)
+{
+    m_call_glfinish = value;
+}
+
 void Window_GLFW::finish() const
 {
     glfwSwapBuffers(m_window);
+
+    if (m_call_glfinish)
+    {
+        glFinish();
+    }
 }
 
 const Transform<double> &Window_GLFW::viewport_transform() const
@@ -95,6 +105,14 @@ glm::ivec2 Window_GLFW::window_size() const
     glm::ivec2 size(0.0);
     glfwGetWindowSize(m_window, &size.x, &size.y);
     return size;
+}
+
+void Window_GLFW::render()
+{
+    use();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    draw(*this);
+    finish();
 }
 
 GLFWwindow *Window_GLFW::handle()

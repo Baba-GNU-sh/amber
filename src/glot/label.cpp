@@ -80,7 +80,7 @@ void Label::set_alignment(AlignmentVertical valign)
     m_valign = valign;
 }
 
-void Label::draw(const Window &window) const
+void Label::draw(const Window &window)
 {
     glm::ivec2 offset = m_position;
     glm::ivec2 char_stride = glm::ivec2(GLYPH_WIDTH, 0);

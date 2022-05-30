@@ -27,7 +27,7 @@ class Marker : public View
     void set_colour(const glm::vec3 &colour);
     void set_label_text(const std::string &text);
     void set_visible(bool visible);
-    void draw(const Window &) const override;
+    void draw(const Window &) override;
 
     glm::dvec2 position() const override;
     glm::dvec2 size() const override;

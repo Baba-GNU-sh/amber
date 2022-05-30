@@ -46,7 +46,7 @@ template <> Axis<AxisHorizontal>::Axis(const Window &window) : AxisBase(window)
 {
 }
 
-void AxisBase::draw(const Window &window) const
+void AxisBase::draw(const Window &window)
 {
     // glScissor coordinates start in the bottom left
     glEnable(GL_SCISSOR_TEST);
@@ -158,7 +158,7 @@ void Axis<AxisVertical>::draw_ticks(const glm::dvec2 &tick_spacing,
     ptr[offset++] = m_position + m_size;
 }
 
-void AxisBase::draw_labels(const Window &window) const
+void AxisBase::draw_labels(const Window &window)
 {
     for (size_t i = 0; i < m_labels_used; i++)
     {

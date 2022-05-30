@@ -26,13 +26,14 @@ class Graph : public View
     Graph &operator=(Graph &&) = delete;
 
     glm::dvec2 cursor_gs() const;
-    void draw(const Window &window) const override;
+    void draw(const Window &window) override;
     void on_resize(int, int) override;
 
     glm::dvec2 size() const override;
     glm::dvec2 position() const override;
     void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
     void on_cursor_move(Window &window, double xpos, double ypos) override;
+    void set_follow_latest_data(bool value);
 
     bool marker_is_visible(MarkerType m) const;
     double marker_position(MarkerType m) const;
@@ -96,4 +97,5 @@ class Graph : public View
 
     bool m_is_selecting = false;
     glm::dvec2 m_selection_start;
+    bool m_follow_latest_data = false;
 };

@@ -39,14 +39,8 @@ class Window_GLFW : public Window, public View
     glm::vec2 scaling() const;
     void scissor(int x, int y, int width, int height) const override;
     glm::ivec2 window_size() const override;
-
-    virtual void render() const
-    {
-        use();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        draw(*this);
-        finish();
-    }
+    void set_call_glfinish(bool);
+    virtual void render();
 
   protected:
     GLFWwindow *m_window;
@@ -74,4 +68,5 @@ class Window_GLFW : public Window, public View
     glm::ivec2 m_windowed_size;
     glm::ivec2 m_windowed_pos;
     static bool m_first_window;
+    bool m_call_glfinish = false;
 };

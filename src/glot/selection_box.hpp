@@ -18,7 +18,7 @@ class SelectionBox : public View
     void set_position(const glm::dvec2 &position) override;
     void set_size(const glm::dvec2 &size) override;
     void set_visible(bool visible);
-    void draw(const Window &) const override;
+    void draw(const Window &) override;
 
   private:
     struct BoxVerticies

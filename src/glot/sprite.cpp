@@ -73,7 +73,7 @@ void Sprite::set_tint(const glm::vec3 &colour)
     m_tint_colour = colour;
 }
 
-void Sprite::draw(const Window &window) const
+void Sprite::draw(const Window &window)
 {
     m_shader.use();
     glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);

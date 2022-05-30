@@ -14,7 +14,7 @@ class AxisBase : public View
     AxisBase(const Window &window);
     ~AxisBase();
 
-    void draw(const Window &window) const override;
+    void draw(const Window &window) override;
 
     glm::dvec2 position() const override;
     glm::dvec2 size() const override;
@@ -38,7 +38,7 @@ class AxisBase : public View
 
     void draw_ticks(const Window &window) const;
 
-    void draw_labels(const Window &window) const;
+    void draw_labels(const Window &window);
     virtual void draw_ticks(const glm::dvec2 &tick_spacing,
                             double tick_size,
                             glm::vec2 *const ptr,
