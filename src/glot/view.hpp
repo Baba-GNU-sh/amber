@@ -10,6 +10,12 @@
 #include <vector>
 #include "graph_utils.hpp"
 
+struct HitBox
+{
+    glm::dvec2 tl;
+    glm::dvec2 br;
+};
+
 struct View
 {
     virtual ~View() = default;
@@ -38,17 +44,18 @@ struct View
         // simultaneous button presses?
         if (action == GLFW_PRESS)
         {
-            std::for_each(m_views.begin(),
-                          m_views.end(),
-                          [this, &cursor_pos, button, action, mods](auto *view) {
-                              if (GraphUtils::hit_test(cursor_pos,
-                                                       view->position(),
-                                                       view->position() + view->size()))
-                              {
-                                  view->on_mouse_button(cursor_pos, button, action, mods);
-                                  m_sticky_view = view;
-                              }
-                          });
+            // Search views backward, which is the opposite of the render order
+            for (auto iter = m_views.rbegin(); iter != m_views.rend(); iter++)
+            {
+                auto *view = *iter;
+                const auto hitbox = view->get_hitbox();
+                if (GraphUtils::hit_test(cursor_pos, hitbox.tl, hitbox.br))
+                {
+                    view->on_mouse_button(cursor_pos, button, action, mods);
+                    m_sticky_view = view;
+                    break;
+                }
+            }
         }
         else if (action == GLFW_RELEASE)
         {
@@ -113,6 +120,11 @@ struct View
     virtual void set_size(const glm::dvec2 &)
     {
         //
+    }
+
+    virtual HitBox get_hitbox() const
+    {
+        return HitBox{position(), position() + size()};
     }
 
     void add_view(View *view)

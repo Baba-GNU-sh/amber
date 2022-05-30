@@ -117,6 +117,12 @@ void Marker::draw(const Window &)
     glDrawArrays(GL_LINES, 0, 2);
 }
 
+HitBox Marker::get_hitbox() const
+{
+    glm::dvec2 tl(m_handle.position().x - m_handle.size().x / 2, m_handle.position().y);
+    return HitBox{tl, tl + m_handle.size()};
+}
+
 glm::dvec2 Marker::position() const
 {
     return m_handle.position();
