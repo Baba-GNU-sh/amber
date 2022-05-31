@@ -31,6 +31,7 @@ add_library(
 		marker.cpp
 		selection_box.cpp
 		axis.cpp
+		view.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(

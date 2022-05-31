@@ -2,6 +2,7 @@
 
 #include <string>
 #include <glm/glm.hpp>
+#include "window.hpp"
 #include "shader_utils.hpp"
 #include "font.hpp"
 #include "view.hpp"
