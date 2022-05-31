@@ -185,9 +185,10 @@ void AxisBase::set_graph_transform(const Transform<double> &t)
     update_layout();
 }
 
-void AxisBase::on_scroll(Window &window, double, double yoffset)
+void AxisBase::on_scroll(const glm::dvec2 &cursor_position, double, double yoffset)
 {
-    on_zoom(window, yoffset);
+    (void)cursor_position;
+    on_zoom(yoffset);
 }
 
 void AxisBase::on_mouse_button(const glm::dvec2 &, int button, int action, int)

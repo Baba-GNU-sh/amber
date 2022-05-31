@@ -23,10 +23,10 @@ class AxisBase : public View
     void set_size(const glm::dvec2 &size) override;
     void set_graph_transform(const Transform<double> &t);
 
-    void on_scroll(Window &, double x, double y) override;
+    void on_scroll(const glm::dvec2 &, double x, double y) override;
     void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
 
-    boost::signals2::signal<void(const Window &, double)> on_zoom;
+    boost::signals2::signal<void(double)> on_zoom;
 
   protected:
     std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> tick_spacing() const;

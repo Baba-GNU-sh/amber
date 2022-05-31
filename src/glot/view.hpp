@@ -25,15 +25,20 @@ struct View
             m_views.begin(), m_views.end(), [&window](View *view) { view->draw(window); });
     }
 
-    virtual void on_scroll(Window &window, double xoffset, double yoffset)
+    virtual void on_scroll(const glm::dvec2 &cursor_position, double xoffset, double yoffset)
     {
-        std::for_each(m_views.begin(), m_views.end(), [&window, xoffset, yoffset](auto *view) {
-            if (GraphUtils::hit_test(
-                    window.cursor(), view->position(), view->position() + view->size()))
+        // Search views backward, which is the opposite of the render order
+        // This means that views rendered last (on top) should be hit first
+        for (auto iter = m_views.rbegin(); iter != m_views.rend(); iter++)
+        {
+            auto *view = *iter;
+            const auto hitbox = view->get_hitbox();
+            if (GraphUtils::hit_test(cursor_position, hitbox.tl, hitbox.br))
             {
-                view->on_scroll(window, xoffset, yoffset);
+                view->on_scroll(cursor_position, xoffset, yoffset);
+                break;
             }
-        });
+        }
     }
 
     virtual void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods)
@@ -45,6 +50,7 @@ struct View
         if (action == GLFW_PRESS)
         {
             // Search views backward, which is the opposite of the render order
+            // This means that views rendered last (on top) should be hit first
             for (auto iter = m_views.rbegin(); iter != m_views.rend(); iter++)
             {
                 auto *view = *iter;
@@ -80,10 +86,10 @@ struct View
         }
     }
 
-    virtual void on_cursor_move(Window &window, double xpos, double ypos)
+    virtual void on_cursor_move(double xpos, double ypos)
     {
-        std::for_each(m_views.begin(), m_views.end(), [&window, xpos, ypos](auto *view) {
-            view->on_cursor_move(window, xpos, ypos);
+        std::for_each(m_views.begin(), m_views.end(), [xpos, ypos](auto *view) {
+            view->on_cursor_move(xpos, ypos);
         });
     }
 

@@ -149,7 +149,7 @@ void Marker::on_mouse_button(const glm::dvec2 &, int button, int action, int)
     }
 }
 
-void Marker::on_cursor_move(Window &, double x, double y)
+void Marker::on_cursor_move(double x, double y)
 {
     glm::dvec2 cursor(x, y);
 

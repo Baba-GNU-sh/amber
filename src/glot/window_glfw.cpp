@@ -211,12 +211,12 @@ void Window_GLFW::handle_framebuffer_size_callback(int width, int height)
 
 void Window_GLFW::handle_cursor_pos_callback(double xpos, double ypos)
 {
-    on_cursor_move(*this, xpos, ypos);
+    on_cursor_move(xpos, ypos);
 }
 
 void Window_GLFW::handle_scroll_callback(double xoffset, double yoffset)
 {
-    on_scroll(*this, xoffset, yoffset);
+    on_scroll(cursor(), xoffset, yoffset);
 }
 
 void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)

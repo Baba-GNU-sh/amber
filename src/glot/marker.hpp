@@ -34,7 +34,7 @@ class Marker : public View
     glm::dvec2 size() const override;
 
     void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
-    void on_cursor_move(Window &window, double x, double y) override;
+    void on_cursor_move(double x, double y) override;
 
     boost::signals2::signal<void(double)> on_drag;
 

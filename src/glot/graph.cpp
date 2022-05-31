@@ -18,22 +18,22 @@ Graph::Graph(GraphState &state, Window &window)
 
     m_view.set_zoom_limit(ZOOM_MAX);
 
-    m_axis_horizontal.on_zoom.connect([this](const Window &window, double amount) {
+    m_axis_horizontal.on_zoom.connect([this](double amount) {
         const auto delta = 1.0 + amount * 0.1;
-        apply_zoom(window, glm::dvec2(delta, 1.0));
+        apply_zoom(glm::dvec2(delta, 1.0));
     });
 
-    m_axis_vertical.on_zoom.connect([this](const Window &window, double amount) {
+    m_axis_vertical.on_zoom.connect([this](double amount) {
         const auto delta = 1.0 + amount * 0.1;
-        apply_zoom(window, glm::dvec2(1.0, delta));
+        apply_zoom(glm::dvec2(1.0, delta));
     });
 
-    m_plot.on_zoom.connect([this](const Window &window, double amount) {
+    m_plot.on_zoom.connect([this](double amount) {
         const auto delta = 1.0 + amount * 0.1;
-        apply_zoom(window, glm::dvec2(delta));
+        apply_zoom(glm::dvec2(delta));
     });
 
-    m_plot.on_pan.connect([this](const Window &, glm::dvec2 amount) {
+    m_plot.on_pan.connect([this](glm::dvec2 amount) {
         const auto delta_gs = screen2graph_delta(amount);
         m_view.translate(delta_gs);
         m_axis_horizontal.set_graph_transform(m_view);
@@ -122,7 +122,7 @@ void Graph::on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action
     }
 }
 
-void Graph::on_cursor_move(Window &window, double x, double y)
+void Graph::on_cursor_move(double x, double y)
 {
     if (m_is_selecting)
     {
@@ -130,7 +130,7 @@ void Graph::on_cursor_move(Window &window, double x, double y)
         m_selection_box.set_size(m_window.cursor() - m_selection_start);
     }
 
-    View::on_cursor_move(window, x, y);
+    View::on_cursor_move(x, y);
 }
 
 bool Graph::marker_is_visible(MarkerType m) const
@@ -229,17 +229,17 @@ glm::dvec2 Graph::graph2screen(const glm::dvec2 &value) const
     return screen_space;
 }
 
-void Graph::apply_zoom(const Window &window, const glm::dvec2 &zoom_delta_vec)
+void Graph::apply_zoom(const glm::dvec2 &zoom_delta_vec)
 {
     // Store where the pointer is in graph space before scaling
-    const auto cursor_in_gs_old = screen2graph(window.cursor());
+    const auto cursor_in_gs_old = screen2graph(m_window.cursor());
 
     // Scale the view matrix by the zoom amount, clamping to some max value
     m_view.scale(zoom_delta_vec);
 
     // Work out where the cursor would be under this new zoom level and recenter the view on the
     // cursor
-    const auto cursor_in_gs_new = screen2graph(window.cursor());
+    const auto cursor_in_gs_new = screen2graph(m_window.cursor());
     auto cursor_delta = cursor_in_gs_new - cursor_in_gs_old;
     m_view.translate(cursor_delta);
 

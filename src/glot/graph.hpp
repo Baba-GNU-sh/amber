@@ -32,7 +32,7 @@ class Graph : public View
     glm::dvec2 size() const override;
     glm::dvec2 position() const override;
     void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
-    void on_cursor_move(Window &window, double xpos, double ypos) override;
+    void on_cursor_move(double xpos, double ypos) override;
     void set_follow_latest_data(bool value);
 
     bool marker_is_visible(MarkerType m) const;
@@ -50,7 +50,7 @@ class Graph : public View
     glm::dvec2 screen2graph_delta(const glm::dvec2 &value) const;
     glm::dvec2 graph2screen(const glm::dvec2 &value) const;
 
-    void apply_zoom(const Window &window, const glm::dvec2 &);
+    void apply_zoom(const glm::dvec2 &);
 
     const Marker &get_marker(MarkerType m) const
     {

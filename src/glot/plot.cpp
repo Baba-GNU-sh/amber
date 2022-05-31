@@ -142,9 +142,9 @@ void Plot::draw(const Window &window)
     }
 }
 
-void Plot::on_scroll(Window &window, double, double yoffset)
+void Plot::on_scroll(const glm::dvec2 &, double, double yoffset)
 {
-    on_zoom(window, yoffset);
+    on_zoom(yoffset);
 }
 
 void Plot::on_mouse_button(const glm::dvec2 &, int button, int action, int)
@@ -159,14 +159,14 @@ void Plot::on_mouse_button(const glm::dvec2 &, int button, int action, int)
     }
 }
 
-void Plot::on_cursor_move(Window &window, double x, double y)
+void Plot::on_cursor_move(double x, double y)
 {
     const glm::dvec2 cursor_pos(x, y);
     if (m_is_dragging)
     {
         const auto delta = cursor_pos - m_cursor_pos_old;
         spdlog::info("{}{}", delta.x, delta.y);
-        on_pan(window, delta);
+        on_pan(delta);
     }
     m_cursor_pos_old = cursor_pos;
 }
