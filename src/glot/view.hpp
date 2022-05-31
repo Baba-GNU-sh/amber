@@ -19,10 +19,9 @@ struct HitBox
 struct View
 {
     virtual ~View() = default;
-    virtual void draw(const Window &window)
+    virtual void draw()
     {
-        std::for_each(
-            m_views.begin(), m_views.end(), [&window](View *view) { view->draw(window); });
+        std::for_each(m_views.begin(), m_views.end(), [](View *view) { view->draw(); });
     }
 
     virtual void on_scroll(const glm::dvec2 &cursor_position, double xoffset, double yoffset)
@@ -93,12 +92,11 @@ struct View
         });
     }
 
-    virtual void on_key(Window &window, int key, int scancode, int action, int mods)
+    virtual void on_key(int key, int scancode, int action, int mods)
     {
-        std::for_each(
-            m_views.begin(), m_views.end(), [&window, key, scancode, action, mods](auto *view) {
-                view->on_key(window, key, scancode, action, mods);
-            });
+        std::for_each(m_views.begin(), m_views.end(), [key, scancode, action, mods](auto *view) {
+            view->on_key(key, scancode, action, mods);
+        });
     }
 
     virtual void on_resize(int width, int height)

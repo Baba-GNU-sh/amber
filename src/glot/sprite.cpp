@@ -7,7 +7,7 @@
 #include <vector>
 #include "resources.hpp"
 
-Sprite::Sprite(const std::string &file_name)
+Sprite::Sprite(Window &window, const std::string &file_name) : m_window(window)
 {
     std::tie(m_texture, m_size) = load_texture(file_name);
 
@@ -73,7 +73,7 @@ void Sprite::set_tint(const glm::vec3 &colour)
     m_tint_colour = colour;
 }
 
-void Sprite::draw(const Window &window)
+void Sprite::draw()
 {
     m_shader.use();
     glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
@@ -81,7 +81,7 @@ void Sprite::draw(const Window &window)
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
     int uniform_id = m_shader.uniform_location("view_matrix");
-    const auto vp_matrix_inv = glm::mat3(window.viewport_transform().matrix_inverse());
+    const auto vp_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
 
     uniform_id = m_shader.uniform_location("tint_colour");

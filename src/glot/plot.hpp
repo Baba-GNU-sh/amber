@@ -24,12 +24,9 @@ class Plot : public View
     glm::dvec2 size() const override;
     void set_size(const glm::dvec2 &size) override;
 
-    void draw(const Window &window) override;
+    void draw() override;
 
-    void draw_plot(const Window &window,
-                   const std::vector<TSSample> &data,
-                   glm::vec3 plot_colour,
-                   float y_offset) const;
+    void draw_plot(const std::vector<TSSample> &data, glm::vec3 plot_colour, float y_offset) const;
 
     void on_scroll(const glm::dvec2 &, double, double) override;
 

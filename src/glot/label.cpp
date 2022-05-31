@@ -8,19 +8,21 @@
 #include "resources.hpp"
 #include "font.hpp"
 
-Label::Label(Font &material, int capacity) : m_material(material), m_capacity(capacity)
+Label::Label(Window &window, Font &material, int capacity)
+    : m_window(window), m_material(material), m_capacity(capacity)
 {
     initialize_buffers();
 }
 
-Label::Label(Font &material, const std::string &text, int capacity)
-    : m_material(material), m_capacity(capacity), m_text(text)
+Label::Label(Window &window, Font &material, const std::string &text, int capacity)
+    : m_window(window), m_material(material), m_capacity(capacity), m_text(text)
 {
     initialize_buffers();
 }
 
 Label::Label(Label &&other)
-    : m_material(other.m_material), m_capacity(other.m_capacity), m_colour(other.m_colour)
+    : m_window(other.m_window), m_material(other.m_material), m_capacity(other.m_capacity),
+      m_colour(other.m_colour)
 {
     m_glyphbuf_vao = other.m_glyphbuf_vao;
     other.m_glyphbuf_vao = 0;
@@ -80,7 +82,7 @@ void Label::set_alignment(AlignmentVertical valign)
     m_valign = valign;
 }
 
-void Label::draw(const Window &window)
+void Label::draw()
 {
     glm::ivec2 offset = m_position;
     glm::ivec2 char_stride = glm::ivec2(GLYPH_WIDTH, 0);
@@ -118,7 +120,7 @@ void Label::draw(const Window &window)
     glBindBuffer(GL_ARRAY_BUFFER, m_glyphbuf_vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphVerticies) * count, buffer);
 
-    const auto vp_matrix_inv = window.viewport_transform().matrix_inverse();
+    const auto vp_matrix_inv = m_window.viewport_transform().matrix_inverse();
     m_material.use(m_colour, vp_matrix_inv);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_glyphbuf_ebo);

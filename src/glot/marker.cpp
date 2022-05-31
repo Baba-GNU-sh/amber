@@ -11,7 +11,8 @@
 #include "resources.hpp"
 
 Marker::Marker(Window &window)
-    : m_window(window), m_handle("marker_center.png"), m_font("proggy_clean.png"), m_label(m_font)
+    : m_window(window), m_handle(window, "marker_center.png"), m_font("proggy_clean.png"),
+      m_label(window, m_font)
 {
     glGenBuffers(1, &m_line_vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
@@ -84,13 +85,13 @@ bool Marker::is_visible() const
     return m_is_visible;
 }
 
-void Marker::draw(const Window &)
+void Marker::draw()
 {
     if (!m_is_visible)
         return;
 
-    m_handle.draw(m_window);
-    m_label.draw(m_window);
+    m_handle.draw();
+    m_label.draw();
 
     glm::dvec2 graph_pos(m_position, 0.0);
     auto position_ss = m_window.viewport_transform().apply(m_graph_transform.apply(graph_pos));

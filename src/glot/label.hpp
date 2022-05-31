@@ -23,8 +23,8 @@ class Label : public View
         Bottom
     };
 
-    Label(Font &material, int capacity = 128);
-    Label(Font &material, const std::string &text, int capacity = 128);
+    Label(Window &window, Font &material, int capacity = 128);
+    Label(Window &window, Font &material, const std::string &text, int capacity = 128);
     ~Label();
 
     Label(const Label &) = delete;
@@ -38,7 +38,7 @@ class Label : public View
     glm::dvec2 position() const override;
     void set_alignment(AlignmentHorizontal halign);
     void set_alignment(AlignmentVertical valign);
-    void draw(const Window &window) override;
+    void draw() override;
     glm::dvec2 size() const override;
 
   private:
@@ -56,6 +56,7 @@ class Label : public View
     void initialize_buffers();
     void draw_glyph(char character, const glm::ivec2 &pos, GlyphVerticies **buf) const;
 
+    Window &m_window;
     Font &m_material;
     std::size_t m_capacity;
     std::string m_text;

@@ -71,10 +71,7 @@ void Plot::set_size(const glm::dvec2 &size)
     m_size = size;
 }
 
-void Plot::draw_plot(const Window &window,
-                     const std::vector<TSSample> &data,
-                     glm::vec3 line_colour,
-                     float y_offset) const
+void Plot::draw_plot(const std::vector<TSSample> &data, glm::vec3 line_colour, float y_offset) const
 {
     glBindVertexArray(m_vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -86,11 +83,11 @@ void Plot::draw_plot(const Window &window,
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(view_matrix_offset[0]));
 
     uniform_id = m_shader.uniform_location("viewport_matrix");
-    const auto viewport_matrix = glm::mat3(window.viewport_transform().matrix());
+    const auto viewport_matrix = glm::mat3(m_window.viewport_transform().matrix());
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix[0]));
 
     uniform_id = m_shader.uniform_location("viewport_matrix_inv");
-    const auto viewport_matrix_inv = glm::mat3(window.viewport_transform().matrix_inverse());
+    const auto viewport_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
 
     uniform_id = m_shader.uniform_location("line_thickness_px");
@@ -107,7 +104,7 @@ void Plot::draw_plot(const Window &window,
 
     // glScissor coordinates start in the bottom left
     glEnable(GL_SCISSOR_TEST);
-    window.scissor(m_position.x, m_position.y, m_size.x, m_size.y);
+    m_window.scissor(m_position.x, m_position.y, m_size.x, m_size.y);
 
     // Limit the number of samples we copy to the vertex buffer
     const auto num_samples = std::min(data.size(), COLS_MAX);
@@ -117,7 +114,7 @@ void Plot::draw_plot(const Window &window,
     glDisable(GL_SCISSOR_TEST);
 }
 
-void Plot::draw(const Window &window)
+void Plot::draw()
 {
     const auto plot_size_px = m_size;
     const auto plot_position_px = m_position;
@@ -137,7 +134,7 @@ void Plot::draw(const Window &window)
                 samples.data(), plot_position_gs.x, interval_gs, num_samples);
             samples.resize(n_samples);
 
-            draw_plot(window, samples, time_series.colour, time_series.y_offset);
+            draw_plot(samples, time_series.colour, time_series.y_offset);
         }
     }
 }

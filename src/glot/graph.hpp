@@ -26,7 +26,7 @@ class Graph : public View
     Graph &operator=(Graph &&) = delete;
 
     glm::dvec2 cursor_gs() const;
-    void draw(const Window &window) override;
+    void draw() override;
     void on_resize(int, int) override;
 
     glm::dvec2 size() const override;

@@ -31,7 +31,7 @@ class ImGuiMenuView : public View
         update_follow_latest_data();
     }
 
-    void draw(const Window &) override
+    void draw() override
     {
         ImVec2 menubar_size;
         if (ImGui::BeginMainMenuBar())

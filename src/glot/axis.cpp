@@ -5,7 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <boost/signals2.hpp>
 
-AxisBase::AxisBase(const Window &window) : m_window(window), m_font("proggy_clean.png")
+AxisBase::AxisBase(Window &window) : m_window(window), m_font("proggy_clean.png")
 {
     glGenVertexArrays(1, &m_linebuf_vao);
     glBindVertexArray(m_linebuf_vao);
@@ -25,7 +25,7 @@ AxisBase::AxisBase(const Window &window) : m_window(window), m_font("proggy_clea
     // Initialize the labels
     for (size_t i = 0; i < NUM_LABELS; ++i)
     {
-        m_labels.emplace_back(m_font);
+        m_labels.emplace_back(window, m_font);
         m_labels.back().set_colour(glm::vec3(1.0, 1.0, 1.0));
     }
 
@@ -38,21 +38,21 @@ AxisBase::~AxisBase()
     glDeleteVertexArrays(1, &m_linebuf_vao);
 }
 
-template <> Axis<AxisVertical>::Axis(const Window &window) : AxisBase(window)
+template <> Axis<AxisVertical>::Axis(Window &window) : AxisBase(window)
 {
 }
 
-template <> Axis<AxisHorizontal>::Axis(const Window &window) : AxisBase(window)
+template <> Axis<AxisHorizontal>::Axis(Window &window) : AxisBase(window)
 {
 }
 
-void AxisBase::draw(const Window &window)
+void AxisBase::draw()
 {
-    draw_ticks(window);
-    draw_labels(window);
+    draw_ticks();
+    draw_labels();
 }
 
-void AxisBase::draw_ticks(const Window &window) const
+void AxisBase::draw_ticks() const
 {
     int offset = 0;
 
@@ -73,7 +73,7 @@ void AxisBase::draw_ticks(const Window &window) const
 
     m_lines_shader.use();
     int uniform_id = m_lines_shader.uniform_location("view_matrix");
-    const auto viewport_matrix_inv = glm::mat3(window.viewport_transform().matrix_inverse());
+    const auto viewport_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
     glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(viewport_matrix_inv[0]));
 
     uniform_id = m_lines_shader.uniform_location("colour");
@@ -151,11 +151,11 @@ void Axis<AxisVertical>::draw_ticks(const glm::dvec2 &tick_spacing,
     ptr[offset++] = m_position + m_size;
 }
 
-void AxisBase::draw_labels(const Window &window)
+void AxisBase::draw_labels()
 {
     for (size_t i = 0; i < m_labels_used; i++)
     {
-        m_labels[i].draw(window);
+        m_labels[i].draw();
     }
 }
 

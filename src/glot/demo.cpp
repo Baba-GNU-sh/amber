@@ -7,7 +7,7 @@
 
 class Panel : public View
 {
-    void draw(const Window &window) override
+    void draw() override
     {
         ImGui::Begin("Help");
         ImGui::Text("%.1f ms/frame (%.1f FPS)",
@@ -27,7 +27,7 @@ int main()
     int offset = 0;
     for (int i = 0; i < 10; i++)
     {
-        auto sprite = new Sprite("marker_center.png");
+        auto sprite = new Sprite(window, "marker_center.png");
         sprite->set_position(glm::dvec2(offset, 0));
         offset += sprite->size().x;
         window.add_view(sprite);
@@ -38,7 +38,7 @@ int main()
     offset = 0;
     for (int i = 0; i < 10; i++)
     {
-        auto label = new Label(font, "Hello!");
+        auto label = new Label(window, font, "Hello!");
         window.add_view(label);
         label->set_position(glm::dvec2(offset, 50));
         label->set_colour(glm::vec3(1.0, 1.0, 1.0));

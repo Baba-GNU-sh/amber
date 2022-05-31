@@ -43,7 +43,7 @@ void SelectionBox::set_visible(bool visible)
     m_is_visible = visible;
 }
 
-void SelectionBox::draw(const Window &)
+void SelectionBox::draw()
 {
     if (!m_is_visible)
         return;

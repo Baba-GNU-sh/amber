@@ -11,10 +11,10 @@
 class AxisBase : public View
 {
   public:
-    AxisBase(const Window &window);
+    AxisBase(Window &window);
     ~AxisBase();
 
-    void draw(const Window &window) override;
+    void draw() override;
 
     glm::dvec2 position() const override;
     glm::dvec2 size() const override;
@@ -36,9 +36,9 @@ class AxisBase : public View
 
     static glm::dvec2 crush(const glm::dvec2 &value, const glm::dvec2 &interval, bool ceil);
 
-    void draw_ticks(const Window &window) const;
+    void draw_ticks() const;
 
-    void draw_labels(const Window &window);
+    void draw_labels();
     virtual void draw_ticks(const glm::dvec2 &tick_spacing,
                             double tick_size,
                             glm::vec2 *const ptr,
@@ -54,7 +54,7 @@ class AxisBase : public View
     static constexpr size_t NUM_LABELS = 128;
 
     // View invariates
-    const Window &m_window;
+    Window &m_window;
     Font m_font;
 
     // View variables
@@ -78,7 +78,7 @@ enum AxisOrientation
 template <AxisOrientation Orientation> class Axis : public AxisBase
 {
   public:
-    Axis(const Window &window);
+    Axis(Window &window);
 
   private:
     void draw_ticks(const glm::dvec2 &tick_spacing,

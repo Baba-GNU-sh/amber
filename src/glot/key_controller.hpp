@@ -8,7 +8,7 @@ class KeyController : public View
         //
     }
 
-    void on_key(Window &, int key, int, int action, int mods) override
+    void on_key(int key, int, int action, int mods) override
     {
         if (action == GLFW_PRESS)
         {

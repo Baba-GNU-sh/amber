@@ -23,7 +23,7 @@ class Sprite : public View
         Right
     };
 
-    Sprite(const std::string &filename);
+    Sprite(Window &window, const std::string &filename);
     ~Sprite();
     Sprite(const Sprite &) = delete;
     Sprite &operator=(const Sprite &) = delete;
@@ -37,7 +37,7 @@ class Sprite : public View
     void set_alignment(AlignmentVertical align);
     void set_alignment(AlignmentHorizontal align);
     void set_tint(const glm::vec3 &colour);
-    virtual void draw(const Window &window) override;
+    virtual void draw() override;
 
   private:
     struct TextureCoord
@@ -48,6 +48,7 @@ class Sprite : public View
 
     static std::pair<unsigned int, glm::ivec2> load_texture(const std::string &file_name);
 
+    Window &m_window;
     unsigned int m_vertex_buffer;
     unsigned int m_vao;
     unsigned int m_texture;

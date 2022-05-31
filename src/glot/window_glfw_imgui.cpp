@@ -27,14 +27,13 @@ void Window_GLFW_ImGui::render()
 {
     use();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    std::for_each(m_views.begin(), m_views.end(), [this](auto &view) { view->draw(*this); });
+    std::for_each(m_views.begin(), m_views.end(), [](auto &view) { view->draw(); });
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    std::for_each(
-        m_imgui_views.begin(), m_imgui_views.end(), [this](auto &view) { view->draw(*this); });
+    std::for_each(m_imgui_views.begin(), m_imgui_views.end(), [](auto &view) { view->draw(); });
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

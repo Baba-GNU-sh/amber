@@ -71,14 +71,14 @@ glm::dvec2 Graph::cursor_gs() const
     return screen2graph(m_window.cursor());
 }
 
-void Graph::draw(const Window &window)
+void Graph::draw()
 {
     if (m_follow_latest_data)
     {
         reveal_newest_sample();
     }
 
-    View::draw(window);
+    View::draw();
 }
 
 void Graph::on_resize(int width, int height)
