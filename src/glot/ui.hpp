@@ -328,7 +328,7 @@ class ImGuiMenuView : public View
 
     bool m_enable_vsync = true;
     bool m_call_glfinish = false;
-    bool m_enable_multisampling = false;
+    bool m_enable_multisampling = true;
     glm::vec3 m_clear_colour = glm::vec3(0.1, 0.1, 0.1);
     bool m_follow_latest_data = false;
 
