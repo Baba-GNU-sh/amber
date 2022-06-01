@@ -48,5 +48,9 @@ if (BUILD_TESTS)
 			glot
 			GTest::GTest
 	)
+	if (BUILD_COVERAGE)
+		target_compile_options(database_tests PRIVATE -fprofile-arcs -ftest-coverage)
+		target_link_options(database_tests PUBLIC -fprofile-arcs -ftest-coverage)
+	endif()
 	add_test(NAME Tests COMMAND database_tests)
 endif()
