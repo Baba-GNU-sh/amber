@@ -193,7 +193,7 @@ void AxisBase::on_scroll(const glm::dvec2 &cursor_position, double, double yoffs
 
 void AxisBase::on_mouse_button(const glm::dvec2 &, int button, int action, int)
 {
-    spdlog::info("Click {} {}", button, action);
+    spdlog::debug("Click {} {}", button, action);
 }
 
 std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> AxisBase::tick_spacing() const

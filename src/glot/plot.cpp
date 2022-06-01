@@ -162,7 +162,6 @@ void Plot::on_cursor_move(double x, double y)
     if (m_is_dragging)
     {
         const auto delta = cursor_pos - m_cursor_pos_old;
-        spdlog::info("{}{}", delta.x, delta.y);
         on_pan(delta);
     }
     m_cursor_pos_old = cursor_pos;

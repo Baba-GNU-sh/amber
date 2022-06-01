@@ -141,12 +141,10 @@ void Marker::on_mouse_button(const glm::dvec2 &, int button, int action, int)
         if (!m_is_visible)
             return;
         m_is_dragging = true;
-        spdlog::info("Clicked");
     }
     else if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT)
     {
         m_is_dragging = false;
-        spdlog::info("Released");
     }
 }
 
