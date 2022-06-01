@@ -64,7 +64,7 @@ class ImGuiMenuView : public View
 
                 if (ImGui::Checkbox("Call glFinish", &m_call_glfinish))
                 {
-                    update_multisampling();
+                    update_call_glfinish();
                 }
 
                 ImGui::Separator();
