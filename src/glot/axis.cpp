@@ -299,7 +299,7 @@ template <> void Axis<AxisHorizontal>::update_layout()
         tick_pos_ss.y = m_position.y;
 
         auto &label = m_labels[m_labels_used++];
-        label.set_position(tick_pos_ss);
+        label.set_position(tick_pos_ss + glm::dvec2(0, 6));
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(label_precision.x) << tick_pos.x;
@@ -335,7 +335,7 @@ template <> void Axis<AxisVertical>::update_layout()
         tick_pos_ss.x = m_position.x + m_size.x;
 
         auto &label = m_labels[m_labels_used++];
-        label.set_position(tick_pos_ss);
+        label.set_position(tick_pos_ss + glm::dvec2(-10, 0));
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(label_precision.y) << tick_pos.y;

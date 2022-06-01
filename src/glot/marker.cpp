@@ -170,7 +170,7 @@ void Marker::update_layout()
     position_ss.y = 0;
 
     m_handle.set_position(position_ss + glm::dvec2(0, m_height));
-    m_label.set_position(position_ss + glm::dvec2(0, m_height + 16));
+    m_label.set_position(position_ss + glm::dvec2(0, m_height + 30));
 
     std::stringstream ss;
     ss << m_position;
