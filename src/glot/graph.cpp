@@ -115,6 +115,8 @@ void Graph::on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action
         m_selection_box.set_visible(false);
         m_axis_horizontal.set_graph_transform(m_view);
         m_axis_vertical.set_graph_transform(m_view);
+        m_marker_a.set_graph_transform(m_view);
+        m_marker_b.set_graph_transform(m_view);
     }
     else
     {
