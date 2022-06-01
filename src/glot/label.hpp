@@ -56,6 +56,7 @@ class Label : public View
 
     void initialize_buffers();
     void draw_glyph(char character, const glm::ivec2 &pos, GlyphVerticies **buf) const;
+    void update_buffers() const;
 
     Window &m_window;
     Font &m_material;
@@ -72,4 +73,6 @@ class Label : public View
     unsigned int m_glyphbuf_vao;
     unsigned int m_glyphbuf_vbo;
     unsigned int m_glyphbuf_ebo;
+
+    bool m_is_dirty = true;
 };

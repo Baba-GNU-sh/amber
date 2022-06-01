@@ -48,17 +48,30 @@ void Label::set_text(const std::string &text)
     {
         throw std::runtime_error("String is longer than capacity!");
     }
-    m_text = text;
+
+    if (text != m_text)
+    {
+        m_is_dirty = true;
+        m_text = text;
+    }
 }
 
 void Label::set_colour(const glm::vec3 &colour)
 {
-    m_colour = colour;
+    if (colour != m_colour)
+    {
+        m_is_dirty = true;
+        m_colour = colour;
+    }
 }
 
 void Label::set_position(const glm::dvec2 &position)
 {
-    m_position = position;
+    if (position != m_position)
+    {
+        m_is_dirty = true;
+        m_position = position;
+    }
 }
 
 glm::dvec2 Label::position() const
@@ -68,63 +81,43 @@ glm::dvec2 Label::position() const
 
 glm::dvec2 Label::size() const
 {
-    // TODO: This is wrong...
+    // TODO: This needs filling in...
     return glm::dvec2(100, 50);
 }
 
 void Label::set_alignment(AlignmentHorizontal halign)
 {
-    m_halign = halign;
+    if (halign != m_halign)
+    {
+        m_is_dirty = true;
+        m_halign = halign;
+    }
 }
 
 void Label::set_alignment(AlignmentVertical valign)
 {
-    m_valign = valign;
+    if (valign != m_valign)
+    {
+        m_is_dirty = true;
+        m_valign = valign;
+    }
 }
 
 void Label::draw()
 {
-    glm::ivec2 offset = m_position;
-    glm::ivec2 char_stride = glm::ivec2(GLYPH_WIDTH, 0);
-
-    if (m_halign == Label::AlignmentHorizontal::Right)
+    if (m_is_dirty)
     {
-        offset -= char_stride * static_cast<int>(m_text.size());
+        update_buffers();
+        m_is_dirty = false;
     }
-    else if (m_halign == Label::AlignmentHorizontal::Center)
-    {
-        offset -= char_stride * static_cast<int>(m_text.size()) / 2;
-    }
-
-    if (m_valign == Label::AlignmentVertical::Center)
-    {
-        offset -= glm::ivec2(0, GLYPH_HEIGHT / 2);
-    }
-    else if (m_valign == Label::AlignmentVertical::Bottom)
-    {
-        offset -= glm::ivec2(0, GLYPH_HEIGHT);
-    }
-
-    GlyphVerticies buffer[128];
-    GlyphVerticies *bufptr = &buffer[0];
-
-    for (auto character : m_text)
-    {
-        draw_glyph(character, offset, &bufptr);
-        offset += char_stride;
-    }
-
-    std::size_t count = (bufptr - buffer);
-
-    glBindVertexArray(m_glyphbuf_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, m_glyphbuf_vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphVerticies) * count, buffer);
 
     const auto vp_matrix_inv = m_window.viewport_transform().matrix_inverse();
     m_material.use(m_colour, vp_matrix_inv);
 
+    glBindBuffer(GL_ARRAY_BUFFER, m_glyphbuf_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_glyphbuf_ebo);
-    glDrawElements(GL_TRIANGLES, 6 * count, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(m_glyphbuf_vao);
+    glDrawElements(GL_TRIANGLES, 6 * m_text.size(), GL_UNSIGNED_INT, 0);
 }
 
 void Label::initialize_buffers()
@@ -196,4 +189,42 @@ void Label::draw_glyph(char character, const glm::ivec2 &pos, GlyphVerticies **b
         glm::vec2(COL_STRIDE * col + ATLAS_GLYPH_WIDTH, ROW_STRIDE * row + ATLAS_GLYPH_HEIGHT);
 
     *buf = data + 1;
+}
+
+void Label::update_buffers() const
+{
+    glm::ivec2 offset = m_position;
+    glm::ivec2 char_stride = glm::ivec2(GLYPH_WIDTH, 0);
+
+    if (m_halign == Label::AlignmentHorizontal::Right)
+    {
+        offset -= char_stride * static_cast<int>(m_text.size());
+    }
+    else if (m_halign == Label::AlignmentHorizontal::Center)
+    {
+        offset -= char_stride * static_cast<int>(m_text.size()) / 2;
+    }
+
+    if (m_valign == Label::AlignmentVertical::Center)
+    {
+        offset -= glm::ivec2(0, GLYPH_HEIGHT / 2);
+    }
+    else if (m_valign == Label::AlignmentVertical::Bottom)
+    {
+        offset -= glm::ivec2(0, GLYPH_HEIGHT);
+    }
+
+    GlyphVerticies buffer[128];
+    GlyphVerticies *bufptr = &buffer[0];
+
+    for (auto character : m_text)
+    {
+        draw_glyph(character, offset, &bufptr);
+        offset += char_stride;
+    }
+
+    std::size_t count = (bufptr - buffer);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_glyphbuf_vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphVerticies) * count, buffer);
 }
