@@ -32,6 +32,7 @@ add_library(
 		selection_box.cpp
 		axis.cpp
 		view.cpp
+		ui.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(
