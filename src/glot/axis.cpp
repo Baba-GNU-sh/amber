@@ -1,9 +1,10 @@
-#include "axis.hpp"
-#include "resources.hpp"
+#include <sstream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <boost/signals2.hpp>
+
+#include "resources.hpp"
+#include "axis.hpp"
 
 AxisBase::AxisBase(Window &window) : m_window(window), m_font("proggy_clean.png")
 {

@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <stb_image/stb_image.h>
+#include <sstream>
 
 #include "marker.hpp"
 #include "label.hpp"
