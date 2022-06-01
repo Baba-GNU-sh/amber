@@ -47,6 +47,7 @@ class Sprite : public View
     };
 
     static std::pair<unsigned int, glm::ivec2> load_texture(const std::string &file_name);
+    void update_buffers() const;
 
     Window &m_window;
     unsigned int m_vertex_buffer;
@@ -58,4 +59,5 @@ class Sprite : public View
     AlignmentVertical m_vertical_alignment = AlignmentVertical::Top;
     AlignmentHorizontal m_horizontal_alignment = AlignmentHorizontal::Left;
     glm::vec3 m_tint_colour = glm::vec3(1.0);
+    bool m_is_dirty = true;
 };

@@ -46,6 +46,7 @@ Sprite::~Sprite()
 void Sprite::set_position(const glm::dvec2 &position)
 {
     m_position = position;
+    m_is_dirty = true;
 }
 
 glm::dvec2 Sprite::position() const
@@ -61,57 +62,33 @@ glm::dvec2 Sprite::size() const
 void Sprite::set_alignment(AlignmentVertical align)
 {
     m_vertical_alignment = align;
+    m_is_dirty = true;
 }
 
 void Sprite::set_alignment(AlignmentHorizontal align)
 {
     m_horizontal_alignment = align;
+    m_is_dirty = true;
 }
 
 void Sprite::set_tint(const glm::vec3 &colour)
 {
     m_tint_colour = colour;
+    m_is_dirty = true;
 }
 
 void Sprite::draw()
 {
+    if (m_is_dirty)
+    {
+        update_buffers();
+        m_is_dirty = false;
+    }
+
     m_shader.use();
     glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
     glBindVertexArray(m_vao);
     glBindTexture(GL_TEXTURE_2D, m_texture);
-
-    int uniform_id = m_shader.uniform_location("view_matrix");
-    const auto vp_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
-    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
-
-    uniform_id = m_shader.uniform_location("tint_colour");
-    glUniform3fv(uniform_id, 1, &m_tint_colour[0]);
-
-    auto position = m_position;
-    switch (m_horizontal_alignment)
-    {
-    case AlignmentHorizontal::Center:
-        position.x -= m_size.x / 2;
-        break;
-    case AlignmentHorizontal::Right:
-        position.x -= m_size.x;
-        break;
-    default:
-        break;
-    }
-
-    // TODO use alignment rules
-    TextureCoord data[4];
-    data[0].vertex_pos = position;
-    data[0].texture_pos = glm::vec2(0.0, 0.0);
-    data[1].vertex_pos = glm::vec2(position.x, position.y + m_size.y);
-    data[1].texture_pos = glm::vec2(0.0, 1.0);
-    data[2].vertex_pos = glm::vec2(position.x + m_size.x, position.y);
-    data[2].texture_pos = glm::vec2(1.0, 0.0);
-    data[3].vertex_pos = position + m_size;
-    data[3].texture_pos = glm::vec2(1.0, 1.0);
-
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
@@ -139,4 +116,46 @@ std::pair<unsigned int, glm::ivec2> Sprite::load_texture(const std::string &file
     stbi_image_free(tex_data);
 
     return std::make_pair(texture_handle, glm::ivec2(width, height));
+}
+
+void Sprite::update_buffers() const
+{
+    // Update the shader uniforms
+    m_shader.use();
+    int uniform_id = m_shader.uniform_location("view_matrix");
+    const auto vp_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
+    glUniformMatrix3fv(uniform_id, 1, GL_FALSE, glm::value_ptr(vp_matrix_inv[0]));
+
+    uniform_id = m_shader.uniform_location("tint_colour");
+    glUniform3fv(uniform_id, 1, &m_tint_colour[0]);
+
+    // Update the vertex buffers
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
+    glBindVertexArray(m_vao);
+
+    auto position = m_position;
+    switch (m_horizontal_alignment)
+    {
+    case AlignmentHorizontal::Center:
+        position.x -= m_size.x / 2;
+        break;
+    case AlignmentHorizontal::Right:
+        position.x -= m_size.x;
+        break;
+    default:
+        break;
+    }
+
+    // TODO use alignment rules
+    TextureCoord data[4];
+    data[0].vertex_pos = position;
+    data[0].texture_pos = glm::vec2(0.0, 0.0);
+    data[1].vertex_pos = glm::vec2(position.x, position.y + m_size.y);
+    data[1].texture_pos = glm::vec2(0.0, 1.0);
+    data[2].vertex_pos = glm::vec2(position.x + m_size.x, position.y);
+    data[2].texture_pos = glm::vec2(1.0, 0.0);
+    data[3].vertex_pos = position + m_size;
+    data[3].texture_pos = glm::vec2(1.0, 1.0);
+
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
 }
