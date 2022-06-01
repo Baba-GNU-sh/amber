@@ -49,6 +49,11 @@ target_link_libraries(
 		Boost::boost
 )
 
+if (USE_IWYU)
+	find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+	set_property(TARGET glot PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+endif()
+
 if (NOT MSVC)
 	target_compile_options(glot PRIVATE -Werror -Wall -Wextra)
 endif()

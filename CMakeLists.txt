@@ -5,6 +5,7 @@ option(BUILD_TESTS "Build test programs" OFF)
 option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
 option(BUILD_COVERAGE "Build with coverage instrumentation" OFF)
 option(USE_SANITIZERS "Build with address and undefined behaviour sanitizer instrumentation" OFF)
+option(USE_IWYU "Use the Include What You Use tool when building" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 
