@@ -84,7 +84,11 @@
             "type": "pickString",
             "options": [
                 "Debug",
-                "Release"
+                "Release",
+                "Test",
+                "TestCoverage",
+                "Benchmark",
+                "IWYU"
             ]
         }
     ]

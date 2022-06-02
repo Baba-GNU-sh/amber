@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(glot)
 
-option(BUILD_TESTS "Build test programs" OFF)
-option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
-option(BUILD_COVERAGE "Build with coverage instrumentation" OFF)
-option(USE_SANITIZERS "Build with address and undefined behaviour sanitizer instrumentation" OFF)
-option(USE_IWYU "Use the Include What You Use tool when building" OFF)
-
 set(CMAKE_CXX_STANDARD 17)
 
 # Note: We need to enable testing at the top level to generate the test file at the root of the build dir

@@ -128,7 +128,7 @@ GLot comes with a suite of tests and performance benchmarks.
 ```bash
 mkdir build && cd build
 CONAN_SYSREQUIRES_MODE=enabled conan install ..
-cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DBUILD_COVERAGE=ON -DUSE_SANITIZERS=ON ..
+cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DUSE_COVERAGE=ON -DUSE_SANITIZERS=ON ..
 cmake --build .
 ctest --verbose
 ```

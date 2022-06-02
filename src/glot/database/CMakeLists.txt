@@ -18,7 +18,7 @@ if (USE_SANITIZERS)
 	target_link_options(database PUBLIC -fsanitize=address -fsanitize=undefined)
 endif()
 
-if (BUILD_COVERAGE)
+if (USE_COVERAGE)
 	target_compile_options(database PRIVATE -fprofile-arcs -ftest-coverage)
 	target_link_options(database PUBLIC -fprofile-arcs -ftest-coverage)
 endif()
@@ -48,7 +48,7 @@ if (BUILD_TESTS)
 			glot
 			GTest::GTest
 	)
-	if (BUILD_COVERAGE)
+	if (USE_COVERAGE)
 		target_compile_options(database_tests PRIVATE -fprofile-arcs -ftest-coverage)
 		target_link_options(database_tests PUBLIC -fprofile-arcs -ftest-coverage)
 	endif()

@@ -10,6 +10,11 @@ add_subdirectory(bindings)
 add_subdirectory(stb_image)
 add_subdirectory(database)
 
+option(BUILD_TESTS "Build test programs" OFF)
+option(USE_COVERAGE "Build with coverage instrumentation" OFF)
+option(USE_SANITIZERS "Build with address and undefined behaviour sanitizer instrumentation" OFF)
+option(ENABLE_IWYU "Use the Include-What-You-Use tool when building (requires clang)" OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(
@@ -50,7 +55,7 @@ target_link_libraries(
 		Boost::boost
 )
 
-if (USE_IWYU)
+if (ENABLE_IWYU)
 	find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
 	set_property(TARGET glot PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 endif()
@@ -64,7 +69,7 @@ if (USE_SANITIZERS)
 	target_link_options(glot PUBLIC -fsanitize=address -fsanitize=undefined)
 endif()
 
-if (BUILD_COVERAGE)
+if (USE_COVERAGE)
 	target_compile_options(glot PRIVATE -fprofile-arcs -ftest-coverage)
 	target_link_options(glot PUBLIC -fprofile-arcs -ftest-coverage)
 endif()
@@ -81,7 +86,7 @@ if (BUILD_TESTS)
 			glot
 			GTest::GTest
 	)
-	if (BUILD_COVERAGE)
+	if (USE_COVERAGE)
 		target_compile_options(tests PRIVATE -fprofile-arcs -ftest-coverage)
 		target_link_options(tests PUBLIC -fprofile-arcs -ftest-coverage)
 	endif()
