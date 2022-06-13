@@ -62,5 +62,5 @@ cmake \
   -DBUILD_BENCHMARKS="${BENCHMARKS}" \
   -DUSE_COVERAGE="${COVERAGE}" \
   -DUSE_SANITIZERS="${SANITIZERS}" \
-  -DENABLE_IWYU="${IWYU}".
+  -DENABLE_IWYU="${IWYU}" .
 ln -sfn build/current/compile_commands.json compile_commands.json
