@@ -14,21 +14,19 @@ class AudioFilePlugin : public Plugin
     AudioFilePlugin(PluginContext &pluggy, std::string_view filename);
     virtual ~AudioFilePlugin();
 
-    void thread();
-    float *data();
-    std::size_t size();
-    int sample_rate() const;
     void start() override;
     void stop() override;
     bool is_running() const override;
     void draw_menu() override;
 
   private:
-    AudioFile<float> _audioFile;
-    std::thread _thread;
-    std::atomic<bool> _running;
-    std::shared_ptr<TimeSeriesDense> _ts;
-    std::shared_ptr<spdlog::logger> _logger;
-    std::size_t _current_sample;
-    std::string _filename;
+    void background_worker();
+
+    AudioFile<float> m_audioFile;
+    std::thread m_thread;
+    std::atomic<bool> m_running;
+    std::shared_ptr<TimeSeriesDense> m_ts;
+    std::shared_ptr<spdlog::logger> m_logger;
+    std::size_t m_current_sample;
+    std::string m_filename;
 };

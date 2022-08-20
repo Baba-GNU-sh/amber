@@ -10,52 +10,52 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-WaveGenPlugin::WaveGenPlugin(PluginContext &ctx) : _ctx(ctx)
+WaveGenPlugin::WaveGenPlugin(PluginContext &ctx) : m_ctx(ctx)
 {
-    _logger = spdlog::stdout_color_mt("WaveGenPlugin");
-    _logger->info("Initialized");
+    m_logger = spdlog::stdout_color_mt("WaveGenPlugin");
+    m_logger->info("Initialized");
 
-    _ts = std::make_shared<TimeSeriesDense>(0.0, 1.0 / _sample_rate);
-    _ctx.get_database().register_timeseries("wavegen/channelA", _ts);
+    m_ts = std::make_shared<TimeSeriesDense>(0.0, 1.0 / m_sample_rate);
+    m_ctx.get_database().register_timeseries("wavegen/channelA", m_ts);
 
-    _settings.amplitude = 1.0;
-    _settings.frequency = 1.0;
-    _settings.type = Sine;
+    m_settings.amplitude = 1.0;
+    m_settings.frequency = 1.0;
+    m_settings.type = Sine;
 }
 
 WaveGenPlugin::~WaveGenPlugin()
 {
-    if (_running)
+    if (m_running)
     {
-        _running = false;
-        _thread.join();
+        m_running = false;
+        m_thread.join();
     }
-    _logger->info("Bye");
+    m_logger->info("Bye");
 }
 
 void WaveGenPlugin::start()
 {
-    if (!_running)
+    if (!m_running)
     {
-        _running = true;
-        _thread = std::thread(&WaveGenPlugin::thread_handler, this);
-        _logger->info("Started");
+        m_running = true;
+        m_thread = std::thread(&WaveGenPlugin::thread_handler, this);
+        m_logger->info("Started");
     }
 }
 
 void WaveGenPlugin::stop()
 {
-    if (_running)
+    if (m_running)
     {
-        _running = false;
-        _thread.join();
-        _logger->info("Stopped");
+        m_running = false;
+        m_thread.join();
+        m_logger->info("Stopped");
     }
 }
 
 bool WaveGenPlugin::is_running() const
 {
-    return _running;
+    return m_running;
 }
 
 void WaveGenPlugin::draw_menu()
@@ -63,16 +63,16 @@ void WaveGenPlugin::draw_menu()
     const char *items[] = {"Sine", "Square", "Triangle", "SawTooth"};
 
     ImGui::Begin("Wave Gen");
-    ImGui::Text("Running: %s", _running ? "yes" : "no");
-    ImGui::Text("Sample Rate: %u", _sample_rate);
+    ImGui::Text("Running: %s", m_running ? "yes" : "no");
+    ImGui::Text("Sample Rate: %u", m_sample_rate);
 
-    std::lock_guard<std::mutex> _(_mutex);
+    std::lock_guard<std::mutex> _(m_mutex);
     ImGui::Combo(
-        "Signal Type", reinterpret_cast<int *>(&_settings.type), items, IM_ARRAYSIZE(items));
+        "Signal Type", reinterpret_cast<int *>(&m_settings.type), items, IM_ARRAYSIZE(items));
     ImGui::SliderFloat(
-        "Frequency", &_settings.frequency, 0.1, 1000, "%.1f", ImGuiSliderFlags_Logarithmic);
+        "Frequency", &m_settings.frequency, 0.1, 1000, "%.1f", ImGuiSliderFlags_Logarithmic);
     ImGui::SliderFloat(
-        "Amplitude", &_settings.amplitude, 0.1, 10.0, "%.3f", ImGuiSliderFlags_Logarithmic);
+        "Amplitude", &m_settings.amplitude, 0.1, 10.0, "%.3f", ImGuiSliderFlags_Logarithmic);
 
     ImGui::End();
 }
@@ -82,11 +82,11 @@ void WaveGenPlugin::thread_handler()
     using namespace std::chrono;
     using namespace std::chrono_literals;
 
-    const auto sample_period = std::chrono::duration<double>(1s) / _sample_rate;
+    const auto sample_period = std::chrono::duration<double>(1s) / m_sample_rate;
     auto prevtime = std::chrono::steady_clock::now();
     double x = 0.0;
 
-    while (_running)
+    while (m_running)
     {
         std::this_thread::sleep_for(10ms);
 
@@ -95,15 +95,15 @@ void WaveGenPlugin::thread_handler()
         prevtime = now;
 
         WaveSettings settings = [this]() {
-            std::lock_guard<std::mutex> _(_mutex);
-            return _settings;
+            std::lock_guard<std::mutex> _(m_mutex);
+            return m_settings;
         }();
 
         while (delta > seconds(0))
         {
-            x += settings.frequency / _sample_rate;
+            x += settings.frequency / m_sample_rate;
             const auto value = settings.amplitude * sample_value(settings.type, x);
-            _ts->push_sample(value);
+            m_ts->push_sample(value);
             delta -= sample_period;
         }
     }

@@ -9,5 +9,5 @@ class PluginContext
     Database &get_database();
 
   private:
-    Database &_database;
+    Database &m_database;
 };

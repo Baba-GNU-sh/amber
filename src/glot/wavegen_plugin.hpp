@@ -36,12 +36,12 @@ class WaveGenPlugin : public Plugin
   private:
     void thread_handler();
     double sample_value(WaveType settings, double time) const;
-    PluginContext &_ctx;
-    const unsigned int _sample_rate = 10'000;
-    std::shared_ptr<spdlog::logger> _logger;
-    std::atomic<bool> _running = false;
-    std::thread _thread;
-    std::shared_ptr<TimeSeriesDense> _ts;
-    mutable std::mutex _mutex;
-    WaveSettings _settings;
+    PluginContext &m_ctx;
+    const unsigned int m_sample_rate = 10'000;
+    std::shared_ptr<spdlog::logger> m_logger;
+    std::atomic<bool> m_running = false;
+    std::thread m_thread;
+    std::shared_ptr<TimeSeriesDense> m_ts;
+    mutable std::mutex m_mutex;
+    WaveSettings m_settings;
 };
