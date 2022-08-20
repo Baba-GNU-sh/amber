@@ -60,7 +60,7 @@ Run GLot with:
 ./glot
 ```
 
-## OSX
+## MacOS
 
 First, install the developer tools for mac, which should install things like clang and make. Then install homebrew, and with it install conan and cmake.
 
