@@ -8,12 +8,12 @@ PluginManager::PluginManager()
 
 void PluginManager::add_plugin(std::string_view name, std::shared_ptr<Plugin> plugin)
 {
-    _plugins.push_back(PluginInfo{std::string(name), false, plugin});
+    m_plugins.push_back(PluginInfo{std::string(name), false, plugin});
 }
 
 void PluginManager::start_all()
 {
-    for (auto plugin : _plugins)
+    for (auto plugin : m_plugins)
     {
         plugin.plugin->start();
     }
@@ -21,7 +21,7 @@ void PluginManager::start_all()
 
 void PluginManager::stop_all()
 {
-    for (auto plugin : _plugins)
+    for (auto plugin : m_plugins)
     {
         plugin.plugin->stop();
     }
@@ -29,7 +29,7 @@ void PluginManager::stop_all()
 
 void PluginManager::draw_menu()
 {
-    for (auto &plugin : _plugins)
+    for (auto &plugin : m_plugins)
     {
         if (ImGui::BeginMenu(plugin.name.c_str()))
         {
@@ -60,7 +60,7 @@ void PluginManager::draw_menu()
 
 void PluginManager::draw_dialogs() const
 {
-    for (auto plugin : _plugins)
+    for (auto plugin : m_plugins)
     {
         if (plugin.show_menu)
         {

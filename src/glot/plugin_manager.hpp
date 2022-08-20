@@ -24,5 +24,5 @@ class PluginManager
     void draw_dialogs() const;
 
   private:
-    std::vector<PluginInfo> _plugins;
+    std::vector<PluginInfo> m_plugins;
 };
