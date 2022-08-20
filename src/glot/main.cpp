@@ -303,23 +303,21 @@ void init_timeseries(Database &database, GraphState &state)
 
     // A nice selection of material colours from here (column 400):
     // https://material.io/resources/color/
-    std::vector<glm::vec3> plot_colours;
-
-    plot_colours.push_back(createGlmColour(0xef5350));
-    plot_colours.push_back(createGlmColour(0x42a5f5));
-    plot_colours.push_back(createGlmColour(0xd4e157));
-    plot_colours.push_back(createGlmColour(0xec407a));
-    plot_colours.push_back(createGlmColour(0x26c6da));
-    plot_colours.push_back(createGlmColour(0xffee58));
-    plot_colours.push_back(createGlmColour(0xab47bc));
-    plot_colours.push_back(createGlmColour(0x26a69a));
-    plot_colours.push_back(createGlmColour(0xffca28));
-    plot_colours.push_back(createGlmColour(0x7e57c2));
-    plot_colours.push_back(createGlmColour(0x66bb6a));
-    plot_colours.push_back(createGlmColour(0xffa726));
-    plot_colours.push_back(createGlmColour(0x5c6bc0));
-    plot_colours.push_back(createGlmColour(0x9ccc65));
-    plot_colours.push_back(createGlmColour(0xff7043));
+    std::vector<glm::vec3> plot_colours = {createGlmColour(0xef5350),
+                                           createGlmColour(0x42a5f5),
+                                           createGlmColour(0xd4e157),
+                                           createGlmColour(0xec407a),
+                                           createGlmColour(0x26c6da),
+                                           createGlmColour(0xffee58),
+                                           createGlmColour(0xab47bc),
+                                           createGlmColour(0x26a69a),
+                                           createGlmColour(0xffca28),
+                                           createGlmColour(0x7e57c2),
+                                           createGlmColour(0x66bb6a),
+                                           createGlmColour(0xffa726),
+                                           createGlmColour(0x5c6bc0),
+                                           createGlmColour(0x9ccc65),
+                                           createGlmColour(0xff7043)};
 
     const auto &data = database.data();
     state.timeseries.resize(data.size());
