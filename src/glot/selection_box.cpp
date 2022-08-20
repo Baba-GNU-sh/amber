@@ -28,18 +28,26 @@ SelectionBox::~SelectionBox()
     glDeleteBuffers(1, &m_vbo);
 }
 
-void SelectionBox::set_position(const glm::ivec2 &position)
+void SelectionBox::set_position(const glm::dvec2 &position)
 {
     m_position = position;
 }
 
-void SelectionBox::set_size(const glm::ivec2 &size)
+void SelectionBox::set_size(const glm::dvec2 &size)
 {
     m_size = size;
 }
 
-void SelectionBox::draw() const
+void SelectionBox::set_visible(bool visible)
 {
+    m_is_visible = visible;
+}
+
+void SelectionBox::draw()
+{
+    if (!m_is_visible)
+        return;
+
     glBindVertexArray(m_vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
@@ -54,7 +62,7 @@ void SelectionBox::draw() const
     uniform_id = m_shader.uniform_location("alpha");
     glUniform1f(uniform_id, 0.5);
 
-    auto align_to_pixel = [](const glm::ivec2 &in) { return glm::vec2(round(in.x), round(in.y)); };
+    auto align_to_pixel = [](const glm::dvec2 &in) { return glm::vec2(round(in.x), round(in.y)); };
 
     BoxVerticies verts{align_to_pixel(m_position),
                        align_to_pixel(glm::vec2(m_position.x + m_size.x, m_position.y)),

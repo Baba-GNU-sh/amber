@@ -4,33 +4,54 @@
 #include "shader_utils.hpp"
 #include <database/timeseries.hpp>
 #include "window.hpp"
+#include "view.hpp"
+#include <boost/signals2.hpp>
+#include "graph_state.hpp"
 
-class Plot
+class Plot : public View
 {
   public:
-    Plot(Window &window);
+    Plot(GraphState &state, const Transform<double> &view, Window &m_window);
     ~Plot();
     Plot(const Plot &) = delete;
     Plot &operator=(const Plot &) = delete;
     Plot(Plot &&);
     Plot &operator=(Plot &&) = delete;
 
-    void set_position(const glm::ivec2 &position);
-    void set_size(const glm::ivec2 &size);
+    glm::dvec2 position() const override;
+    void set_position(const glm::dvec2 &position) override;
 
-    void draw(const glm::mat3 &view_matrix,
-              const std::vector<TSSample> &data,
-              int plot_width,
-              glm::vec3 plot_colour,
-              float y_offset,
-              bool show_line_segments) const;
+    glm::dvec2 size() const override;
+    void set_size(const glm::dvec2 &size) override;
+
+    void draw() override;
+
+    void draw_plot(const std::vector<TSSample> &data, glm::vec3 plot_colour, float y_offset) const;
+
+    void on_scroll(const glm::dvec2 &, double, double) override;
+
+    void on_mouse_button(const glm::dvec2 &cursor_pos, int, int, int) override;
+    void on_cursor_move(double, double) override;
+
+    boost::signals2::signal<void(double)> on_zoom;
+    boost::signals2::signal<void(const glm::dvec2 &)> on_pan;
 
   private:
-    static constexpr size_t COLS_MAX = 8192; // Number of preallocated buffer space for samples
+    glm::dvec2 screen2graph(const glm::dvec2 &value) const;
+    glm::dvec2 screen2graph_delta(const glm::dvec2 &value) const;
+    glm::dvec2 graph2screen(const glm::dvec2 &value) const;
+
+    GraphState &m_state;
+    const Transform<double> &m_view;
     Window &m_window;
+    static constexpr size_t PIXELS_PER_COL = 1;
+    static constexpr size_t COLS_MAX = 8192; // Number of preallocated buffer space for samples
     unsigned int m_vao;
     unsigned int m_vbo;
     Program m_shader;
-    glm::ivec2 m_position;
-    glm::ivec2 m_size;
+    glm::dvec2 m_position;
+    glm::dvec2 m_size;
+
+    bool m_is_dragging = false;
+    glm::dvec2 m_cursor_pos_old;
 };

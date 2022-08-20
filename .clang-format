@@ -1,5 +1,9 @@
 ﻿BasedOnStyle: Microsoft
-ColumnLimit: '100'
+ColumnLimit: "100"
 BinPackArguments: false
 BinPackParameters: false
 SortIncludes: false # Causes issues when headers need to be incuded in specific orders
+
+# TODO - add this one back in when we have support for clang-14
+# See: https://stackoverflow.com/questions/56811537/clang-format-how-to-keep-each-element-of-constructors-initializer-list-on-a-se
+# PackConstructorInitializers: false

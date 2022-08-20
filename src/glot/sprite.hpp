@@ -4,8 +4,9 @@
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
 #include "window.hpp"
+#include "view.hpp"
 
-class Sprite
+class Sprite : public View
 {
   public:
     enum class AlignmentVertical
@@ -22,18 +23,21 @@ class Sprite
         Right
     };
 
-    Sprite(const Window &window, const std::string &filename);
+    Sprite(Window &window, const std::string &filename);
     ~Sprite();
     Sprite(const Sprite &) = delete;
     Sprite &operator=(const Sprite &) = delete;
     Sprite(Sprite &&) = delete;
     Sprite &operator=(Sprite &&) = delete;
 
-    void set_position(const glm::ivec2 &pos);
+    void set_position(const glm::dvec2 &pos) override;
+    glm::dvec2 position() const override;
+    glm::dvec2 size() const override;
+
     void set_alignment(AlignmentVertical align);
     void set_alignment(AlignmentHorizontal align);
     void set_tint(const glm::vec3 &colour);
-    void draw() const;
+    virtual void draw() override;
 
   private:
     struct TextureCoord
@@ -43,15 +47,17 @@ class Sprite
     };
 
     static std::pair<unsigned int, glm::ivec2> load_texture(const std::string &file_name);
+    void update_buffers() const;
 
-    const Window &m_window;
+    Window &m_window;
     unsigned int m_vertex_buffer;
     unsigned int m_vao;
     unsigned int m_texture;
     Program m_shader;
-    glm::ivec2 m_position;
-    glm::ivec2 m_size;
-    AlignmentVertical m_vertical_alignment;
-    AlignmentHorizontal m_horizontal_alignment;
-    glm::vec3 m_tint_colour;
+    glm::dvec2 m_position = glm::dvec2(0.0);
+    glm::dvec2 m_size = glm::dvec2(0.0);
+    AlignmentVertical m_vertical_alignment = AlignmentVertical::Top;
+    AlignmentHorizontal m_horizontal_alignment = AlignmentHorizontal::Left;
+    glm::vec3 m_tint_colour = glm::vec3(1.0);
+    bool m_is_dirty = true;
 };

@@ -10,6 +10,11 @@ add_subdirectory(bindings)
 add_subdirectory(stb_image)
 add_subdirectory(database)
 
+option(BUILD_TESTS "Build test programs" OFF)
+option(USE_COVERAGE "Build with coverage instrumentation" OFF)
+option(USE_SANITIZERS "Build with address and undefined behaviour sanitizer instrumentation" OFF)
+option(ENABLE_IWYU "Use the Include-What-You-Use tool when building (requires clang)" OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(
@@ -19,10 +24,10 @@ add_library(
 		shader_program.cpp
 		plugin_context.cpp
 		plugin_manager.cpp
-		window.cpp
+		window_glfw.cpp
+		window_glfw_imgui.cpp
 		audiofile_plugin.cpp
 		wavegen_plugin.cpp
-		imgui_window.cpp
 		graph.cpp
 		label.cpp
 		plot.cpp
@@ -30,7 +35,9 @@ add_library(
 		font.cpp
 		marker.cpp
 		selection_box.cpp
-		imgui_database_panel.cpp
+		axis.cpp
+		view.cpp
+		ui.cpp
 )
 target_include_directories(glot PUBLIC .)
 target_link_libraries(
@@ -48,6 +55,11 @@ target_link_libraries(
 		Boost::boost
 )
 
+if (ENABLE_IWYU)
+	find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+	set_property(TARGET glot PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+endif()
+
 if (NOT MSVC)
 	target_compile_options(glot PRIVATE -Werror -Wall -Wextra)
 endif()
@@ -57,7 +69,7 @@ if (USE_SANITIZERS)
 	target_link_options(glot PUBLIC -fsanitize=address -fsanitize=undefined)
 endif()
 
-if (BUILD_COVERAGE)
+if (USE_COVERAGE)
 	target_compile_options(glot PRIVATE -fprofile-arcs -ftest-coverage)
 	target_link_options(glot PUBLIC -fprofile-arcs -ftest-coverage)
 endif()
@@ -74,7 +86,7 @@ if (BUILD_TESTS)
 			glot
 			GTest::GTest
 	)
-	if (BUILD_COVERAGE)
+	if (USE_COVERAGE)
 		target_compile_options(tests PRIVATE -fprofile-arcs -ftest-coverage)
 		target_link_options(tests PUBLIC -fprofile-arcs -ftest-coverage)
 	endif()

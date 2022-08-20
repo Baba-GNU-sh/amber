@@ -1,8 +1,10 @@
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <stb_image/stb_image.h>
+#include <sstream>
 
 #include "marker.hpp"
 #include "label.hpp"
@@ -11,11 +13,11 @@
 
 Marker::Marker(Window &window)
     : m_window(window), m_handle(window, "marker_center.png"), m_font("proggy_clean.png"),
-      m_label(m_window, m_font)
+      m_label(window, m_font)
 {
     glGenBuffers(1, &m_line_vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(glm::ivec2), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(glm::vec2), nullptr, GL_STREAM_DRAW);
 
     glGenVertexArrays(1, &m_line_vao);
     glBindVertexArray(m_line_vao);
@@ -39,11 +41,27 @@ Marker::~Marker()
     glDeleteVertexArrays(1, &m_line_vao);
 }
 
-void Marker::set_position(const glm::ivec2 &position)
+double Marker::x_position() const
+{
+    return m_position;
+}
+
+void Marker::set_x_position(double position)
 {
     m_position = position;
-    m_handle.set_position(m_position + glm::ivec2(0, m_height));
-    m_label.set_position(m_position + glm::ivec2(0, m_height + 16));
+    update_layout();
+}
+
+void Marker::set_graph_transform(const Transform<double> &transform)
+{
+    m_graph_transform = transform;
+    update_layout();
+}
+
+void Marker::set_screen_height(int height)
+{
+    m_height = height;
+    update_layout();
 }
 
 void Marker::set_colour(const glm::vec3 &colour)
@@ -53,26 +71,33 @@ void Marker::set_colour(const glm::vec3 &colour)
     m_label.set_colour(colour);
 }
 
-void Marker::set_height(int height)
-{
-    m_height = height;
-    m_handle.set_position(m_position + glm::ivec2(0, m_height));
-    m_label.set_position(m_position + glm::ivec2(0, m_height + 16));
-}
-
 void Marker::set_label_text(const std::string &text)
 {
     m_label.set_text(text);
 }
 
-void Marker::draw() const
+void Marker::set_visible(bool visible)
 {
+    m_is_visible = visible;
+}
+
+bool Marker::is_visible() const
+{
+    return m_is_visible;
+}
+
+void Marker::draw()
+{
+    if (!m_is_visible)
+        return;
+
     m_handle.draw();
     m_label.draw();
 
-    // Align to the nearest half-pixel
-    glm::vec2 position_float = m_position;
-    position_float.x = round(position_float.x + 0.5) - 0.5;
+    glm::dvec2 graph_pos(m_position, 0.0);
+    auto position_ss = m_window.viewport_transform().apply(m_graph_transform.apply(graph_pos));
+    position_ss.y = 0;
+    position_ss.x = round(position_ss.x + 0.5) - 0.5;
 
     // Draw the vertical line
     const auto vp_matrix_inv = glm::mat3(m_window.viewport_transform().matrix_inverse());
@@ -86,36 +111,67 @@ void Marker::draw() const
     glBindBuffer(GL_ARRAY_BUFFER, m_line_vertex_buffer);
 
     glm::vec2 line_verticies[2];
-    line_verticies[0] = position_float;
-    line_verticies[1] = position_float + glm::vec2(0, m_height);
+    line_verticies[0] = position_ss;
+    line_verticies[1] = position_ss + glm::dvec2(0, m_height);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(line_verticies), line_verticies);
 
     glBindVertexArray(m_line_vao);
     glDrawArrays(GL_LINES, 0, 2);
 }
 
-unsigned int Marker::load_texture(const std::string &file_name) const
+HitBox Marker::get_hitbox() const
 {
-    unsigned int texture_handle;
-    glGenTextures(1, &texture_handle);
-    glBindTexture(GL_TEXTURE_2D, texture_handle);
+    glm::dvec2 tl(m_handle.position().x - m_handle.size().x / 2, m_handle.position().y);
+    return HitBox{tl, tl + m_handle.size()};
+}
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glm::dvec2 Marker::position() const
+{
+    return m_handle.position();
+}
 
-    int width, height, nrChannels;
-    auto file_path = Resources::find_sprite(file_name);
-    unsigned char *tex_data = stbi_load(file_path.c_str(), &width, &height, &nrChannels, 0);
-    if (!tex_data)
+glm::dvec2 Marker::size() const
+{
+    return m_handle.size();
+}
+
+void Marker::on_mouse_button(const glm::dvec2 &, int button, int action, int)
+{
+    if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT)
     {
-        throw std::runtime_error("Unable to load marker texture: " +
-                                 std::string(stbi_failure_reason()));
+        if (!m_is_visible)
+            return;
+        m_is_dragging = true;
+    }
+    else if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        m_is_dragging = false;
+    }
+}
+
+void Marker::on_cursor_move(double x, double y)
+{
+    glm::dvec2 cursor(x, y);
+
+    if (m_is_dragging)
+    {
+        const auto delta = cursor - m_cursor_old;
+        on_drag(delta.x);
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
-    stbi_image_free(tex_data);
+    m_cursor_old = glm::dvec2(x, y);
+}
 
-    return texture_handle;
+void Marker::update_layout()
+{
+    glm::dvec2 graph_pos(m_position, 0.0);
+    auto position_ss = m_window.viewport_transform().apply(m_graph_transform.apply(graph_pos));
+    position_ss.y = 0;
+
+    m_handle.set_position(position_ss + glm::dvec2(0, m_height));
+    m_label.set_position(position_ss + glm::dvec2(0, m_height + 30));
+
+    std::stringstream ss;
+    ss << m_position;
+    m_label.set_text(ss.str());
 }

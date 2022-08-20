@@ -1,62 +1,83 @@
 name: ci
 on: push
 jobs:
-
   Ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Install Conan
-      id: conan
-      uses: turtlebrowser/get-conan@main
-    
-    - name: Install Deps
-      run: |
-        conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
-        CONAN_SYSREQUIRES_MODE=enabled conan install -if ${{github.workspace}}/build .
-        sudo apt-get install -y gcovr
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
 
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MODULE_PATH=${{github.workspace}}/build -DBUILD_TESTS=ON -DBUILD_COVERAGE=ON -DUSE_SANITIZERS=ON
+      - name: Install Deps
+        run: |
+          conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
+          CONAN_SYSREQUIRES_MODE=enabled conan install -if ${{github.workspace}}/build -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True .
+          sudo apt-get install -y gcovr
 
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MODULE_PATH=${{github.workspace}}/build -DBUILD_TESTS=ON -DUSE_COVERAGE=ON -DUSE_SANITIZERS=ON
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest --verbose
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build -j`nproc`
 
-    - name: Coverage
-      working-directory: ${{github.workspace}}/build
-      run: gcovr --root .. --xml --output coverage.xml --exclude-throw-branches --exclude='.*/test/.*'
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest --verbose
 
-    - uses: codecov/codecov-action@v2
-      with:
-        files: ${{github.workspace}}/build/coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        verbose: true
+      - name: Coverage
+        working-directory: ${{github.workspace}}/build
+        run: gcovr --root .. --xml --output coverage.xml --exclude-throw-branches --exclude='.*/test/.*'
+
+      - uses: codecov/codecov-action@v2
+        with:
+          files: ${{github.workspace}}/build/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
 
   Windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Install Conan
-      id: conan
-      uses: turtlebrowser/get-conan@main
-    
-    - name: Install Deps
-      run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug . 
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
 
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}\build "-DCMAKE_MODULE_PATH=$('${{github.workspace}}\build' -replace '\\', '/')" -DBUILD_TESTS=ON
+      - name: Install Deps
+        run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug .
 
-    - name: Build
-      run: cmake --build ${{github.workspace}}\build --config Debug
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}\build "-DCMAKE_MODULE_PATH=$('${{github.workspace}}\build' -replace '\\', '/')" -DBUILD_TESTS=ON
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C Debug --verbose
+      - name: Build
+        run: cmake --build ${{github.workspace}}\build --config Debug
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -C Debug --verbose
+
+  MacOS:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Install Deps
+        run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug .
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MODULE_PATH=${{github.workspace}}/build -DBUILD_TESTS=ON -DUSE_SANITIZERS=ON
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config Debug -j`sysctl -n hw.logicalcpu`
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -C Debug --verbose

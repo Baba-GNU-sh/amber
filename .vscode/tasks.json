@@ -19,7 +19,12 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "cmake --build . -j`nproc`",
+            "linux": {
+                "command": "cmake --build . -j`nproc`",
+            },
+            "osx": {
+                "command": "cmake --build . -j`sysctl -n hw.logicalcpu`"
+            },
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}/build/current"
@@ -76,7 +81,15 @@
             "id": "build_type",
             "description": "The type of build",
             "default": "Debug",
-            "type": "promptString"
-        },
+            "type": "pickString",
+            "options": [
+                "Debug",
+                "Release",
+                "Test",
+                "TestCoverage",
+                "Benchmark",
+                "IWYU"
+            ]
+        }
     ]
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/signals2.hpp>
+
 #include <glm/glm.hpp>
 #include <database/timeseries.hpp>
 #include "shader_utils.hpp"
@@ -7,7 +9,7 @@
 #include "window.hpp"
 #include "sprite.hpp"
 
-class Marker
+class Marker : public View
 {
   public:
     Marker(Window &window);
@@ -17,23 +19,27 @@ class Marker
     Marker(Marker &&) = delete;
     Marker &operator=(Marker &&) = delete;
 
-    void set_position(const glm::ivec2 &position);
+    double x_position() const;
+    bool is_visible() const;
+    void set_x_position(double position);
+    void set_graph_transform(const Transform<double> &transform);
+    void set_screen_height(int height);
     void set_colour(const glm::vec3 &colour);
-    void set_height(int height);
     void set_label_text(const std::string &text);
-    void draw() const;
+    void set_visible(bool visible);
+    void draw() override;
+    HitBox get_hitbox() const override;
 
-    bool is_dragging = false; // TODO The marker object should listen to mouse events from the
-                              // window and decide when it is clicked and when to start dragging
+    glm::dvec2 position() const override;
+    glm::dvec2 size() const override;
+
+    void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
+    void on_cursor_move(double x, double y) override;
+
+    boost::signals2::signal<void(double)> on_drag;
 
   private:
-    struct TextureCoord
-    {
-        glm::vec2 vertex_pos;
-        glm::vec2 texture_pos;
-    };
-
-    unsigned int load_texture(const std::string &filename) const;
+    void update_layout();
 
     Window &m_window;
     Sprite m_handle;
@@ -42,7 +48,11 @@ class Marker
     unsigned int m_line_vertex_buffer;
     unsigned int m_line_vao;
     Program m_line_shader;
-    glm::ivec2 m_position;
+    double m_position;
     glm::vec3 m_colour;
     int m_height;
+    Transform<double> m_graph_transform;
+    bool m_is_dragging = false;
+    glm::dvec2 m_cursor_old;
+    bool m_is_visible = false;
 };

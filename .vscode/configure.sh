@@ -1,30 +1,66 @@
 #!/bin/bash
 
-BUILD_TYPE="$1"
+die() {
+  echo "ERROR: $1"
+  exit 1
+}
 
-COVERAGE=""
-SANITIZERS=""
-TESTS=""
-BENCHMARKS=""
+BUILD_TYPE="$1"
+BUILD_DIR="build/${BUILD_TYPE}"
+
+MODE="Release"
+COVERAGE="OFF"
+SANITIZERS="OFF"
+TESTS="OFF"
+BENCHMARKS="OFF"
+IWYU="OFF"
 
 case "$BUILD_TYPE" in
   "Debug")
-    COVERAGE="-DBUILD_COVERAGE=ON"
-    SANITIZERS="-DUSE_SANITIZERS=ON"
-    TESTS="-DBUILD_TESTS=ON"
+    MODE="Debug"
     ;;
   "Release")
-    COVERAGE="-DBUILD_COVERAGE=OFF"
-    SANITIZERS="-DUSE_SANITIZERS=OFF"
-    TESTS="-DBUILD_TESTS=OFF"
-    BENCHMARKS="-DBUILD_BENCHMARKS=ON"
+    MODE="Release"
+    ;;
+  "Test")
+    MODE="Debug"
+    TESTS="ON"
+    ;;
+  "Test")
+    MODE="Debug"
+    TESTS="ON"
+    ;;
+  "TestCoverage")
+    MODE="Debug"
+    TESTS="ON"
+    COVERAGE="ON"
+    ;;
+  "Benchmark")
+    MODE="Release"
+    BENCHMARK="ON"
+    ;;
+  "IWYU")
+    MODE="Release"
+    IWYU="ON"
+    ;;
+  *)
+    die "Select one of: Debug, Release, Test, TestCoverage, Benchmark, IWYU"
     ;;
 esac
 
-echo "Build settings: ${BUILD_TYPE} ${COVERAGE} ${SANITIZERS} ${TESTS} ${BENCHMARKS}"
+echo "Build settings: ${BUILD_TYPE} Coverage=${COVERAGE} Sanitizers=${SANITIZERS} Tests=${TESTS} Benchmarks=${BENCHMARKS} IWYU=${IWYU}"
 
-mkdir -p "build/${BUILD_TYPE}"
+mkdir -p "${BUILD_DIR}"
 ln -sfn "${BUILD_TYPE}" "build/current"
-CONAN_SYSREQUIRES_MODE=enabled conan install -if "build/${BUILD_TYPE}" -s build_type="${BUILD_TYPE}" .
-cmake -B build/${BUILD_TYPE} -DCMAKE_MODULE_PATH=${PWD}/build/${BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" "${TESTS}" "${COVERAGE}" "${SANITIZERS}" "${BENCHMARKS}" .
+CONAN_SYSREQUIRES_MODE=enabled conan install -if "${BUILD_DIR}" -s build_type="${MODE}" .
+cmake \
+  -B "${BUILD_DIR}" \
+  -DCMAKE_MODULE_PATH="${PWD}/${BUILD_DIR}" \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+  -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+  -DBUILD_TESTS="${TESTS}" \
+  -DBUILD_BENCHMARKS="${BENCHMARKS}" \
+  -DUSE_COVERAGE="${COVERAGE}" \
+  -DUSE_SANITIZERS="${SANITIZERS}" \
+  -DENABLE_IWYU="${IWYU}" .
 ln -sfn build/current/compile_commands.json compile_commands.json

@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(glot)
 
-option(BUILD_TESTS "Build test programs" OFF)
-option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
-option(BUILD_COVERAGE "Build with coverage instrumentation" OFF)
-option(USE_SANITIZERS "Build with address and undefined behaviour sanitizer instrumentation" OFF)
-
 set(CMAKE_CXX_STANDARD 17)
 
 # Note: We need to enable testing at the top level to generate the test file at the root of the build dir
@@ -22,6 +17,9 @@ if (NOT MSVC)
 endif()
 set_target_properties(main PROPERTIES OUTPUT_NAME glot)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
+
+add_executable(demo src/glot/demo.cpp)
+target_link_libraries(demo PRIVATE glot)
 
 # Copy assets and shaders to the build dir
 configure_file(shaders/plot/vertex.glsl shaders/plot/vertex.glsl COPYONLY)
