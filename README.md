@@ -197,3 +197,5 @@ ln -s build/compile_commands.json .
 
 ## Fonts
 Amber uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in `font.png`.
+
+Ascii art from https://patorjk.com/software/taag/#p=display&f=Small%20Slant&t=Amber
