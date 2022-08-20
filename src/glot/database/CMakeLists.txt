@@ -45,7 +45,7 @@ if (BUILD_TESTS)
 	target_link_libraries(
 		database_tests
 		PRIVATE
-			glot
+			amber
 			GTest::GTest
 	)
 	if (USE_COVERAGE)

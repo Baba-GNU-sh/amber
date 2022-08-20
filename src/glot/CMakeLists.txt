@@ -18,7 +18,7 @@ option(ENABLE_IWYU "Use the Include-What-You-Use tool when building (requires cl
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(
-	glot
+	amber
 	STATIC
 		shader.cpp
 		shader_program.cpp
@@ -39,9 +39,9 @@ add_library(
 		view.cpp
 		ui.cpp
 )
-target_include_directories(glot PUBLIC .)
+target_include_directories(amber PUBLIC .)
 target_link_libraries(
-	glot
+	amber
 	PUBLIC
 		bindings
 		stb_image
@@ -57,21 +57,21 @@ target_link_libraries(
 
 if (ENABLE_IWYU)
 	find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
-	set_property(TARGET glot PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+	set_property(TARGET amber PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 endif()
 
 if (NOT MSVC)
-	target_compile_options(glot PRIVATE -Werror -Wall -Wextra)
+	target_compile_options(amber PRIVATE -Werror -Wall -Wextra)
 endif()
 
 if (USE_SANITIZERS)
-	target_compile_options(glot PRIVATE -fsanitize=address -fsanitize=undefined)
-	target_link_options(glot PUBLIC -fsanitize=address -fsanitize=undefined)
+	target_compile_options(amber PRIVATE -fsanitize=address -fsanitize=undefined)
+	target_link_options(amber PUBLIC -fsanitize=address -fsanitize=undefined)
 endif()
 
 if (USE_COVERAGE)
-	target_compile_options(glot PRIVATE -fprofile-arcs -ftest-coverage)
-	target_link_options(glot PUBLIC -fprofile-arcs -ftest-coverage)
+	target_compile_options(amber PRIVATE -fprofile-arcs -ftest-coverage)
+	target_link_options(amber PUBLIC -fprofile-arcs -ftest-coverage)
 endif()
 
 if (BUILD_TESTS)
@@ -83,7 +83,7 @@ if (BUILD_TESTS)
 	target_link_libraries(
 		tests
 		PRIVATE
-			glot
+			amber
 			GTest::GTest
 	)
 	if (USE_COVERAGE)

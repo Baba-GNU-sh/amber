@@ -88,7 +88,7 @@ int main()
         plugin_manager.start_all();
 
         // Create a new window using GLFW, OpenGL and initializing ImGui
-        Window_GLFW_ImGui window(1024, 768, "GLot");
+        Window_GLFW_ImGui window(1024, 768, "Amber");
 
         // We need to do this after creating our GL context which is done when the first GLFW
         // window is created

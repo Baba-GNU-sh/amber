@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "GLot (Run)",
+            "name": "Amber (Run)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/current/glot",
+            "program": "${workspaceFolder}/build/current/amber",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/current",
@@ -34,10 +34,10 @@
             ]
         },
         {
-            "name": "GLot (Attach)",
+            "name": "Amber (Attach)",
             "type": "cppdbg",
             "request": "attach",
-            "program": "${workspaceFolder}/build/current/glot",
+            "program": "${workspaceFolder}/build/current/amber",
             "processId": "${command:pickProcess}",
             "linux": {
                 "MIMode": "gdb"
@@ -52,17 +52,17 @@
                     "ignoreFailures": true
                 },
                 {
-                    "description":  "Set Disassembly Flavor to Intel",
+                    "description": "Set Disassembly Flavor to Intel",
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
             ]
         },
         {
-            "name": "GLot Tests",
+            "name": "Amber Tests",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/current/src/glot/tests",
+            "program": "${workspaceFolder}/build/current/src/amber/tests",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/current",
@@ -88,10 +88,10 @@
             ]
         },
         {
-            "name": "GLot Benchmarks",
+            "name": "Amber Benchmarks",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/current/src/glot/bench",
+            "program": "${workspaceFolder}/build/current/src/amber/bench",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/current",

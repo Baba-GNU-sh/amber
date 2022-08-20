@@ -1,3 +1,11 @@
+```
+   ___         __          
+  / _ | __ _  / /  ___ ____
+ / __ |/  ' \/ _ \/ -_) __/
+/_/ |_/_/_/_/_.__/\__/_/
+ Real Time Data Plotter
+```
+
 [![Actions Status](https://github.com/baba-GNU-sh/glot/workflows/ci/badge.svg?branch=main)](https://github.com/baba-GNU-sh/glot/actions)
 [![codecov](https://codecov.io/gh/baba-GNU-sh/glot/branch/main/graph/badge.svg?token=TYEKEONCCL)](https://codecov.io/gh/baba-GNU-sh/glot)
 
@@ -5,35 +13,48 @@
 
 # Introduction
 
-GLot is (going to be) an OpenGL oscilloscope-like desktop graphing application for Windows, Linux and Mac, used for exploring high-frequency time-series data signals from arbitrary sources such as robots, servers, data loggers, sound cards, USB oscillioscopes, USB logic analyzers, and custom microcontrollers.
+Amber is (going to be) a real-time data-plotter for Windows, Linux and Mac, designed to be used for exploring high-frequency time-series data.
 
-Much like an oscilloscope, GLot will display these signals as a 2D graph view with time along the X axis, and signal value up the Y axis. GLot will provide intuitive controls for navigating the graph (e.g. scrolling around, zooming in and out on combined & individual axes, zooming in on specific events with a selection tool), and will be fast and responsive even when displaying large amounts of high frequency data. The graph display will be designed to give you as much information about the signal as possible at every zoom level without making any assumptions, for example, by showing average value + error bars when there is more than data point per pixel.
+Examples of data sources Amber coulde be good for are: robots, servers, data loggers, sound cards, USB oscillioscopes, and USB logic analyzers.
 
-Ultimately, data sources shall be provided via plugins, allowing users to easily get data from custom sources into GLot.
+Much like an oscilloscope, Amber displays signals on a 2D graph, with time along the X axis and signal value up the Y axis. Amber provides intuitive controls for navigating the graph (e.g. scrolling around, zooming in and out on combined & individual axes, zooming in on specific events with a selection tool), and remains fast and responsive even when displaying large amounts of high frequency data.
 
-GLot is designed to fill a hole that I have personally encountered many times while working as an embedded software engineer: I can get data off my embedded device but have no decent way to view and explore it! There are alternatives (see the [Alternatives](#alternatives) section for a list), and while there are plenty of quality tools out there, I've found all of them to be lacking in at least one important way factor.
+The graph renderer is be designed to give you as much information about the signal as possible at every zoom level without aliasing, for example, by showing average value + error bars when there is more than data point per pixel.
 
-So far, GLot is far from complete. It's just an example project which I am using to test the graph renderer using OpenGL, and the best way to draw other UI elements such as menus and buttons, for which I am currently using ImGui.
+Ultimately, data sources shall be provided via plugins, allowing users to easily get data from custom sources into Amber.
+
+# Rationale
+
+Amber is designed to fill a hole that I have personally encountered many times while working as an embedded software engineer: I can get sensor data out of my embedded device but have no decent way to view and explore it! There are alternatives (see the [Alternatives](#alternatives) section for a list), and while there are plenty of quality tools out there, I've found all of them to be lacking in at least one important way.
+
+At the time of writing, Amber is far from complete. It's mainly an example project which I am using to test the graph renderer (which is based on OpenGL), and to figure out the best way to draw other UI elements such as menus and buttons, for which I am currently using ImGui.
 
 # Design Philosophy
 
-GLot will feature the following features:
+Amber will is designed around the following principles:
 
-- Keep recording data 'til your memory is full (no fixed size ring buffer).
+- Keep recording data 'til your memory is full (no fixed size ring buffer here).
+- Always show the most useful information possible, regardless of the zoom level without aliasing.
 - Target 60FPS even on modest integrated laptop graphics.
-- Builds and runs on Windows and Linux - see [actions](/actions).
-- Always show the most useful information possible, regardless of the zoom level.
+- Builds and runs on Windows, Linux, and Mac - see [actions](/actions).
 
 # Screenshots
 
+Ubuntu
 ![screenshot_ubuntu](screenshot_ubuntu.png)
+
+Mac
 ![screenshot_maxos](screenshot_macos.png)
+
+Windows
 ![screenshot_macos](screenshot_windows.png)
 
 
-# How to build
+# Building from source
 
-Glot uses [Conan](http://conan.io/) to manage its dependencies, which makes it easier to build on Windows (and hopefully MacOS). So far, GLot has been tested on Ubuntu 20.04 and Windows 10, but it may well work on other distros and Windowses thanks to Conan.
+Amber uses [conan](http://conan.io/) to manage dependencies, which makes the build easier to manage on different platforms.
+
+Amber has been tested on Ubuntu 20.04, Windows 10, and MacOS Monterey, but it may well work on other distros and OS versions.
 
 ## Ubuntu
 
@@ -54,15 +75,19 @@ cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build .
 ```
 
-Run GLot with:
+Run Amber with:
 
 ```bash
-./glot
+./amber
 ```
 
 ## MacOS
 
 First, install the developer tools for mac, which should install things like clang and make. Then install homebrew, and with it install conan and cmake.
+
+```zsh
+brew install conan cmake
+```
 
 Clone this repo, and from within the root of the cloned workspace, run:
 
@@ -73,10 +98,10 @@ cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build .
 ```
 
-Run GLot with:
+Run Amber with:
 
 ```zsh
-./glot
+./amber
 ```
 
 ## Windows
@@ -99,7 +124,7 @@ PS C:\Users\steve> conan --version
 Conan version 1.44.1
 ```
 
-You will also need to get hold of the MSVC compiler from somewhere. I would recommend installing Visual Studio Community Edition. GLot has been tested with the 2019 or 2022 editions.
+You will also need to get hold of the MSVC compiler from somewhere. I would recommend installing Visual Studio Community Edition. Amber has been tested with the 2019 or 2022 editions.
 
 Clone this repo then cd into into the newly created dir. Now rung the following to make a build:
 
@@ -111,17 +136,17 @@ cmake "-DCMAKE_MODULE_PATH=$((pwd).path -replace '\\', '/')" ..
 cmake --build . --config Debug
 ```
 
-Now you can run GLot with the following command:
+Now you can run Amber with the following command:
 
 ```powershell
-.\build\Debug\glot.exe
+.\build\Debug\amber.exe
 ```
 
-Cmake should have generated a VS solution in `build/glot.sln` which you can open up in Visual Studio, and debug and build directly from there. Just make sure to select the `main` project as the startup application.
+Cmake should have generated a VS solution in `build/amber.sln` which you can open up in Visual Studio, and debug and build directly from there. Just make sure to select the `main` project as the startup application.
 
 ## Running Tests
 
-GLot comes with a suite of tests and performance benchmarks.
+Amber comes with a suite of tests and performance benchmarks.
 
 > Note: this only works with `gcc` on Linux AFAIK.
 
@@ -142,7 +167,7 @@ firefox coverage.html
 
 ## Running Benchmarks
 
-Performance is an important part of glot, so some benchmarks are also available, mainly oriented around accessing timeseries data.
+Performance is an important part of amber, so some benchmarks are also available, mainly oriented around accessing timeseries data.
 
 ```bash
 mkdir build && cd build
@@ -171,4 +196,4 @@ ln -s build/compile_commands.json .
 ```
 
 ## Fonts
-GLot uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in `font.png`.
+Amber uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in `font.png`.
