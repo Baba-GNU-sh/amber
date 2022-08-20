@@ -8,9 +8,9 @@ if (BUILD_TESTS)
 	enable_testing()
 endif()
 
-add_subdirectory(src/glot)
+add_subdirectory(src/amber)
 
-add_executable(main src/glot/main.cpp)
+add_executable(main src/amber/main.cpp)
 target_link_libraries(main PRIVATE amber)
 if (NOT MSVC)
 	target_compile_options(main PRIVATE -Werror -Wall -Wextra)
@@ -18,7 +18,7 @@ endif()
 set_target_properties(main PROPERTIES OUTPUT_NAME amber)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
 
-add_executable(demo src/glot/demo.cpp)
+add_executable(demo src/amber/demo.cpp)
 target_link_libraries(demo PRIVATE amber)
 
 # Copy assets and shaders to the build dir
