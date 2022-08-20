@@ -31,7 +31,7 @@ At the time of writing, Amber is far from complete. It's mainly an example proje
 
 # Design Philosophy
 
-Amber will is designed around the following principles:
+Amber is designed around the following principles:
 
 - Keep recording data 'til your memory is full (no fixed size ring buffer here).
 - Always show the most useful information possible, regardless of the zoom level without aliasing.
