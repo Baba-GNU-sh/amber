@@ -82,10 +82,10 @@ jobs:
         id: github-cache-conan
         uses: actions/cache@v3
         env:
-          cache-name: cache-conan-modules
+          cache-name: conan-modules
         with:
           path: ~/.conan
-          key: host-${{ runner.os }}-target-${{ runner.os }}-${{ hashFiles('conanfile.txt') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.txt') }}
 
       - name: Install Deps
         run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug .
