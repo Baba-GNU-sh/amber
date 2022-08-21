@@ -7,7 +7,7 @@ spdlog/1.9.2
 audiofile/1.0.9
 gtest/cci.20210126
 benchmark/[>=1.6.0]
-boost/[>=1.71.0]
+sigslot/1.2.1
 
 # Only required for building the font atlas - has a compat issue with boost so disable for now
 # freetype/2.11.1

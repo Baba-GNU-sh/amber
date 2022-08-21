@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/signals2.hpp>
+#include <sigslot/signal.hpp>
 
 #include <glm/glm.hpp>
 #include <database/timeseries.hpp>
@@ -36,7 +36,7 @@ class Marker : public View
     void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
     void on_cursor_move(double x, double y) override;
 
-    boost::signals2::signal<void(double)> on_drag;
+    sigslot::signal<double> on_drag;
 
   private:
     void update_layout();
