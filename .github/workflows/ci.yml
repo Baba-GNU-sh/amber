@@ -56,9 +56,6 @@ jobs:
           path: ~/.conan
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.txt') }}
 
-      - name: HACK Delete boost from conan cache
-        run: conan remove boost -f
-
       - name: Install Deps
         run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug .
 
