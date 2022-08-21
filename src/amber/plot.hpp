@@ -5,7 +5,7 @@
 #include <database/timeseries.hpp>
 #include "window.hpp"
 #include "view.hpp"
-#include <boost/signals2.hpp>
+#include <sigslot/signal.hpp>
 #include "graph_state.hpp"
 
 class Plot : public View
@@ -33,8 +33,8 @@ class Plot : public View
     void on_mouse_button(const glm::dvec2 &cursor_pos, int, int, int) override;
     void on_cursor_move(double, double) override;
 
-    boost::signals2::signal<void(double)> on_zoom;
-    boost::signals2::signal<void(const glm::dvec2 &)> on_pan;
+    sigslot::signal<double> on_zoom;
+    sigslot::signal<const glm::dvec2 &> on_pan;
 
   private:
     glm::dvec2 screen2graph(const glm::dvec2 &value) const;

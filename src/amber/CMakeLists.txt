@@ -4,7 +4,7 @@ find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(audiofile REQUIRED)
-find_package(Boost REQUIRED)
+find_package(PalSigslot REQUIRED)
 
 add_subdirectory(bindings)
 add_subdirectory(stb_image)
@@ -52,7 +52,7 @@ target_link_libraries(
 		imgui::imgui
 		spdlog::spdlog
 		audiofile::audiofile
-		Boost::boost
+		Pal::Sigslot
 )
 
 if (ENABLE_IWYU)

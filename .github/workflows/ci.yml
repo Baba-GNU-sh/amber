@@ -47,6 +47,15 @@ jobs:
         id: conan
         uses: turtlebrowser/get-conan@main
 
+      - name: Cache Conan Modules
+        id: github-cache-conan
+        uses: actions/cache@v3
+        env:
+          cache-name: conan-modules
+        with:
+          path: ~/.conan
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.txt') }}
+
       - name: Install Deps
         run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug .
 
@@ -68,6 +77,15 @@ jobs:
       - name: Install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
+
+      - name: Cache Conan Modules
+        id: github-cache-conan
+        uses: actions/cache@v3
+        env:
+          cache-name: conan-modules
+        with:
+          path: ~/.conan
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.txt') }}
 
       - name: Install Deps
         run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug .
