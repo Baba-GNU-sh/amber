@@ -60,17 +60,17 @@ jobs:
         run: conan remove boost -f
 
       - name: Install Deps
-        run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Debug .
+        run: conan install -if ${{github.workspace}}/build --build=missing -s build_type=Release .
 
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}\build "-DCMAKE_MODULE_PATH=$('${{github.workspace}}\build' -replace '\\', '/')" -DBUILD_TESTS=ON
 
       - name: Build
-        run: cmake --build ${{github.workspace}}\build --config Debug
+        run: cmake --build ${{github.workspace}}\build --config Release
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C Debug --verbose
+        run: ctest -C Release --verbose
 
   MacOS:
     runs-on: macos-latest
