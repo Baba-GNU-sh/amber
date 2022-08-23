@@ -62,25 +62,22 @@ Follow the relevant link below to find build instructions for your system.
 - [Linux](docs/building/linux.md)
 - [Windows](docs/building/windows.md)
 
-## Alternatives
+# Development
+
+I would highly recommend using clangd to develop Amber, as it integrates nicely with cmake. You can ask cmake to generate a `compile_commands.json` file which is read up by clangd so autocompletion and highlighting can be tightly integrated with the build system.
+
+Make sure `clangd` is available on your path, by installing clangd using your package manager, and install a relevant extension for your IDE, such as the clangd extension for VSCode or ALE for vim.
+
+Then add `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` to your cmake command, and make a symlink from the root of the repo to this file in your build dir `ln -s build/compile_commands.json .`.
+
+# Alternatives
 
 - [PlotJuggler](https://www.plotjuggler.io/)
+- todo...
 
-## Additional Notes
 
-### Using with clangd
+# Acknowledgements
 
-```bash
-cd build
-cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
-```
+Amber uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in and can be found in `assets/fonts/proggy_clean.png`. 
 
-From the root dir, make a symlink to `compile_commands.json` in the build dir.
-```
-ln -s build/compile_commands.json .
-```
-
-## Fonts
-Amber uses the font ProggyClean by Tristan Grimmer. This is pre-rendered out to a bitmap font atlas in `font.png`.
-
-Ascii art from https://patorjk.com/software/taag/#p=display&f=Small%20Slant&t=Amber
+The Amber ascii art at the top of this README is from here: https://patorjk.com/software/taag/#p=display&f=Small%20Slant&t=Amber
