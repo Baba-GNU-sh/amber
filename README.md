@@ -6,8 +6,8 @@
  Real Time Data Plotter
 ```
 
-[![Actions Status](https://github.com/baba-GNU-sh/glot/workflows/ci/badge.svg?branch=main)](https://github.com/baba-GNU-sh/glot/actions)
-[![codecov](https://codecov.io/gh/baba-GNU-sh/glot/branch/main/graph/badge.svg?token=TYEKEONCCL)](https://codecov.io/gh/baba-GNU-sh/glot)
+[![Actions Status](https://github.com/baba-GNU-sh/amber/workflows/ci/badge.svg?branch=main)](https://github.com/baba-GNU-sh/amber/actions)
+[![codecov](https://codecov.io/gh/baba-GNU-sh/amber/branch/main/graph/badge.svg?token=TYEKEONCCL)](https://codecov.io/gh/baba-GNU-sh/amber)
 
 > :warning: **This project is under heavy development, and thus is unlikely to be very useful to anyone in its current state!**
 
