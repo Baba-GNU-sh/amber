@@ -7,7 +7,7 @@
 Install python, then install conan:
 
 ```bash
-sudo apt install python3-pip build-essential cmake git
+sudo apt install python3-pip build-essential cmake git pkg-config
 pip3 install conan
 conan profile update settings.compiler.libcxx=libstdc++11 default
 ```
@@ -18,7 +18,7 @@ Clone this repo then cd into the root:
 
 ```bash
 mkdir build && cd build
-CONAN_SYSREQUIRES_MODE=enabled conan install ..
+CONAN_SYSREQUIRES_MODE=enabled conan install -c tools.system.package_manager:mode=install ..
 cmake -DCMAKE_MODULE_PATH=${PWD} -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build .
 ```

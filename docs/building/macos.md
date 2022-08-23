@@ -3,7 +3,7 @@
 First, install the developer tools for mac, which should install things like clang and make. Then install [homebrew](https://brew.sh/), and with it install conan and cmake.
 
 ```zsh
-brew install conan cmake ninja
+brew install conan cmake
 ```
 
 Clone this repo, and from within the root of the cloned workspace, run:
