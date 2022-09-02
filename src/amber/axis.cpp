@@ -6,7 +6,7 @@
 #include "resources.hpp"
 #include "axis.hpp"
 
-AxisBase::AxisBase(Window &window) : m_window(window), m_font("proggy_clean.png")
+AxisBase::AxisBase(Window &window) : m_window(window), m_font("proggy_clean.png"), m_is_dragging(false)
 {
     glGenVertexArrays(1, &m_linebuf_vao);
     glBindVertexArray(m_linebuf_vao);
@@ -194,7 +194,36 @@ void AxisBase::on_scroll(const glm::dvec2 &cursor_position, double, double yoffs
 
 void AxisBase::on_mouse_button(const glm::dvec2 &, int button, int action, int)
 {
-    spdlog::debug("Click {} {}", button, action);
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        m_is_dragging = true;
+    }
+    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        m_is_dragging = false;
+    }
+}
+
+template <> void Axis<AxisHorizontal>::on_cursor_move(double, double)
+{
+    if (m_is_dragging)
+    {
+        auto delta = m_window.cursor() - m_prev_cursor;
+        on_pan(delta.x);
+    }
+
+    m_prev_cursor = m_window.cursor();
+}
+
+template <> void Axis<AxisVertical>::on_cursor_move(double, double)
+{
+    if (m_is_dragging)
+    {
+        auto delta = m_window.cursor() - m_prev_cursor;
+        on_pan(delta.y);
+    }
+
+    m_prev_cursor = m_window.cursor();
 }
 
 std::tuple<glm::dvec2, glm::dvec2, glm::ivec2> AxisBase::tick_spacing() const

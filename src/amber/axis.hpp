@@ -26,6 +26,7 @@ class AxisBase : public View
     void on_scroll(const glm::dvec2 &, double x, double y) override;
     void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
 
+    sigslot::signal<double> on_pan;
     sigslot::signal<double> on_zoom;
 
   protected:
@@ -67,6 +68,9 @@ class AxisBase : public View
     unsigned int m_linebuf_vao;
     unsigned int m_linebuf_vbo;
     Program m_lines_shader;
+
+    bool m_is_dragging;
+    glm::dvec2 m_prev_cursor;
 };
 
 enum AxisOrientation
@@ -87,4 +91,6 @@ template <AxisOrientation Orientation> class Axis : public AxisBase
                     int &offset) const override;
 
     void update_layout() override;
+
+    void on_cursor_move(double xpos, double ypos) override;
 };

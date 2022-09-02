@@ -22,10 +22,26 @@ Graph::Graph(GraphState &state, Window &window)
         const auto delta = 1.0 + amount * 0.1;
         apply_zoom(glm::dvec2(delta, 1.0));
     });
+    m_axis_horizontal.on_pan.connect([this](double amount) {
+        const auto delta_gs = screen2graph_delta(glm::dvec2(amount, 0));
+        m_view.translate(delta_gs);
+        m_axis_horizontal.set_graph_transform(m_view);
+        m_axis_vertical.set_graph_transform(m_view);
+        m_marker_a.set_graph_transform(m_view);
+        m_marker_b.set_graph_transform(m_view);
+    });
 
     m_axis_vertical.on_zoom.connect([this](double amount) {
         const auto delta = 1.0 + amount * 0.1;
         apply_zoom(glm::dvec2(1.0, delta));
+    });
+    m_axis_vertical.on_pan.connect([this](double amount) {
+        const auto delta_gs = screen2graph_delta(glm::dvec2(0, amount));
+        m_view.translate(delta_gs);
+        m_axis_horizontal.set_graph_transform(m_view);
+        m_axis_vertical.set_graph_transform(m_view);
+        m_marker_a.set_graph_transform(m_view);
+        m_marker_b.set_graph_transform(m_view);
     });
 
     m_plot.on_zoom.connect([this](double amount) {
