@@ -1,6 +1,9 @@
 #pragma once
 
 #include "view.hpp"
+#include "window.hpp"
+#include "graph.hpp"
+
 class KeyController : public View
 {
   public:
