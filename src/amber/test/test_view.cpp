@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+using namespace glm;
 using ::testing::StrictMock;
 
 TEST(View, modifiers_can_be_combined)
@@ -17,66 +18,84 @@ TEST(View, modifiers_can_be_combined)
 class MockView : public View
 {
   public:
-    MOCK_METHOD(void,
-                on_mouse_button,
-                (const glm::dvec2 &, MouseButton, Action, Modifiers),
-                (override));
-    MOCK_METHOD(void, on_scroll, (const glm::dvec2 &, double, double), (override));
+    MOCK_METHOD(void, on_mouse_button, (const dvec2 &, MouseButton, Action, Modifiers), (override));
+    MOCK_METHOD(void, on_scroll, (const dvec2 &, double, double), (override));
     MOCK_METHOD(void, draw, (), (override));
     MOCK_METHOD(void, on_cursor_move, (double x, double y), (override));
     MOCK_METHOD(void, on_resize, (int, int), (override));
     MOCK_METHOD(void, on_key, (Key, int, Action action, Modifiers mods), (override));
 };
 
-TEST(View, on_mouse_button_call_forwarded_to_child_view_and_sticky)
+TEST(View, mouseClickedWithinChildView_childReceivesPressAndReleaseEvents)
 {
-    View view;
-
     MockView mock_view;
+    mock_view.set_position(dvec2(0, 0));
+    mock_view.set_size(dvec2(500, 500));
+
+    View view;
     view.add_view(&mock_view);
 
-    mock_view.set_position(glm::dvec2(0, 0));
-    mock_view.set_size(glm::dvec2(500, 500));
-
-    glm::dvec2 cursor_inside(100, 200);
-    glm::dvec2 cursor_outside(-100, -100);
+    EXPECT_CALL(
+        mock_view,
+        on_mouse_button(dvec2(100, 100), MouseButton::Primary, Action::Press, Modifiers::None));
+    view.on_mouse_button(dvec2(100, 100), MouseButton::Primary, Action::Press, Modifiers::None);
 
     EXPECT_CALL(
         mock_view,
-        on_mouse_button(cursor_inside, MouseButton::Primary, Action::Press, Modifiers::None))
-        .Times(1);
-    view.on_mouse_button(cursor_inside, MouseButton::Primary, Action::Press, Modifiers::None);
-
-    EXPECT_CALL(
-        mock_view,
-        on_mouse_button(cursor_outside, MouseButton::Primary, Action::Release, Modifiers::None))
-        .Times(1);
-    view.on_mouse_button(cursor_outside, MouseButton::Primary, Action::Release, Modifiers::None);
+        on_mouse_button(dvec2(100, 100), MouseButton::Primary, Action::Release, Modifiers::None));
+    view.on_mouse_button(dvec2(100, 100), MouseButton::Primary, Action::Release, Modifiers::None);
 }
 
-TEST(View, on_mouse_button_call_forwarded_to_child_view_when_not_stick)
+TEST(View, mousePressedWithinChildViewButReleasedOutside_checkChildReceivesPressAndReleaseEvents)
 {
-    View view;
+    MockView mock_view;
+    mock_view.set_position(dvec2(0, 0));
+    mock_view.set_size(dvec2(500, 500));
 
-    StrictMock<MockView> mock_view;
+    View view;
     view.add_view(&mock_view);
 
-    mock_view.set_position(glm::dvec2(0, 0));
-    mock_view.set_size(glm::dvec2(500, 500));
+    EXPECT_CALL(
+        mock_view,
+        on_mouse_button(dvec2(100, 100), MouseButton::Primary, Action::Press, Modifiers::None));
+    view.on_mouse_button(dvec2(100, 100), MouseButton::Primary, Action::Press, Modifiers::None);
 
-    glm::dvec2 cursor_inside(100, 200);
-    glm::dvec2 cursor_outside(-100, -100);
+    EXPECT_CALL(
+        mock_view,
+        on_mouse_button(dvec2(800, 800), MouseButton::Primary, Action::Release, Modifiers::None));
+    view.on_mouse_button(dvec2(800, 800), MouseButton::Primary, Action::Release, Modifiers::None);
+}
 
-    // The mouse is clicked outside and released inside the child view so we expect the mocked
-    // on_mouse_button() to never be called. StrictMock will ensure this doesn't happen
-    view.on_mouse_button(cursor_outside, MouseButton::Primary, Action::Press, Modifiers::None);
-    view.on_mouse_button(cursor_inside, MouseButton::Primary, Action::Release, Modifiers::None);
+TEST(View, mouseClickedOusideChildView_checkChildReceivesNoEvents)
+{
+    StrictMock<MockView> mock_view;
+    mock_view.set_position(dvec2(0, 0));
+    mock_view.set_size(dvec2(500, 500));
+
+    View view;
+    view.add_view(&mock_view);
+
+    view.on_mouse_button(dvec2(800, 800), MouseButton::Primary, Action::Press, Modifiers::None);
+    view.on_mouse_button(dvec2(800, 800), MouseButton::Primary, Action::Release, Modifiers::None);
+}
+
+TEST(View, mousePressedOusideChildViewButReleasedInside_checkChildReceivesNoEvents)
+{
+    StrictMock<MockView> mock_view;
+    mock_view.set_position(dvec2(0, 0));
+    mock_view.set_size(dvec2(500, 500));
+
+    View view;
+    view.add_view(&mock_view);
+
+    view.on_mouse_button(dvec2(800, 800), MouseButton::Primary, Action::Press, Modifiers::None);
+    view.on_mouse_button(dvec2(100, 100), MouseButton::Primary, Action::Release, Modifiers::None);
 }
 
 TEST(View, draw_call_forwarded_to_child_view)
 {
     MockView mock_view;
-    EXPECT_CALL(mock_view, draw()).Times(1);
+    EXPECT_CALL(mock_view, draw());
 
     View view;
     view.add_view(&mock_view);
@@ -86,7 +105,7 @@ TEST(View, draw_call_forwarded_to_child_view)
 TEST(View, on_cursor_move_call_forwarded_to_child_view)
 {
     MockView mock_view;
-    EXPECT_CALL(mock_view, on_cursor_move(0, 0)).Times(1);
+    EXPECT_CALL(mock_view, on_cursor_move(0, 0));
 
     View view;
     view.add_view(&mock_view);
@@ -96,7 +115,7 @@ TEST(View, on_cursor_move_call_forwarded_to_child_view)
 TEST(View, on_resize_call_forwarded_to_child_view)
 {
     MockView mock_view;
-    EXPECT_CALL(mock_view, on_resize(0, 0)).Times(1);
+    EXPECT_CALL(mock_view, on_resize(0, 0));
 
     View view;
     view.add_view(&mock_view);
@@ -106,7 +125,7 @@ TEST(View, on_resize_call_forwarded_to_child_view)
 TEST(View, on_key_call_forwarded_to_child_view)
 {
     MockView mock_view;
-    EXPECT_CALL(mock_view, on_key(Key::A, 0, Action::Press, Modifiers::Control)).Times(1);
+    EXPECT_CALL(mock_view, on_key(Key::A, 0, Action::Press, Modifiers::Control));
 
     View view;
     view.add_view(&mock_view);
@@ -116,22 +135,22 @@ TEST(View, on_key_call_forwarded_to_child_view)
 TEST(View, on_scroll_call_forwarded_to_child_view)
 {
     MockView mock_view;
-    mock_view.set_position(glm::vec2(0, 0));
-    mock_view.set_size(glm::vec2(500, 500));
-    EXPECT_CALL(mock_view, on_scroll(glm::dvec2(100, 200), 10, 20)).Times(1);
+    mock_view.set_position(vec2(0, 0));
+    mock_view.set_size(vec2(500, 500));
+    EXPECT_CALL(mock_view, on_scroll(dvec2(100, 200), 10, 20));
 
     View view;
     view.add_view(&mock_view);
-    view.on_scroll(glm::dvec2(100, 200), 10, 20);
+    view.on_scroll(dvec2(100, 200), 10, 20);
 }
 
 TEST(View, hitbox_looks_reasonable)
 {
     View view;
-    view.set_position(glm::dvec2(100, 100));
-    view.set_size(glm::dvec2(100, 100));
+    view.set_position(dvec2(100, 100));
+    view.set_size(dvec2(100, 100));
 
     auto hitbox = view.get_hitbox();
-    ASSERT_EQ(hitbox.tl, glm::dvec2(100, 100));
-    ASSERT_EQ(hitbox.br, glm::dvec2(200, 200));
+    ASSERT_EQ(hitbox.tl, dvec2(100, 100));
+    ASSERT_EQ(hitbox.br, dvec2(200, 200));
 }
