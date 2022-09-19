@@ -1,5 +1,3 @@
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 #include <algorithm>
 #include "graph_utils.hpp"
 #include "view.hpp"
@@ -56,17 +54,6 @@ void View::on_mouse_button(const glm::dvec2 &cursor_pos,
         {
             m_sticky_view->on_mouse_button(cursor_pos, button, action, mods);
             m_sticky_view = nullptr;
-        }
-        else
-        {
-            std::for_each(
-                m_views.begin(), m_views.end(), [&cursor_pos, button, action, mods](auto *view) {
-                    if (GraphUtils::hit_test(
-                            cursor_pos, view->position(), view->position() + view->size()))
-                    {
-                        view->on_mouse_button(cursor_pos, button, action, mods);
-                    }
-                });
         }
     }
 }
