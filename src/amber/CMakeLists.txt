@@ -79,6 +79,7 @@ if (BUILD_TESTS)
 	add_executable(tests
 		test/test_transform.cpp
 		test/test_graph_utils.cpp
+		test/test_view.cpp
 	)
 	target_link_libraries(
 		tests

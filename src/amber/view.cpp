@@ -25,13 +25,16 @@ void View::on_scroll(const glm::dvec2 &cursor_position, double xoffset, double y
     }
 }
 
-void View::on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods)
+void View::on_mouse_button(const glm::dvec2 &cursor_pos,
+                           MouseButton button,
+                           Action action,
+                           Modifiers mods)
 {
     // This logic gets a bit tricky
     // If a view is clicked, then the cursor moved outside of the view before the view is
     // released, we still want to send the release event to the view. How do we handle multiple
     // simultaneous button presses?
-    if (action == GLFW_PRESS)
+    if (action == Action::Press)
     {
         // Search views backward, which is the opposite of the render order
         // This means that views rendered last (on top) should be hit first
@@ -47,7 +50,7 @@ void View::on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action,
             }
         }
     }
-    else if (action == GLFW_RELEASE)
+    else if (action == Action::Release)
     {
         if (m_sticky_view)
         {
@@ -75,7 +78,7 @@ void View::on_cursor_move(double xpos, double ypos)
     });
 }
 
-void View::on_key(int key, int scancode, int action, int mods)
+void View::on_key(Key key, int scancode, Action action, Modifiers mods)
 {
     std::for_each(m_views.begin(), m_views.end(), [key, scancode, action, mods](auto *view) {
         view->on_key(key, scancode, action, mods);
@@ -91,22 +94,22 @@ void View::on_resize(int width, int height)
 
 glm::dvec2 View::position() const
 {
-    return glm::dvec2(0.0);
+    return m_position;
 }
 
-void View::set_position(const glm::dvec2 &)
+void View::set_position(const glm::dvec2 &position)
 {
-    //
+    m_position = position;
 }
 
 glm::dvec2 View::size() const
 {
-    return glm::dvec2(0.0);
+    return m_size;
 }
 
-void View::set_size(const glm::dvec2 &)
+void View::set_size(const glm::dvec2 &size)
 {
-    //
+    m_size = size;
 }
 
 HitBox View::get_hitbox() const

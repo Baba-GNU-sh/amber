@@ -1,11 +1,11 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "shader_utils.hpp"
+#include <sigslot/signal.hpp>
 #include <database/timeseries.hpp>
+#include "shader_utils.hpp"
 #include "window.hpp"
 #include "view.hpp"
-#include <sigslot/signal.hpp>
 #include "graph_state.hpp"
 
 class Plot : public View
@@ -20,23 +20,21 @@ class Plot : public View
 
     glm::dvec2 position() const override;
     void set_position(const glm::dvec2 &position) override;
-
     glm::dvec2 size() const override;
     void set_size(const glm::dvec2 &size) override;
-
     void draw() override;
-
-    void draw_plot(const std::vector<TSSample> &data, glm::vec3 plot_colour, float y_offset) const;
-
-    void on_scroll(const glm::dvec2 &, double, double) override;
-
-    void on_mouse_button(const glm::dvec2 &cursor_pos, int, int, int) override;
-    void on_cursor_move(double, double) override;
 
     sigslot::signal<double> on_zoom;
     sigslot::signal<const glm::dvec2 &> on_pan;
 
   private:
+    void draw_plot(const std::vector<TSSample> &data, glm::vec3 plot_colour, float y_offset) const;
+    void on_scroll(const glm::dvec2 &, double, double) override;
+    void on_mouse_button(const glm::dvec2 &cursor_pos,
+                         MouseButton button,
+                         Action action,
+                         Modifiers mods) override;
+    void on_cursor_move(double, double) override;
     glm::dvec2 screen2graph(const glm::dvec2 &value) const;
     glm::dvec2 screen2graph_delta(const glm::dvec2 &value) const;
     glm::dvec2 graph2screen(const glm::dvec2 &value) const;
