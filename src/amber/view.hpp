@@ -5,14 +5,19 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-struct HitBox
+struct Hitbox
 {
     glm::dvec2 tl;
     glm::dvec2 br;
+
+    bool test(double x, double y);
+    bool test(const glm::dvec2 &point);
 };
 
 enum class Action
 {
+    Unknown,
+
     Press,
     Release,
     Repeat
@@ -20,6 +25,8 @@ enum class Action
 
 enum class MouseButton
 {
+    Unkown,
+
     Primary,
     Secondary,
     Middle
@@ -33,6 +40,16 @@ enum class Modifiers : int
     Control = 0x0004,
     Super = 0x0008
 };
+
+inline constexpr bool operator&(Modifiers x, Modifiers y)
+{
+    return static_cast<int>(x) & static_cast<int>(y);
+}
+
+inline constexpr Modifiers operator|(Modifiers x, Modifiers y)
+{
+    return static_cast<Modifiers>(static_cast<int>(x) | static_cast<int>(y));
+}
 
 enum class Key
 {
@@ -164,16 +181,6 @@ enum class Key
     MENU = 348,
 };
 
-inline constexpr bool operator&(Modifiers x, Modifiers y)
-{
-    return static_cast<int>(x) & static_cast<int>(y);
-}
-
-inline constexpr Modifiers operator|(Modifiers x, Modifiers y)
-{
-    return static_cast<Modifiers>(static_cast<int>(x) | static_cast<int>(y));
-}
-
 struct View
 {
     virtual ~View() = default;
@@ -190,7 +197,7 @@ struct View
     virtual void set_position(const glm::dvec2 &);
     virtual glm::dvec2 size() const;
     virtual void set_size(const glm::dvec2 &);
-    virtual HitBox get_hitbox() const;
+    virtual Hitbox hitbox() const;
     void add_view(View *view);
 
     std::vector<View *> m_views;

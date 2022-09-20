@@ -2,7 +2,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
-#include "graph_utils.hpp"
 #include "view.hpp"
 
 bool Window_GLFW::m_first_window = true;

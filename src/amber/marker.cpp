@@ -119,10 +119,10 @@ void Marker::draw()
     glDrawArrays(GL_LINES, 0, 2);
 }
 
-HitBox Marker::get_hitbox() const
+Hitbox Marker::hitbox() const
 {
     glm::dvec2 tl(m_handle.position().x - m_handle.size().x / 2, m_handle.position().y);
-    return HitBox{tl, tl + m_handle.size()};
+    return Hitbox{tl, tl + m_handle.size()};
 }
 
 glm::dvec2 Marker::position() const

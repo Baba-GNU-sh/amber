@@ -150,7 +150,7 @@ TEST(View, hitbox_looks_reasonable)
     view.set_position(dvec2(100, 100));
     view.set_size(dvec2(100, 100));
 
-    auto hitbox = view.get_hitbox();
+    auto hitbox = view.hitbox();
     ASSERT_EQ(hitbox.tl, dvec2(100, 100));
     ASSERT_EQ(hitbox.br, dvec2(200, 200));
 }

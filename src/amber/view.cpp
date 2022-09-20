@@ -1,6 +1,23 @@
 #include <algorithm>
-#include "graph_utils.hpp"
 #include "view.hpp"
+
+bool Hitbox::test(const glm::dvec2 &point)
+{
+    return test(point.x, point.y);
+}
+
+bool Hitbox::test(double x, double y)
+{
+    if (x < tl.x)
+        return false;
+    if (x > br.x)
+        return false;
+    if (y < tl.y)
+        return false;
+    if (y > br.y)
+        return false;
+    return true;
+}
 
 void View::draw()
 {
@@ -14,8 +31,7 @@ void View::on_scroll(const glm::dvec2 &cursor_position, double xoffset, double y
     for (auto iter = m_views.rbegin(); iter != m_views.rend(); iter++)
     {
         auto *view = *iter;
-        const auto hitbox = view->get_hitbox();
-        if (GraphUtils::hit_test(cursor_position, hitbox.tl, hitbox.br))
+        if (view->hitbox().test(cursor_position))
         {
             view->on_scroll(cursor_position, xoffset, yoffset);
             break;
@@ -39,8 +55,7 @@ void View::on_mouse_button(const glm::dvec2 &cursor_pos,
         for (auto iter = m_views.rbegin(); iter != m_views.rend(); iter++)
         {
             auto *view = *iter;
-            const auto hitbox = view->get_hitbox();
-            if (GraphUtils::hit_test(cursor_pos, hitbox.tl, hitbox.br))
+            if (view->hitbox().test(cursor_pos))
             {
                 view->on_mouse_button(cursor_pos, button, action, mods);
                 m_sticky_view = view;
@@ -99,9 +114,9 @@ void View::set_size(const glm::dvec2 &size)
     m_size = size;
 }
 
-HitBox View::get_hitbox() const
+Hitbox View::hitbox() const
 {
-    return HitBox{position(), position() + size()};
+    return Hitbox{position(), position() + size()};
 }
 
 void View::add_view(View *view)

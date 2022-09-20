@@ -9,7 +9,6 @@
 #include "plot.hpp"
 #include "marker.hpp"
 #include "resources.hpp"
-#include "graph_utils.hpp"
 #include "view.hpp"
 
 Graph::Graph(GraphState &state, Window &window)
