@@ -13,6 +13,10 @@ TEST(Hitbox, hit_test)
     ASSERT_FALSE(hitbox.test(glm::dvec2(1.5, 0.5)));
     ASSERT_FALSE(hitbox.test(glm::dvec2(0.5, 1.5)));
     ASSERT_FALSE(hitbox.test(glm::dvec2(1.5, 1.5)));
+
+    ASSERT_FALSE(hitbox.test(glm::dvec2(-1, 0.5)));
+    ASSERT_FALSE(hitbox.test(glm::dvec2(0.5, -1)));
+    ASSERT_FALSE(hitbox.test(glm::dvec2(-1, -1)));
 }
 
 TEST(Hitbox, hit_test_doubles)
@@ -25,4 +29,8 @@ TEST(Hitbox, hit_test_doubles)
     ASSERT_FALSE(hitbox.test(1.5, 0.5));
     ASSERT_FALSE(hitbox.test(0.5, 1.5));
     ASSERT_FALSE(hitbox.test(1.5, 1.5));
+
+    ASSERT_FALSE(hitbox.test(-1, 0.5));
+    ASSERT_FALSE(hitbox.test(0.5, -1));
+    ASSERT_FALSE(hitbox.test(-1, -1));
 }
