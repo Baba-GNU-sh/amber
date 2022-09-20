@@ -28,7 +28,7 @@ class Marker : public View
     void set_label_text(const std::string &text);
     void set_visible(bool visible);
     void draw() override;
-    Hitbox hitbox() const override;
+    Hitbox<double> hitbox() const override;
 
     glm::dvec2 position() const override;
     glm::dvec2 size() const override;

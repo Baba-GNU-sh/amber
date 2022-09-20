@@ -4,7 +4,7 @@
 // #include <cstddef>
 #include <vector>
 #include <glm/glm.hpp>
-#include "hitbox.hpp"
+#include "utils/hitbox.hpp"
 
 enum class Action
 {
@@ -189,7 +189,7 @@ struct View
     virtual void set_position(const glm::dvec2 &);
     virtual glm::dvec2 size() const;
     virtual void set_size(const glm::dvec2 &);
-    virtual Hitbox hitbox() const;
+    virtual Hitbox<double> hitbox() const;
     void add_view(View *view);
 
     std::vector<View *> m_views;

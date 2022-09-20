@@ -38,7 +38,6 @@ add_library(
 		axis.cpp
 		view.cpp
 		ui.cpp
-		hitbox.cpp
 )
 target_include_directories(amber PUBLIC .)
 target_link_libraries(

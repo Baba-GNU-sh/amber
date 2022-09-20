@@ -96,9 +96,9 @@ void View::set_size(const glm::dvec2 &size)
     m_size = size;
 }
 
-Hitbox View::hitbox() const
+Hitbox<double> View::hitbox() const
 {
-    return Hitbox{position(), position() + size()};
+    return Hitbox<double>{position(), position() + size()};
 }
 
 void View::add_view(View *view)
