@@ -1,18 +1,10 @@
 #pragma once
 
 // TODO: Remove this dependency
-#include <cstddef>
-#include <glm/glm.hpp>
+// #include <cstddef>
 #include <vector>
-
-struct Hitbox
-{
-    glm::dvec2 tl;
-    glm::dvec2 br;
-
-    bool test(double x, double y);
-    bool test(const glm::dvec2 &point);
-};
+#include <glm/glm.hpp>
+#include "hitbox.hpp"
 
 enum class Action
 {
