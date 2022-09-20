@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <stdexcept>
 #include <utility>
 #include <imgui.h>
 #include <sstream>
@@ -8,7 +9,7 @@
 #include "plot.hpp"
 #include "marker.hpp"
 #include "resources.hpp"
-#include "graph_utils.hpp"
+#include "view.hpp"
 
 Graph::Graph(GraphState &state, Window &window)
     : m_state(state), m_window(window), m_axis_horizontal(window), m_axis_vertical(window),
@@ -114,9 +115,13 @@ glm::dvec2 Graph::position() const
     return m_position;
 }
 
-void Graph::on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods)
+void Graph::on_mouse_button(const glm::dvec2 &cursor_pos,
+                            MouseButton button,
+                            Action action,
+                            Modifiers mods)
 {
-    if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT)
+
+    if (action == Action::Press && button == MouseButton::Secondary)
     {
         m_is_selecting = true;
         m_selection_start = m_window.cursor();
@@ -124,7 +129,7 @@ void Graph::on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action
         m_selection_box.set_position(m_selection_start);
         m_selection_box.set_size(glm::dvec2(0.0));
     }
-    else if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_RIGHT)
+    else if (action == Action::Release && button == MouseButton::Secondary)
     {
         m_is_selecting = false;
         fit_graph(screen2graph(m_selection_start), screen2graph(m_window.cursor()));

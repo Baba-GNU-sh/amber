@@ -119,10 +119,10 @@ void Marker::draw()
     glDrawArrays(GL_LINES, 0, 2);
 }
 
-HitBox Marker::get_hitbox() const
+Hitbox<double> Marker::hitbox() const
 {
     glm::dvec2 tl(m_handle.position().x - m_handle.size().x / 2, m_handle.position().y);
-    return HitBox{tl, tl + m_handle.size()};
+    return Hitbox<double>{tl, tl + m_handle.size()};
 }
 
 glm::dvec2 Marker::position() const
@@ -135,15 +135,15 @@ glm::dvec2 Marker::size() const
     return m_handle.size();
 }
 
-void Marker::on_mouse_button(const glm::dvec2 &, int button, int action, int)
+void Marker::on_mouse_button(const glm::dvec2 &, MouseButton button, Action action, Modifiers)
 {
-    if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT)
+    if (action == Action::Press && button == MouseButton::Primary)
     {
         if (!m_is_visible)
             return;
         m_is_dragging = true;
     }
-    else if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT)
+    else if (action == Action::Release && button == MouseButton::Primary)
     {
         m_is_dragging = false;
     }

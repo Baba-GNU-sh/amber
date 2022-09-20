@@ -1,5 +1,9 @@
 #pragma once
 
+#include "view.hpp"
+#include "window.hpp"
+#include "graph.hpp"
+
 class KeyController : public View
 {
   public:
@@ -8,25 +12,27 @@ class KeyController : public View
         //
     }
 
-    void on_key(int key, int, int action, int mods) override
+    void on_key(Key key, int scancode, Action action, Modifiers mods) override
     {
-        if (action == GLFW_PRESS)
+        (void)scancode;
+
+        if (action == Action::Press)
         {
-            if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
+            if (key == Key::F11)
             {
                 m_window.set_fullscreen(!m_window.is_fullscreen());
             }
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            if (key == Key::ESCAPE)
             {
                 m_window.request_close();
             }
-            if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+            if (key == Key::SPACE)
             {
                 m_graph.reveal_newest_sample();
             }
-            if (key == GLFW_KEY_A && action == GLFW_PRESS)
+            if (key == Key::A)
             {
-                if (mods == GLFW_MOD_CONTROL)
+                if (mods & Modifiers::Control)
                 {
                     m_graph.set_marker_visible(Graph::MarkerType::A, false);
                 }
@@ -37,9 +43,9 @@ class KeyController : public View
                     m_graph.set_marker_position(Graph::MarkerType::A, cursor_gs.x);
                 }
             }
-            else if (key == GLFW_KEY_B && action == GLFW_PRESS)
+            else if (key == Key::B)
             {
-                if (mods == GLFW_MOD_CONTROL)
+                if (mods & Modifiers::Control)
                 {
                     m_graph.set_marker_visible(Graph::MarkerType::B, false);
                 }
@@ -50,7 +56,7 @@ class KeyController : public View
                     m_graph.set_marker_position(Graph::MarkerType::B, cursor_gs.x);
                 }
             }
-            else if (key == GLFW_KEY_C && action == GLFW_PRESS)
+            else if (key == Key::C)
             {
                 m_graph.set_marker_visible(Graph::MarkerType::A, false);
                 m_graph.set_marker_visible(Graph::MarkerType::B, false);

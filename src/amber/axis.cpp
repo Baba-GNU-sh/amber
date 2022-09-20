@@ -6,7 +6,8 @@
 #include "resources.hpp"
 #include "axis.hpp"
 
-AxisBase::AxisBase(Window &window) : m_window(window), m_font("proggy_clean.png"), m_is_dragging(false)
+AxisBase::AxisBase(Window &window)
+    : m_window(window), m_font("proggy_clean.png"), m_is_dragging(false)
 {
     glGenVertexArrays(1, &m_linebuf_vao);
     glBindVertexArray(m_linebuf_vao);
@@ -192,15 +193,14 @@ void AxisBase::on_scroll(const glm::dvec2 &cursor_position, double, double yoffs
     on_zoom(yoffset);
 }
 
-void AxisBase::on_mouse_button(const glm::dvec2 &, int button, int action, int)
+void AxisBase::on_mouse_button(const glm::dvec2 &, MouseButton button, Action action, Modifiers)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    if (button == MouseButton::Primary)
     {
-        m_is_dragging = true;
-    }
-    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-    {
-        m_is_dragging = false;
+        if (action == Action::Press)
+            m_is_dragging = true;
+        if (action == Action::Release)
+            m_is_dragging = false;
     }
 }
 

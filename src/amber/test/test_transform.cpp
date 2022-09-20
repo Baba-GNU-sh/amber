@@ -6,12 +6,13 @@
 
 static constexpr double EPSILON = 10e-5;
 
-template<class T>
-testing::AssertionResult AreEqual(T expected, T actual) {
-  if (glm::all(glm::equal(expected, actual, EPSILON)))
-    return testing::AssertionSuccess();
-  else
-    return testing::AssertionFailure() << "Expected: " << glm::to_string(expected) << ", Actual: " << glm::to_string(actual);
+template <class T> testing::AssertionResult AreEqual(T expected, T actual)
+{
+    if (glm::all(glm::equal(expected, actual, EPSILON)))
+        return testing::AssertionSuccess();
+    else
+        return testing::AssertionFailure() << "Expected: " << glm::to_string(expected)
+                                           << ", Actual: " << glm::to_string(actual);
 }
 
 TEST(Transform, defaultContrstuctor_transformIsIdentity)

@@ -24,7 +24,10 @@ class AxisBase : public View
     void set_graph_transform(const Transform<double> &t);
 
     void on_scroll(const glm::dvec2 &, double x, double y) override;
-    void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
+    void on_mouse_button(const glm::dvec2 &cursor_pos,
+                         MouseButton button,
+                         Action action,
+                         Modifiers mods) override;
 
     sigslot::signal<double> on_pan;
     sigslot::signal<double> on_zoom;

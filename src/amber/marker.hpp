@@ -28,12 +28,15 @@ class Marker : public View
     void set_label_text(const std::string &text);
     void set_visible(bool visible);
     void draw() override;
-    HitBox get_hitbox() const override;
+    Hitbox<double> hitbox() const override;
 
     glm::dvec2 position() const override;
     glm::dvec2 size() const override;
 
-    void on_mouse_button(const glm::dvec2 &cursor_pos, int button, int action, int mods) override;
+    void on_mouse_button(const glm::dvec2 &cursor_pos,
+                         MouseButton button,
+                         Action action,
+                         Modifiers) override;
     void on_cursor_move(double x, double y) override;
 
     sigslot::signal<double> on_drag;

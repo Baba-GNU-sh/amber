@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
-#include "graph_utils.hpp"
+#include "view.hpp"
 
 bool Window_GLFW::m_first_window = true;
 
@@ -219,14 +219,49 @@ void Window_GLFW::handle_scroll_callback(double xoffset, double yoffset)
     on_scroll(cursor(), xoffset, yoffset);
 }
 
+inline MouseButton convert_button(int button)
+{
+    switch (button)
+    {
+    case GLFW_MOUSE_BUTTON_LEFT:
+        return MouseButton::Primary;
+    case GLFW_MOUSE_BUTTON_RIGHT:
+        return MouseButton::Secondary;
+    case GLFW_MOUSE_BUTTON_MIDDLE:
+        return MouseButton::Middle;
+    default:
+        throw std::runtime_error("Bad conversion");
+    }
+}
+
+inline Action convert_action(int action)
+{
+    switch (action)
+    {
+    case GLFW_RELEASE:
+        return Action::Release;
+    case GLFW_PRESS:
+        return Action::Press;
+    case GLFW_REPEAT:
+        return Action::Repeat;
+    default:
+        throw std::runtime_error("Bad conversion");
+    }
+}
+
+inline Modifiers convert_mods(int mods)
+{
+    return static_cast<Modifiers>(mods);
+}
+
 void Window_GLFW::handle_mouse_button_callback(int button, int action, int mods)
 {
-    on_mouse_button(cursor(), button, action, mods);
+    on_mouse_button(cursor(), convert_button(button), convert_action(action), convert_mods(mods));
 }
 
 void Window_GLFW::handle_key_callback(int key, int scancode, int action, int mods)
 {
-    on_key(key, scancode, action, mods);
+    on_key(static_cast<Key>(key), scancode, convert_action(action), convert_mods(mods));
 }
 
 void Window_GLFW::framebuffer_size_callback(GLFWwindow *window, int width, int height)
