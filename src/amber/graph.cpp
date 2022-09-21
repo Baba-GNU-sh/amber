@@ -11,6 +11,8 @@
 #include "resources.hpp"
 #include "view.hpp"
 
+using namespace amber;
+
 Graph::Graph(GraphState &state, Window &window)
     : m_state(state), m_window(window), m_axis_horizontal(window), m_axis_vertical(window),
       m_plot(state, m_view, window), m_marker_a(window), m_marker_b(window), m_selection_box(window)

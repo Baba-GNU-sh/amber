@@ -7,6 +7,8 @@
 #include <database/timeseries.hpp>
 #include "resources.hpp"
 
+using namespace amber;
+
 Plot::Plot(GraphState &state, const Transform<double> &view, Window &window)
     : m_state(state), m_view(view), m_window(window)
 {
@@ -15,15 +17,23 @@ Plot::Plot(GraphState &state, const Transform<double> &view, Window &window)
 
     glGenBuffers(1, &m_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(TSSample) * COLS_MAX, nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(database::TSSample) * COLS_MAX, nullptr, GL_STREAM_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TSSample), (void *)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(database::TSSample), (void *)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        1, 1, GL_FLOAT, GL_FALSE, sizeof(TSSample), (void *)offsetof(TSSample, min));
+    glVertexAttribPointer(1,
+                          1,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(database::TSSample),
+                          (void *)offsetof(database::TSSample, min));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        2, 1, GL_FLOAT, GL_FALSE, sizeof(TSSample), (void *)offsetof(TSSample, max));
+    glVertexAttribPointer(2,
+                          1,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(database::TSSample),
+                          (void *)offsetof(database::TSSample, max));
     glEnableVertexAttribArray(2);
 
     std::vector<Shader> shaders{
@@ -71,7 +81,9 @@ void Plot::set_size(const glm::dvec2 &size)
     m_size = size;
 }
 
-void Plot::draw_plot(const std::vector<TSSample> &data, glm::vec3 line_colour, float y_offset) const
+void Plot::draw_plot(const std::vector<database::TSSample> &data,
+                     glm::vec3 line_colour,
+                     float y_offset) const
 {
     glBindVertexArray(m_vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -109,7 +121,7 @@ void Plot::draw_plot(const std::vector<TSSample> &data, glm::vec3 line_colour, f
     // Limit the number of samples we copy to the vertex buffer
     const auto num_samples = std::min(data.size(), COLS_MAX);
 
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TSSample) * num_samples, data.data());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(database::TSSample) * num_samples, data.data());
     glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, num_samples);
     glDisable(GL_SCISSOR_TEST);
 }
@@ -129,7 +141,7 @@ void Plot::draw()
     {
         if (time_series.visible)
         {
-            std::vector<TSSample> samples(num_samples);
+            std::vector<database::TSSample> samples(num_samples);
             auto n_samples = time_series.ts->get_samples(
                 samples.data(), plot_position_gs.x, interval_gs, num_samples);
             samples.resize(n_samples);

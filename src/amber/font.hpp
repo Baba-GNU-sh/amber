@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 #include "shader_utils.hpp"
 
+namespace amber
+{
 class Font
 {
   public:
@@ -20,3 +22,4 @@ class Font
     unsigned int m_font_atlas_tex;
     Program m_shader;
 };
+} // namespace amber

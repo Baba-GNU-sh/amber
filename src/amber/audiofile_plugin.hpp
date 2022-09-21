@@ -8,6 +8,8 @@
 #include <spdlog/logger.h>
 #include <thread>
 
+namespace amber
+{
 class AudioFilePlugin : public Plugin
 {
   public:
@@ -25,8 +27,9 @@ class AudioFilePlugin : public Plugin
     AudioFile<float> m_audioFile;
     std::thread m_thread;
     std::atomic<bool> m_running;
-    std::shared_ptr<TimeSeriesDense> m_ts;
+    std::shared_ptr<database::TimeSeriesDense> m_ts;
     std::shared_ptr<spdlog::logger> m_logger;
     std::size_t m_current_sample;
     std::string m_filename;
 };
+} // namespace amber

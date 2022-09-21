@@ -15,7 +15,9 @@
 #include "ui.hpp"
 #include "key_controller.hpp"
 
-void init_timeseries(Database &database, GraphState &state)
+using namespace amber;
+
+void init_timeseries(database::Database &database, GraphState &state)
 {
     const auto createGlmColour = [](int code) {
         float r = static_cast<float>(0xFF & (code >> 16)) / 256.0f;
@@ -76,7 +78,7 @@ int main()
     try
     {
         // Create the timeseries database - this is where all the data goes!
-        Database db;
+        database::Database db;
 
         // Create and launch a selection of example plugins
         PluginContext plugin_context(db);

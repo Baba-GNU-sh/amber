@@ -6,6 +6,9 @@
 #include <glm/glm.hpp>
 #include "utils/hitbox.hpp"
 
+namespace amber
+{
+
 enum class Action
 {
     Unknown,
@@ -197,3 +200,4 @@ struct View
     glm::vec2 m_size;
     glm::vec2 m_position;
 };
+} // namespace amber

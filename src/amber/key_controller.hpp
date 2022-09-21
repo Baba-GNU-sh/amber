@@ -4,6 +4,8 @@
 #include "window.hpp"
 #include "graph.hpp"
 
+namespace amber
+{
 class KeyController : public View
 {
   public:
@@ -68,3 +70,4 @@ class KeyController : public View
     Window &m_window;
     Graph &m_graph;
 };
+} // namespace amber

@@ -1,5 +1,7 @@
 #include <glm/glm.hpp>
 
+namespace amber
+{
 template <class T> struct Hitbox
 {
     typedef glm::vec<2, T> VecType;
@@ -25,3 +27,4 @@ template <class T> struct Hitbox
         return test(point.x, point.y);
     }
 };
+} // namespace amber

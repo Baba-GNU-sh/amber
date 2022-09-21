@@ -2,6 +2,8 @@
 #include <sstream>
 #include "shader_utils.hpp"
 
+using namespace amber;
+
 ShaderImpl::ShaderImpl(const std::string &filename, int shader_type) : m_filename(filename)
 {
     std::ifstream ifs(m_filename, std::ios::in);

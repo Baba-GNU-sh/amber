@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include "utils/transform.hpp"
 
+namespace amber
+{
 struct Window
 {
     virtual glm::dvec2 cursor() const = 0;
@@ -15,3 +17,4 @@ struct Window
     virtual void set_bg_colour(const glm::vec3 &colour) = 0;
     virtual glm::ivec2 window_size() const = 0;
 };
+} // namespace amber

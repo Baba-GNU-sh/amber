@@ -1,6 +1,8 @@
 #include <algorithm>
 #include "view.hpp"
 
+using namespace amber;
+
 void View::draw()
 {
     std::for_each(m_views.begin(), m_views.end(), [](View *view) { view->draw(); });

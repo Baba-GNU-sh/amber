@@ -8,6 +8,8 @@
 #include "resources.hpp"
 #include "font.hpp"
 
+using namespace amber;
+
 Label::Label(Window &window, Font &material, int capacity)
     : m_window(window), m_material(material), m_capacity(capacity)
 {

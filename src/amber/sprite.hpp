@@ -6,6 +6,8 @@
 #include "window.hpp"
 #include "view.hpp"
 
+namespace amber
+{
 class Sprite : public View
 {
   public:
@@ -61,3 +63,4 @@ class Sprite : public View
     glm::vec3 m_tint_colour = glm::vec3(1.0);
     bool m_is_dirty = true;
 };
+} // namespace amber

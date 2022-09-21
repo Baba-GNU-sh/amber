@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 
 using namespace glm;
+using namespace amber;
 using ::testing::StrictMock;
 
 TEST(View, modifiers_can_be_combined)

@@ -9,6 +9,8 @@
 #include "view.hpp"
 #include "axis.hpp"
 
+namespace amber
+{
 class Graph : public View
 {
   public:
@@ -102,3 +104,4 @@ class Graph : public View
     glm::dvec2 m_selection_start;
     bool m_follow_latest_data = false;
 };
+} // namespace amber

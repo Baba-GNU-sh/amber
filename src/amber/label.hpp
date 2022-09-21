@@ -7,6 +7,8 @@
 #include "font.hpp"
 #include "view.hpp"
 
+namespace amber
+{
 class Label : public View
 {
   public:
@@ -76,3 +78,4 @@ class Label : public View
 
     bool m_is_dirty = true;
 };
+} // namespace amber

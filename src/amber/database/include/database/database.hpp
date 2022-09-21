@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 
+namespace amber::database
+{
 class Database
 {
   public:
@@ -31,3 +33,4 @@ class Database
   private:
     std::map<std::string, std::shared_ptr<TimeSeries>> _data;
 };
+} // namespace amber::database

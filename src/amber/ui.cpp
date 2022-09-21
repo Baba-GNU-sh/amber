@@ -3,10 +3,12 @@
 
 #include "ui.hpp"
 
+using namespace amber;
+
 ImGuiMenuView::ImGuiMenuView(Window_GLFW &window,
                              PluginManager &plugin_manager,
                              Graph &graph,
-                             Database &database,
+                             database::Database &database,
                              GraphState &graph_state)
     : m_window(window), m_plugin_manager(plugin_manager), m_graph(graph), m_database(database),
       m_graph_state(graph_state)

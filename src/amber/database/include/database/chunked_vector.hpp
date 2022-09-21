@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 
+namespace amber::database
+{
 template <typename T, unsigned int ChunkSize> class ChunkedVector
 {
     typedef std::array<T, ChunkSize> Chunk;
@@ -81,3 +83,4 @@ template <typename T, unsigned int ChunkSize> class ChunkedVector
     std::vector<std::unique_ptr<Chunk>> _map;
     std::size_t _size;
 };
+} // namespace amber::database

@@ -4,6 +4,8 @@
 #include "selection_box.hpp"
 #include "resources.hpp"
 
+using namespace amber;
+
 SelectionBox::SelectionBox(Window &window) : m_window(window), m_colour(1.0, 1.0, 1.0)
 {
     glGenVertexArrays(1, &m_vao);

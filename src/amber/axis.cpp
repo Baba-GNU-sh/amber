@@ -6,6 +6,8 @@
 #include "resources.hpp"
 #include "axis.hpp"
 
+using namespace amber;
+
 AxisBase::AxisBase(Window &window)
     : m_window(window), m_font("proggy_clean.png"), m_is_dragging(false)
 {

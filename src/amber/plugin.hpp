@@ -1,5 +1,7 @@
 #pragma once
 
+namespace amber
+{
 class Plugin
 {
   public:
@@ -8,3 +10,4 @@ class Plugin
     virtual bool is_running() const = 0;
     virtual void draw_menu() = 0;
 };
+} // namespace amber

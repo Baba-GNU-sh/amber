@@ -4,6 +4,8 @@
 #include <spdlog/spdlog.h>
 #include "view.hpp"
 
+using namespace amber;
+
 bool Window_GLFW::m_first_window = true;
 
 void Window_GLFW::init()

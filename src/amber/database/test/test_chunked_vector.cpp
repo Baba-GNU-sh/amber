@@ -1,6 +1,8 @@
 #include <database/chunked_vector.hpp>
 #include <gtest/gtest.h>
 
+using namespace amber::database;
+
 TEST(ChunkedVector, nullTest)
 {
     ChunkedVector<double, 1024> data;

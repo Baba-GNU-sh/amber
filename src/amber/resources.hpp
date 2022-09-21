@@ -4,6 +4,8 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 
+namespace amber
+{
 class Resources
 {
   public:
@@ -68,3 +70,4 @@ class Resources
         return std::filesystem::current_path();
     }
 };
+} // namespace amber

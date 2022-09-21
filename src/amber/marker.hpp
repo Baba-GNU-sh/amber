@@ -9,6 +9,8 @@
 #include "window.hpp"
 #include "sprite.hpp"
 
+namespace amber
+{
 class Marker : public View
 {
   public:
@@ -59,3 +61,4 @@ class Marker : public View
     glm::dvec2 m_cursor_old;
     bool m_is_visible = false;
 };
+} // namespace amber

@@ -1,6 +1,8 @@
 #include <numeric>
 #include <database/database.hpp>
 
+using namespace amber::database;
+
 void Database::register_timeseries(std::string name, std::shared_ptr<TimeSeries> timeseries)
 {
     _data[name] = timeseries;

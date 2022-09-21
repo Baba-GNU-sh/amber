@@ -6,6 +6,8 @@
 #include "plugin.hpp"
 #include "plugin_context.hpp"
 
+namespace amber
+{
 class PluginManager
 {
     struct PluginInfo
@@ -26,3 +28,4 @@ class PluginManager
   private:
     std::vector<PluginInfo> m_plugins;
 };
+} // namespace amber
