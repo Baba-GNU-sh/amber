@@ -5,6 +5,8 @@
 #include "window.hpp"
 #include "view.hpp"
 
+namespace amber
+{
 class SelectionBox : public View
 {
   public:
@@ -35,3 +37,4 @@ class SelectionBox : public View
     glm::vec3 m_colour;
     bool m_is_visible = false;
 };
+} // namespace amber

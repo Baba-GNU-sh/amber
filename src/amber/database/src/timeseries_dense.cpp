@@ -8,6 +8,8 @@
 #include <intrin.h>
 #endif
 
+using namespace amber::database;
+
 TimeSeriesDense::TimeSeriesDense(double start, double interval)
     : _data(1), _interval(interval), _start(start)
 {

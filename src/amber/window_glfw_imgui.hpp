@@ -6,6 +6,8 @@
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
 
+namespace amber
+{
 class Window_GLFW_ImGui : public Window_GLFW
 {
   public:
@@ -21,3 +23,4 @@ class Window_GLFW_ImGui : public Window_GLFW
 
     std::vector<View *> m_imgui_views;
 };
+} // namespace amber

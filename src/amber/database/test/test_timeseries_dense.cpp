@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <database/timeseries_dense.hpp>
 
+using namespace amber::database;
+
 TEST(TimeSeriesDense, addAndRetrieveTwoSamples)
 {
     TimeSeriesDense db(0.0, 1.0);

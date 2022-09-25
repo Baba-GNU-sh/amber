@@ -8,6 +8,8 @@
 #include "view.hpp"
 #include "graph_state.hpp"
 
+namespace amber
+{
 class Plot : public View
 {
   public:
@@ -28,7 +30,9 @@ class Plot : public View
     sigslot::signal<const glm::dvec2 &> on_pan;
 
   private:
-    void draw_plot(const std::vector<TSSample> &data, glm::vec3 plot_colour, float y_offset) const;
+    void draw_plot(const std::vector<database::TSSample> &data,
+                   glm::vec3 plot_colour,
+                   float y_offset) const;
     void on_scroll(const glm::dvec2 &, double, double) override;
     void on_mouse_button(const glm::dvec2 &cursor_pos,
                          MouseButton button,
@@ -53,3 +57,4 @@ class Plot : public View
     bool m_is_dragging = false;
     glm::dvec2 m_cursor_pos_old;
 };
+} // namespace amber

@@ -7,6 +7,8 @@
 #include <vector>
 #include "resources.hpp"
 
+using namespace amber;
+
 Sprite::Sprite(Window &window, const std::string &file_name) : m_window(window)
 {
     std::tie(m_texture, m_size) = load_texture(file_name);

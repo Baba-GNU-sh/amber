@@ -12,6 +12,8 @@
 #include "view.hpp"
 #include "window.hpp"
 
+namespace amber
+{
 class Window_GLFW : public Window, public View
 {
   public:
@@ -70,3 +72,4 @@ class Window_GLFW : public Window, public View
     static bool m_first_window;
     bool m_call_glfinish = false;
 };
+} // namespace amber

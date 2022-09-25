@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+namespace amber
+{
 class ShaderImpl
 {
   public:
@@ -118,3 +120,4 @@ class Program
   private:
     std::shared_ptr<ProgramImpl> m_impl;
 };
+} // namespace amber

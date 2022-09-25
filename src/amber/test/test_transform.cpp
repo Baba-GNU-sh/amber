@@ -4,6 +4,8 @@
 #include <glm/ext/matrix_relational.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+using namespace amber;
+
 static constexpr double EPSILON = 10e-5;
 
 template <class T> testing::AssertionResult AreEqual(T expected, T actual)

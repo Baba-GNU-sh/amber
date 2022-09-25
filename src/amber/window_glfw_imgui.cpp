@@ -1,6 +1,8 @@
 #include "window_glfw_imgui.hpp"
 #include "window_glfw.hpp"
 
+using namespace amber;
+
 Window_GLFW_ImGui::Window_GLFW_ImGui(int width, int height, const std::string &title)
     : Window_GLFW(width, height, title)
 {

@@ -8,13 +8,15 @@
 #include "window.hpp"
 #include "graph.hpp"
 
+namespace amber
+{
 class ImGuiMenuView : public View
 {
   public:
     ImGuiMenuView(Window_GLFW &window,
                   PluginManager &plugin_manager,
                   Graph &graph,
-                  Database &database,
+                  database::Database &database,
                   GraphState &graph_state);
 
   private:
@@ -56,6 +58,7 @@ class ImGuiMenuView : public View
     Window_GLFW &m_window;
     PluginManager &m_plugin_manager;
     Graph &m_graph;
-    Database &m_database;
+    database::Database &m_database;
     GraphState &m_graph_state;
 };
+} // namespace amber

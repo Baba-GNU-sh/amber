@@ -2,12 +2,15 @@
 
 #include <database/database.hpp>
 
+namespace amber
+{
 class PluginContext
 {
   public:
-    PluginContext(Database &database);
-    Database &get_database();
+    PluginContext(database::Database &database);
+    database::Database &get_database();
 
   private:
-    Database &m_database;
+    database::Database &m_database;
 };
+} // namespace amber

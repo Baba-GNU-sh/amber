@@ -8,6 +8,8 @@
 #include "font.hpp"
 #include "label.hpp"
 
+namespace amber
+{
 class AxisBase : public View
 {
   public:
@@ -97,3 +99,4 @@ template <AxisOrientation Orientation> class Axis : public AxisBase
 
     void on_cursor_move(double xpos, double ypos) override;
 };
+} // namespace amber

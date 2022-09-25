@@ -7,6 +7,8 @@
 #include "plugin_context.hpp"
 #include <database/timeseries_dense.hpp>
 
+namespace amber
+{
 enum WaveType
 {
     Sine = 0,
@@ -41,7 +43,8 @@ class WaveGenPlugin : public Plugin
     std::shared_ptr<spdlog::logger> m_logger;
     std::atomic<bool> m_running = false;
     std::thread m_thread;
-    std::shared_ptr<TimeSeriesDense> m_ts;
+    std::shared_ptr<database::TimeSeriesDense> m_ts;
     mutable std::mutex m_mutex;
     WaveSettings m_settings;
 };
+} // namespace amber

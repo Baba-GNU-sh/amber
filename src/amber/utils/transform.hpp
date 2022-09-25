@@ -4,6 +4,8 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <algorithm>
 
+namespace amber
+{
 /**
  * @brief Stores 2D transformation.
  *
@@ -82,3 +84,4 @@ template <class T> class Transform
     MatType m_inverse;
     T m_zoom_limit = std::numeric_limits<T>::max();
 };
+} // namespace amber

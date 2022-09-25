@@ -2,6 +2,8 @@
 #include <database/timeseries_dense.hpp>
 #include <gtest/gtest.h>
 
+using namespace amber::database;
+
 TEST(Database, putAndGetTimeseries)
 {
     Database db;

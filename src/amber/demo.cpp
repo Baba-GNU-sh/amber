@@ -5,6 +5,8 @@
 #include "label.hpp"
 #include "axis.hpp"
 
+using namespace amber;
+
 class Panel : public View
 {
     void draw() override

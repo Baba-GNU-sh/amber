@@ -6,6 +6,8 @@
 #include <stb_image/stb_image.h>
 #include <glm/gtc/type_ptr.hpp>
 
+using namespace amber;
+
 Font::Font(const std::string &font_atlas_filename)
 {
     // Load the font atlas into a texture

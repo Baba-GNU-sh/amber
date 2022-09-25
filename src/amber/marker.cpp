@@ -11,6 +11,8 @@
 #include <database/timeseries.hpp>
 #include "resources.hpp"
 
+using namespace amber;
+
 Marker::Marker(Window &window)
     : m_window(window), m_handle(window, "marker_center.png"), m_font("proggy_clean.png"),
       m_label(window, m_font)

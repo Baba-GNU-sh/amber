@@ -8,6 +8,9 @@
 #include "chunked_vector.hpp"
 #include "timeseries.hpp"
 
+namespace amber::database
+{
+
 struct DataStore
 {
     double sum;
@@ -99,10 +102,11 @@ class TimeSeriesDense : public TimeSeries
     static int count_trailing_zeros(unsigned long long value);
     static int count_leading_zeros(unsigned long long value);
     std::tuple<double, double, double> _reduce(std::size_t, std::size_t) const;
-    
+
     static constexpr std::size_t CHUNK_SIZE = 16 * 1024;
     mutable std::recursive_mutex _mut;
     std::vector<ChunkedVector<DataStore, CHUNK_SIZE>> _data;
     double _interval;
     double _start;
 };
+} // namespace amber::database

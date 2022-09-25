@@ -1,6 +1,8 @@
 #include "plugin_manager.hpp"
 #include <imgui.h>
 
+using namespace amber;
+
 PluginManager::PluginManager()
 {
     //

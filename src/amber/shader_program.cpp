@@ -2,6 +2,8 @@
 #include <sstream>
 #include "shader_utils.hpp"
 
+using namespace amber;
+
 ProgramImpl::ProgramImpl(const std::vector<Shader> &shaders)
 {
     m_program_handle = glCreateProgram();

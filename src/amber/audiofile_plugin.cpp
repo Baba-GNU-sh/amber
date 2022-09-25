@@ -4,6 +4,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <stdexcept>
 
+using namespace amber;
+
 AudioFilePlugin::AudioFilePlugin(PluginContext &pluggy, std::string_view filename)
     : m_running(false), m_current_sample(0), m_filename(filename)
 {
@@ -12,7 +14,7 @@ AudioFilePlugin::AudioFilePlugin(PluginContext &pluggy, std::string_view filenam
         throw std::runtime_error("Unable to load audio file");
     }
 
-    auto ts = std::make_shared<TimeSeriesDense>(0.0, 1.0 / m_audioFile.getSampleRate());
+    auto ts = std::make_shared<database::TimeSeriesDense>(0.0, 1.0 / m_audioFile.getSampleRate());
     pluggy.get_database().register_timeseries(std::string(filename), ts);
     m_ts = ts;
 

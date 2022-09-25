@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <utility>
 
+namespace amber::database
+{
 struct TSSample
 {
     float timestamp;
@@ -56,3 +58,4 @@ struct TimeSeries
      */
     virtual std::size_t size() const = 0;
 };
+} // namespace amber::database

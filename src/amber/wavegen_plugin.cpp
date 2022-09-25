@@ -10,12 +10,14 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+using namespace amber;
+
 WaveGenPlugin::WaveGenPlugin(PluginContext &ctx) : m_ctx(ctx)
 {
     m_logger = spdlog::stdout_color_mt("WaveGenPlugin");
     m_logger->info("Initialized");
 
-    m_ts = std::make_shared<TimeSeriesDense>(0.0, 1.0 / m_sample_rate);
+    m_ts = std::make_shared<database::TimeSeriesDense>(0.0, 1.0 / m_sample_rate);
     m_ctx.get_database().register_timeseries("wavegen/channelA", m_ts);
 
     m_settings.amplitude = 1.0;
