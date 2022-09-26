@@ -1,7 +1,5 @@
 #pragma once
 
-// TODO: Remove this dependency
-// #include <cstddef>
 #include <vector>
 #include <glm/glm.hpp>
 #include "utils/hitbox.hpp"
