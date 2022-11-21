@@ -5,6 +5,7 @@
 #include <deque>
 #include <memory>
 #include <vector>
+#include <stdexcept>
 
 namespace amber::database
 {
